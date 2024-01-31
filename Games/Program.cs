@@ -24,7 +24,7 @@ namespace ConsoleApp1
 
             }
         }
-        // sdsdsds
+        // sdsdsdsd aldkajldad
         private static void A3ttrGame_a3ttr_ConnectChangedEvent(bool connected)
         {
             Console.WriteLine("连接状态:"+ connected);

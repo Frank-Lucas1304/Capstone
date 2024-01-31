@@ -59,10 +59,11 @@ namespace PianoTiles.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
-            // Color Experiments
+            // Color Experiments and time variable conditions
             times += time;
-            if (times > 10)
+            if (times%100<50)
             {
+                Console.WriteLine(times % (100) );
                 if (red < 255)
                 {
                     red += 1;
@@ -74,11 +75,13 @@ namespace PianoTiles.mod
                         green += 1;
 
                 }
-                times = 0;
+
 
 
             }
             setLed(System.Drawing.Color.FromArgb(red, green, red), 1, 1);
+            setLed(System.Drawing.Color.FromArgb(20, green, 20), 1, 2);
+            setLed(System.Drawing.Color.FromArgb(20, green, 20), 1, 2);
             base.update(time);
             
         }

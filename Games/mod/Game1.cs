@@ -80,7 +80,7 @@ namespace PianoTiles.mod
             //usertime = usertime.Add(new TimeSpan(0, 0, 0, 0, (int)time));
 
             times += time;
-            if (isAnimationOn & times >= speed*0.5)
+            if (isAnimationOn & times >= speed*0.5)//switch constraint to times%(speed*0.5)<(speed*0.5 -1)
             {
                 (int x, int y) = animationDisplay.currPos;
                 (int x, int y) endPos = animationDisplay.endPos;
@@ -286,17 +286,28 @@ namespace PianoTiles.mod
         
         public class Target
         {
+            public static int colorSpeed = 0;
+
             public static int inactiveTargets = 0;
             public long ctime { get; set; }
             public long speed { get; set; } // speed and time window are the same
-
             public string status { get; set; }
             public int length { get; set; }
             public (int x, int y) endPos { get; set; }
             public (int x, int y) startPos { get; set; }
             public (int x, int y) currPos { get; set; }
             public (int x, int y) direction { get; set; }
+            public Color color { get; set; }
 
+            public void update(int times)
+            {   
+                // This method will be responsible for updating the color of the led
+                if (times % colorSpeed < colorSpeed - 1)
+                {   
+                    
+                }
+                
+            }
             public int distance()
             {
                 int xDiff = Math.Abs(currPos.x - endPos.x);
@@ -318,7 +329,6 @@ namespace PianoTiles.mod
                 this.direction = direction;
                 this.length = length;
                 this.status = "missed";
-
             }
         }
     }

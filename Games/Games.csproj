@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="A3TTRControl2">
+      <HintPath>..\dll\A3TTRControl2.dll</HintPath>
+    </Reference>
+    <Reference Include="Cgen.Audio">
+      <HintPath>..\dll\Cgen.Audio.dll</HintPath>
+    </Reference>
+    <Reference Include="CXO2">
+      <HintPath>..\dll\CXO2.dll</HintPath>
+    </Reference>
+    <Reference Include="Midi">
+      <HintPath>..\dll\Midi.dll</HintPath>
+    </Reference>
+    <Reference Include="NVorbis">
+      <HintPath>..\dll\NVorbis.dll</HintPath>
+    </Reference>
+    <Reference Include="OggVorbisEncoder">
+      <HintPath>..\dll\OggVorbisEncoder.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK">
+      <HintPath>..\dll\OpenTK.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

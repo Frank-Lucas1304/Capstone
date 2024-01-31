@@ -3,6 +3,7 @@ using A3TTRControl2;
 using Midi.Devices;
 using Midi.Enums;
 using Midi.Messages;
+using OpenTK;
 using OpenTK.Graphics.ES20;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
@@ -28,6 +29,9 @@ namespace PianoTiles.mod
         long times = 0;// time vs TimeSpan
         bool once = true;
         private int state; //Sets value automatically to 0 if not assigned later in the code
+        int red = 0x0;
+        int blue = 0x0;
+        int green = 0x0;
         public Fluidity()
         {
 
@@ -40,7 +44,7 @@ namespace PianoTiles.mod
         {
             base.Name = "PianoTiles";
             base.init();
-
+            
             //usertime = new TimeSpan(0, 0, 0);
 
 
@@ -55,31 +59,31 @@ namespace PianoTiles.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
-
-            Console.WriteLine();
-            //usertime = usertime.Add(new TimeSpan(0, 0, 0, 0, (int)time));
-            if (times == 0)
-            {
-
-                //Color colorP = a3ttrHelper.getColorP(a3ttrHelper.TransformHexToRGB(item.c.Remove(0, 1)), Color.Black, 1.0 - Opacity);
-            }
-            if (times >= 100 && once)
-            {
-                //Color test = Color.FromArgb((int)(0), 255, 0, 0);
-                //setLed(test, 0, 1);
-                once = false;
-            }
+            // Color Experiments
             times += time;
-            
-            
+            if (times > 10)
+            {
+                if (red < 255)
+                {
+                    red += 1;
+                }
+                else
+                {
+
+                    if (green < 255)
+                        green += 1;
+
+                }
+                times = 0;
+
+
+            }
+            setLed(System.Drawing.Color.FromArgb(red, green, red), 1, 1);
             base.update(time);
+            
         }
 
-        static void move() { 
-        
-        
-        
-        }
+
 
         /// <summary>
         /// Launchpad按压事件

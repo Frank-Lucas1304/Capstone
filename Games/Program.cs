@@ -23,7 +23,7 @@ namespace ConsoleApp1
              
 
             }
-        }
+        }//dsd
 
         private static void A3ttrGame_a3ttr_ConnectChangedEvent(bool connected)
         {

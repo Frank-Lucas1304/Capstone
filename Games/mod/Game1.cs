@@ -312,11 +312,10 @@ namespace PianoTiles.mod
             {
                 int xDiff = Math.Abs(currPos.x - endPos.x);
                 int yDiff = Math.Abs(currPos.y - endPos.y);
-
                 return xDiff>yDiff?xDiff:yDiff ;
             }
             public void on(bool state = true)
-            {
+            {   
                 this.status = "inactive";
                 this.currPos = this.startPos;
                 if (state)

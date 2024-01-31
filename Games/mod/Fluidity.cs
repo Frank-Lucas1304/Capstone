@@ -1,11 +1,6 @@
-﻿using A3TTRControl;
-using A3TTRControl2;
+﻿using A3TTRControl2;
 using Midi.Devices;
-using Midi.Enums;
-using Midi.Messages;
-using OpenTK;
 using OpenTK.Graphics.ES20;
-using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using System;
 using System.Collections.Generic;
@@ -19,14 +14,15 @@ using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using static A3TTRControl.a3Interface;
 
 namespace PianoTiles.mod
 {
     public class Fluidity : A3GameModel
     {
-        LaunchpadDevice lol = new LaunchpadDevice("LPMiniMK3 MIDI 0", "MIDIIN2 (LPMiniMK3 MIDI) 1");
+
         long times = 0;// time vs TimeSpan
+        List<Target> gameTargets = new List<Target>();
+
         bool once = true;
         private int state; //Sets value automatically to 0 if not assigned later in the code
         int red = 0x0;
@@ -44,14 +40,8 @@ namespace PianoTiles.mod
         {
             base.Name = "PianoTiles";
             base.init();
-            
+            gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
             //usertime = new TimeSpan(0, 0, 0);
-
-
-
-
-
-
         }
         /// <summary>
         /// 更新事件，mod逻辑处理
@@ -113,12 +103,68 @@ namespace PianoTiles.mod
             }
 
         }
+        public class Target
+        {
+            public static int colorSpeed = 0;
+
+            public static int inactiveTargets = 0;
+            public long ctime { get; set; }
+            public long speed { get; set; } // speed and time window are the same
+            public string status { get; set; }
+            public int length { get; set; }
+            public (int x, int y) endPos { get; set; }
+            public (int x, int y) startPos { get; set; }
+            public (int x, int y) currPos { get; set; }
+            public (int x, int y) direction { get; set; }
+            public Color color { get; set; }
+            public void update(int times)
+            {
+                // This method will be responsible for updating the color of the led
+
+                switch (status)
+                {
+                    case "inactive":
+                        if (times % colorSpeed <= colorSpeed - 1)
+                        {
+                            color = Color.FromArgb(0, 0, 0);
+                        }
 
 
+                        if (times % speed <= speed - 1)
+                        {
+
+                        }
 
 
+                        break;
+                }
+            }
+            public int distance()
+            {
+                int xDiff = Math.Abs(currPos.x - endPos.x);
+                int yDiff = Math.Abs(currPos.y - endPos.y);
 
+                return xDiff > yDiff ? xDiff : yDiff;
+            }
+            public void on(bool state = true)
+            {
+                this.status = "inactive";
+                this.currPos = this.startPos;
+                if (state)
+                    ++inactiveTargets;
+            }
+            public Target((int, int) startPos, (int, int) endPos, (int, int) direction, int length)
+            {
+                this.startPos = startPos;
+                this.endPos = endPos;
+                this.direction = direction;
+                this.length = length;
+                this.status = "missed";
+            }
+        }
     }
+
+
 }
 
 

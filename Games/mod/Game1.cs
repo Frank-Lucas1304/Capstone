@@ -1,17 +1,9 @@
 ﻿using A3TTRControl2;
-using Midi.Devices;
-using OpenTK.Graphics.ES20;
-using OpenTK.Input;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.Design;
+
 using System.Drawing;
+
 using System.Linq;
-using System.Linq.Expressions;
-using System.Net.NetworkInformation;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,15 +17,17 @@ namespace PianoTiles.mod
         // we are going to have to manage memory better, we can't just have ever growing list --> later
         bool isAnimationOn = true;
         int animationState = 0;
+        
 
         bool firstRun = true;
         Color ledColor = Color.Cyan; //Colour when you touch a key
         long times = 0;// time vs TimeSpan
-        int speed = 380;
-        int keeptime = 1000;
-        int fadetime = 200;
+        int speed = 0;
+        int bpm = 280;
+        int keeptime = 280;
+        int fadetime = 280;
         int points = 0;
-        int lives = 3;
+        int lives = 5;
         int level = 4;
         int speed_incr = 8;
         const int maxTargetsAtTheTime = 1; //This variable sends x at the exact same time, not staggered
@@ -51,8 +45,9 @@ namespace PianoTiles.mod
         public override void init()
         {
             base.Name = "PianoTiles";
-            base.init();
+
             animationDisplay.on(false);
+            a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
 
             gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
             gameTargets.Add(new Target((4, 3), (7, 0), (1, -1), 3));  //D
@@ -68,8 +63,8 @@ namespace PianoTiles.mod
             gameTargets.Add(new Target((4, 4), (7, 4), (1, 0), 3));  //F
             gameTargets.Add(new Target((3, 4), (3, 7), (0, 1), 3));  //I
             gameTargets.Add(new Target((3, 4), (0, 4), (-1, 0), 3));  //K
-
-
+            a3ttrSoundlist["BGM"].Play();
+            base.init();
         }
         /// <summary>
         /// 更新事件，mod逻辑处理
@@ -77,10 +72,11 @@ namespace PianoTiles.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
+
             //usertime = usertime.Add(new TimeSpan(0, 0, 0, 0, (int)time));
 
             times += time;
-            if (isAnimationOn & times >= speed*0.5)//switch constraint to times%(speed*0.5)<(speed*0.5 -1)
+            if (isAnimationOn & times >= bpm)//switch constraint to times%(speed*0.5)<(speed*0.5 -1)
             {
                 (int x, int y) = animationDisplay.currPos;
                 (int x, int y) endPos = animationDisplay.endPos;
@@ -95,25 +91,27 @@ namespace PianoTiles.mod
                             animationDisplay.endPos = (7, 7);
                             break;
                         case 1:
-                            setFadeLed(Color.White, 4, 4, keeptime * 3, fadetime * 2);
+                            setFadeLed(Color.White, 4, 4, keeptime * 3, fadetime*2 );
                             ++animationState;
                             animationDisplay.direction = (-1, 0);
                             animationDisplay.startPos = endPos;
                             animationDisplay.endPos = (0, 7);
                             break;
                         case 2:
-                            setFadeLed(Color.White, 3, 4, keeptime * 3, fadetime * 2);
+                            setFadeLed(Color.White, 3, 4, keeptime * 3, fadetime*2) ;
                             ++animationState;
                             animationDisplay.direction = (0, -1);
                             animationDisplay.startPos = endPos;
                             animationDisplay.endPos = (0, 0);
                             break;
                         case 3:
-                            setFadeLed(Color.White, 3, 3, keeptime * 3, fadetime * 2);
+
+                            setFadeLed(Color.White, 3, 3, keeptime * 3, fadetime*2);
                             animationState = 0;
                             animationDisplay.direction = (1,0);
                             animationDisplay.startPos = endPos;
                             animationDisplay.endPos = (7, 0);
+
                             break;
                     }
                 }
@@ -121,9 +119,12 @@ namespace PianoTiles.mod
                 times = 0;
             }
             else
-            { 
-                if (times >= speed)
+            {
+               
+                if (times >= bpm)
                 {
+                    Console.WriteLine("speed " + speed);
+                    Console.WriteLine("bpm " + bpm);
                     // SENDING A NEW TARGET IN A RANDOM 
                     // MOVE EACH TARGET TO THE NEXT POSITION
                     for (int i = 0; i < level; i++)
@@ -161,7 +162,7 @@ namespace PianoTiles.mod
         /// 
         public override void input(int action, int type, int x, int y)
         {
-
+            keeptime = bpm; fadetime = bpm; // since game speed is getting faster the fadetime also has too
             if (action == 1 && type == 1)
             {
                 if (isAnimationOn)
@@ -178,12 +179,12 @@ namespace PianoTiles.mod
                         target.status = "hit";
                         --Target.inactiveTargets;
 
-                        base.clearLed(x, y);
+                        clearFadeLed(x, y);
+                        clearLed(x, y);
                         setFadeLed(Color.Green, x, y, keeptime, fadetime);
                         points++;
-                        speed = speed - speed_incr;
-                        keeptime = keeptime - speed_incr;
-                        fadetime = fadetime - speed_incr;
+
+
                         Console.WriteLine("Your points are now: " + points);
 
                     }
@@ -192,9 +193,11 @@ namespace PianoTiles.mod
                 }
 
                 // ADDING EXTRA DIRECTIONS AS THE GAME GOES ON
-                if (points < gameTargets.Count() & points != 0 & points % 5 == 0)
+                if (points < gameTargets.Count() & points != 0 & points % 20 == 0)
                 {
+                    
                     level += 2;
+                    Console.WriteLine(level);
                     Console.WriteLine($"{points} POINTS!");
                     for (int i = gameTargets.Count - 1; i >= 0; i--)
                     {
@@ -203,7 +206,9 @@ namespace PianoTiles.mod
                         gameTargets[k] = gameTargets[i];
                         gameTargets[i] = value;
                     }
-
+                    bpm = bpm - speed_incr;
+                    keeptime = keeptime - speed_incr;
+                    fadetime = fadetime - speed_incr;
 
                 }
 
@@ -239,7 +244,7 @@ namespace PianoTiles.mod
                         if (distance == 2) {
                             color = Color.BlueViolet;
                         }
-                        base.setFadeLed(color, currPos.x, currPos.y, keeptime, fadetime);
+                        base.setFadeLed(color, currPos.x, currPos.y, keeptime, fadetime*2);
                         target.currPos = (currPos.x + direction.x, currPos.y + direction.y); //moves target to next position
                                                                                              //
                     }

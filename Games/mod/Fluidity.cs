@@ -39,9 +39,12 @@ namespace PianoTiles.mod
         public override void init()
         {
             base.Name = "PianoTiles";
+            a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
             base.init();
             gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
-            //usertime = new TimeSpan(0, 0, 0);
+                                                                      //usertime = new TimeSpan(0, 0, 0);
+            a3ttrSoundlist["BGM"].Play();
+
         }
         /// <summary>
         /// 更新事件，mod逻辑处理
@@ -53,7 +56,7 @@ namespace PianoTiles.mod
             times += time;
             if (times%100<50)
             {
-                Console.WriteLine(times % (100) );
+
                 if (red < 255)
                 {
                     red += 1;
@@ -91,8 +94,8 @@ namespace PianoTiles.mod
 
             if (action == 1 && type == 1)
             {
-               
 
+                Console.WriteLine(times);
 
             }
             else if (action == 2 && type == 1)

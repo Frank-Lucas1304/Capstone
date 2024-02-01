@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="A3TTRControl2">
       <HintPath>..\dll\A3TTRControl2.dll</HintPath>
     </Reference>

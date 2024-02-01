@@ -39,6 +39,8 @@ namespace PianoTiles.mod
         public override void init()
         {
             base.Name = "PianoTiles";
+            loadAnimation("gradient2", System.Environment.CurrentDirectory + "\\animation\\gradient2.ttr");
+
             a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
             base.init();
             gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
@@ -73,8 +75,7 @@ namespace PianoTiles.mod
 
             }
             setLed(System.Drawing.Color.FromArgb(red, green, red), 1, 1);
-            setLed(System.Drawing.Color.FromArgb(20, green, 20), 1, 2);
-            setLed(System.Drawing.Color.FromArgb(20, green, 20), 1, 2);
+
             base.update(time);
             
         }
@@ -94,6 +95,7 @@ namespace PianoTiles.mod
 
             if (action == 1 && type == 1)
             {
+                StartAnimation("gradient2", 1, 1);
 
                 Console.WriteLine(times);
 

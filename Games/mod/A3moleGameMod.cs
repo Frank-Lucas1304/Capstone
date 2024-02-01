@@ -2,11 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-
+using Newtonsoft.Json;
 namespace A3ttrEngine.mod
 {
     public class A3moleGameMod : A3GameModel
@@ -26,11 +27,13 @@ namespace A3ttrEngine.mod
         public override void init()
         {
             base.Name = "打地鼠游戏测试";
+            
+            Console.WriteLine();
             a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\bgm_test.wav"));
             a3ttrSoundlist.Add("cx", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\test1.wav"));
             a3ttrSoundlist.Add("Click", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\click.wav"));
-            loadAnimation("red", System.Environment.CurrentDirectory + "\\animation\\红色闪烁动画.ttr");
-            loadAnimation("green", System.Environment.CurrentDirectory + "\\animation\\绿色闪烁动画.ttr");
+            loadAnimation("red", System.Environment.CurrentDirectory + "\\animation\\gradient.ttr");
+            loadAnimation("green", System.Environment.CurrentDirectory + "\\animation\\green.ttr");
             base.init();
             a3ttrSoundlist["BGM"].Play(false, true);
             nexttime+=r.Next(300,1000);

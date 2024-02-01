@@ -17,24 +17,25 @@ namespace PianoTiles.mod
         // we are going to have to manage memory better, we can't just have ever growing list --> later
         bool isAnimationOn = true;
         int animationState = 0;
-        
+        bool levelUp = false;
+        bool gameOver = false;
+        int feedback = 5;
+        /*TIME VARIABLES*/
+        long times = 0;
+            //Music Synchronisation Variables
+        int offset = 0;
+        static int bpm = 280;
+        int targetSpeed = bpm;
+            //Animation
+        int keeptime = bpm;
+        int fadetime = bpm;
 
-        bool firstRun = true;
-        Color ledColor = Color.Cyan; //Colour when you touch a key
-        long times = 0;// time vs TimeSpan
-
-        int offset = 0; // for running analogy with music
-        int bpm = 280;
-        int targetSpeed = 280; //starts off at the same speed as bpm
-
-
-        int keeptime = 280;
-        int fadetime = 280;
-
+        /*GAME PARAMETERS*/
         int points = 0;
         int lives = 5;
-        int level = 4;
-        int speed_incr = 50;
+        int targetNum = 4;
+        int level = 1;
+        double speed_incr = 0.01;
         const int maxTargetsAtTheTime = 1; //This variable sends x at the exact same time, not staggered
         Random random = new Random();
 
@@ -53,6 +54,12 @@ namespace PianoTiles.mod
 
             animationDisplay.on(false);
             a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
+            a3ttrSoundlist.Add("levelUp", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\levelUp.wav"));
+            a3ttrSoundlist.Add("feedback", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\feedback.wav"));
+
+            a3ttrSoundlist.Add("gameover", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\gameover.wav"));
+            //loadAnimation("green", System.Environment.CurrentDirectory + "\\animation\\green.ttr");
+            base.init();
 
             gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
             gameTargets.Add(new Target((4, 3), (7, 0), (1, -1), 3));  //D
@@ -69,7 +76,6 @@ namespace PianoTiles.mod
             gameTargets.Add(new Target((3, 4), (3, 7), (0, 1), 3));  //I
             gameTargets.Add(new Target((3, 4), (0, 4), (-1, 0), 3));  //K
             a3ttrSoundlist["BGM"].Play();
-            base.init();
         }
         /// <summary>
         /// 更新事件，mod逻辑处理
@@ -110,13 +116,11 @@ namespace PianoTiles.mod
                             animationDisplay.endPos = (0, 0);
                             break;
                         case 3:
-
                             setFadeLed(Color.White, 3, 3, keeptime * 3, fadetime*2);
                             animationState = 0;
                             animationDisplay.direction = (1,0);
                             animationDisplay.startPos = endPos;
                             animationDisplay.endPos = (7, 0);
-
                             break;
                     }
                 }
@@ -124,14 +128,23 @@ namespace PianoTiles.mod
                 times = 0;
             }
             else
-            {
-               
+            {              
                 if (times >= offset)
                 {
+                    if (levelUp)
+                    {
+                        a3ttrSoundlist["BGM"].Play();
+                    }
+                    if (gameOver)
+                    {
+                        Environment.Exit(0);
+
+                    }
+                    levelUp = false;
                     offset = targetSpeed; // updating time condition so that target movement will hit their end position on beat
                     // SENDING A NEW TARGET IN A RANDOM 
                     // MOVE EACH TARGET TO THE NEXT POSITION
-                    for (int i = 0; i < level; i++)
+                    for (int i = 0; i < targetNum; i++)
                     {
 
                         Target target = gameTargets.ElementAt(i);
@@ -186,7 +199,13 @@ namespace PianoTiles.mod
                         clearLed(x, y);
                         setFadeLed(Color.Green, x, y, keeptime, fadetime);
                         points++;
+                        /*Slowly increasing speed*/
 
+                        offset = (int)(targetSpeed * speed_incr * 4);
+                        targetSpeed = (bpm * 4 - offset) / 4; // by 4 because of their length
+
+                        keeptime = (int)(keeptime * (1 - speed_incr));
+                        fadetime = (int)(fadetime * (1 - speed_incr));
 
                         Console.WriteLine("Your points are now: " + points);
 
@@ -196,11 +215,20 @@ namespace PianoTiles.mod
                 }
 
                 // ADDING EXTRA DIRECTIONS AS THE GAME GOES ON
-                if (points < gameTargets.Count() & points != 0 & points % 10 == 0)
+                if (points != 0 & points % feedback == 0)
                 {
-                    
-                    level += 2;
-                    Console.WriteLine(level);
+                    feedback = random.Next(7);
+                    a3ttrSoundlist["feedback"].Play();
+
+                }
+
+
+                if (!levelUp && points != 0 & points % 15 == 0)
+                {
+                    if (points < gameTargets.Count())
+                       targetNum += 2;
+                    level += 1;
+                    Console.WriteLine("level up "+level);
                     Console.WriteLine($"{points} POINTS!");
                     for (int i = gameTargets.Count - 1; i >= 0; i--)
                     {
@@ -209,11 +237,12 @@ namespace PianoTiles.mod
                         gameTargets[k] = gameTargets[i];
                         gameTargets[i] = value;
                     }
-                    offset = speed_incr * 4;
-                    targetSpeed = (bpm * 4 - offset) / 4; // by 4 because of their length
-                    
-                    keeptime = keeptime - speed_incr;
-                    fadetime = fadetime - speed_incr;
+                    offset += 10 * bpm; // little break
+                    a3ttrSoundlist["BGM"].Stop();
+                    a3ttrSoundlist["levelUp"].Play();
+                    StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
+                    Console.WriteLine("BREAK");
+                    levelUp = true;
 
                 }
 
@@ -228,7 +257,10 @@ namespace PianoTiles.mod
             }
 
         }
-       
+        static void NextLevel(ref int times)
+        {
+            
+        }
         public void NextPos(Target target)
         {
 
@@ -243,8 +275,7 @@ namespace PianoTiles.mod
 
                     if (distance != 0)
                     {
-                        
-
+                        //ISSUE AT START OF THE GAME HERE
                         Color color = (distance == 1) ? Color.Aqua : Color.Magenta;
                         if (distance == 2) {
                             color = Color.BlueViolet;
@@ -256,7 +287,7 @@ namespace PianoTiles.mod
                     else
                     {   /* TARGET IS ACTIVATED */
                         //I CHANGED THIS SO IT FADES BECAUSE OTHERWISE THE 4 BUTTONS ARE LIT UP WHITE THE WHOLE TIME
-                        Console.WriteLine(target.currPos);
+
                         base.setLed(Color.White, target.currPos.x, target.currPos.y);
                         //base.setFadeLed(Color.White, target.currPos.x, target.currPos.y, keeptime, fadetime);
                         target.status = "active"; // Activate it
@@ -274,12 +305,16 @@ namespace PianoTiles.mod
                     base.setFadeLed(Color.Red, target.endPos.x, target.endPos.y, keeptime, fadetime);
                     lives--;
                     Console.WriteLine("You now have " + lives + " lives!");
+                    
                     if (lives < 1)
                     {
                         //ONCE THE USER GETS TO ZERO LIVES, THE GAME IS OVER
                         Console.WriteLine("GAME OVER :(");
                         Console.WriteLine("Your score is " + points);
-                        Environment.Exit(0);
+                        a3ttrSoundlist["BGM"].Stop();
+                        a3ttrSoundlist["gameover"].Play();
+                        offset = 10 * bpm;
+                        gameOver = true;
                     }
 
 

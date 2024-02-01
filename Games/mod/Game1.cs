@@ -22,14 +22,19 @@ namespace PianoTiles.mod
         bool firstRun = true;
         Color ledColor = Color.Cyan; //Colour when you touch a key
         long times = 0;// time vs TimeSpan
-        int speed = 0;
+
+        int offset = 0; // for running analogy with music
         int bpm = 280;
+        int targetSpeed = 280; //starts off at the same speed as bpm
+
+
         int keeptime = 280;
         int fadetime = 280;
+
         int points = 0;
         int lives = 5;
         int level = 4;
-        int speed_incr = 8;
+        int speed_incr = 50;
         const int maxTargetsAtTheTime = 1; //This variable sends x at the exact same time, not staggered
         Random random = new Random();
 
@@ -121,10 +126,9 @@ namespace PianoTiles.mod
             else
             {
                
-                if (times >= bpm)
+                if (times >= offset)
                 {
-                    Console.WriteLine("speed " + speed);
-                    Console.WriteLine("bpm " + bpm);
+                    offset = targetSpeed; // updating time condition so that target movement will hit their end position on beat
                     // SENDING A NEW TARGET IN A RANDOM 
                     // MOVE EACH TARGET TO THE NEXT POSITION
                     for (int i = 0; i < level; i++)
@@ -162,7 +166,6 @@ namespace PianoTiles.mod
         /// 
         public override void input(int action, int type, int x, int y)
         {
-            keeptime = bpm; fadetime = bpm; // since game speed is getting faster the fadetime also has too
             if (action == 1 && type == 1)
             {
                 if (isAnimationOn)
@@ -193,7 +196,7 @@ namespace PianoTiles.mod
                 }
 
                 // ADDING EXTRA DIRECTIONS AS THE GAME GOES ON
-                if (points < gameTargets.Count() & points != 0 & points % 20 == 0)
+                if (points < gameTargets.Count() & points != 0 & points % 10 == 0)
                 {
                     
                     level += 2;
@@ -206,7 +209,9 @@ namespace PianoTiles.mod
                         gameTargets[k] = gameTargets[i];
                         gameTargets[i] = value;
                     }
-                    bpm = bpm - speed_incr;
+                    offset = speed_incr * 4;
+                    targetSpeed = (bpm * 4 - offset) / 4; // by 4 because of their length
+                    
                     keeptime = keeptime - speed_incr;
                     fadetime = fadetime - speed_incr;
 

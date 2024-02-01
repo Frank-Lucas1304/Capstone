@@ -24,7 +24,7 @@ namespace PianoTiles.mod
         long times = 0;
             //Music Synchronisation Variables
         int offset = 0;
-        static int bpm = 280;
+        static int bpm = 278;
         int targetSpeed = bpm;
             //Animation
         int keeptime = bpm;
@@ -56,7 +56,7 @@ namespace PianoTiles.mod
             a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
             a3ttrSoundlist.Add("levelUp", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\levelUp.wav"));
             a3ttrSoundlist.Add("feedback", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\feedback.wav"));
-
+            a3ttrSoundlist["BGM"].Play();
             a3ttrSoundlist.Add("gameover", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\gameover.wav"));
             //loadAnimation("green", System.Environment.CurrentDirectory + "\\animation\\green.ttr");
             base.init();
@@ -75,7 +75,7 @@ namespace PianoTiles.mod
             gameTargets.Add(new Target((4, 4), (7, 4), (1, 0), 3));  //F
             gameTargets.Add(new Target((3, 4), (3, 7), (0, 1), 3));  //I
             gameTargets.Add(new Target((3, 4), (0, 4), (-1, 0), 3));  //K
-            a3ttrSoundlist["BGM"].Play();
+            
         }
         /// <summary>
         /// 更新事件，mod逻辑处理
@@ -203,9 +203,10 @@ namespace PianoTiles.mod
 
                         offset = (int)(targetSpeed * speed_incr * 4);
                         targetSpeed = (bpm * 4 - offset) / 4; // by 4 because of their length
-
-                        keeptime = (int)(keeptime * (1 - speed_incr*0.5));
-                        fadetime = (int)(fadetime * (1 - speed_incr*0.5));
+                        if (points%2==0)
+                            speed_incr *= 1.1;
+                        keeptime = (int)(targetSpeed);
+                        fadetime = (int)(targetSpeed);
 
                         Console.WriteLine("Your points are now: " + points);
 
@@ -238,7 +239,7 @@ namespace PianoTiles.mod
                         gameTargets[i] = value;
                     }
                     offset += 10 * bpm; // little break
-                    speed_incr *= 5;
+                    speed_incr *= 2;
                     a3ttrSoundlist["BGM"].Stop();
                     a3ttrSoundlist["levelUp"].Play();
                     // StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
@@ -253,7 +254,7 @@ namespace PianoTiles.mod
             else if (action == 2 && type == 1)
             {
                 // WHEN USER LIFTS OFF BUTTON, BUTTON GOES BACK TO ORIGINAL COLOUR
-                base.clearLed(x, y);
+
                 //清除按钮led灯光
             }
 

@@ -19,7 +19,7 @@ namespace PianoTiles.mod
         int animationState = 0;
         bool levelUp = false;
         bool gameOver = false;
-        int feedback = 5;
+        int feedback = 7;
         /*TIME VARIABLES*/
         long times = 0;
             //Music Synchronisation Variables
@@ -32,7 +32,7 @@ namespace PianoTiles.mod
 
         /*GAME PARAMETERS*/
         int points = 0;
-        int lives = 5;
+        int lives = 10;
         int targetNum = 4;
         int level = 1;
         double speed_incr = 0.01;
@@ -204,8 +204,8 @@ namespace PianoTiles.mod
                         offset = (int)(targetSpeed * speed_incr * 4);
                         targetSpeed = (bpm * 4 - offset) / 4; // by 4 because of their length
 
-                        keeptime = (int)(keeptime * (1 - speed_incr));
-                        fadetime = (int)(fadetime * (1 - speed_incr));
+                        keeptime = (int)(keeptime * (1 - speed_incr*0.5));
+                        fadetime = (int)(fadetime * (1 - speed_incr*0.5));
 
                         Console.WriteLine("Your points are now: " + points);
 
@@ -217,7 +217,7 @@ namespace PianoTiles.mod
                 // ADDING EXTRA DIRECTIONS AS THE GAME GOES ON
                 if (points != 0 & points % feedback == 0)
                 {
-                    feedback = random.Next(7);
+                    feedback = random.Next(0, 2)==1 ? 7 : 9;
                     a3ttrSoundlist["feedback"].Play();
 
                 }
@@ -238,9 +238,10 @@ namespace PianoTiles.mod
                         gameTargets[i] = value;
                     }
                     offset += 10 * bpm; // little break
+                    speed_incr *= 5;
                     a3ttrSoundlist["BGM"].Stop();
                     a3ttrSoundlist["levelUp"].Play();
-                    StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
+                    // StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
                     Console.WriteLine("BREAK");
                     levelUp = true;
 

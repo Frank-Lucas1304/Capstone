@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace PianoTiles.mod
 {
-    public class Game1 : A3GameModel
+    public class Game1Hard : A3GameModel
     {
         List<Target> gameTargets = new List<Target>();
         static double[] targetProbability = new double[12] {0,0,0,0,0,0,0,0,0,0,0,0};
@@ -34,13 +34,14 @@ namespace PianoTiles.mod
         int fadetime = 200;
         int points = 0;
         int lives = 3;
-        int level = 4;
-        int speed_incr = 8;
-        const int maxTargetsAtTheTime = 1; //This variable sends x at the exact same time, not staggered
+        //int level = 4;
+        int speed_incr = 12;
+        int maxTargetsAtTheTime = 1; //This variable sends x at the exact same time, not staggered
+        int count = 0; //counter to keep track of when 2 targets should be sent out at the same time
         Random random = new Random();
 
         private int state; //Sets value automatically to 0 if not assigned later in the code
-        public Game1()
+        public Game1Hard()
         {
 
 
@@ -54,20 +55,96 @@ namespace PianoTiles.mod
             base.init();
             animationDisplay.on(false);
 
-            gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
-            gameTargets.Add(new Target((4, 3), (7, 0), (1, -1), 3));  //D
-            gameTargets.Add(new Target((4, 4), (7, 7), (1, 1), 3));  //G
-            gameTargets.Add(new Target((3, 4), (0, 7), (-1, 1), 3));  //J
+            //LIGHT UP OUTSIDE PERIMETER
+            /**
+            Color outside_color = Color.Magenta;
+            foreach (int value in Enumerable.Range(0, 7)) 
+            {
+                base.setLed(outside_color, 0, value);
+                base.setLed(outside_color, 7, value);
+                base.setLed(outside_color, value, 0);
+                base.setLed(outside_color, value, 7);
 
-            gameTargets.Add(new Target((3, 3), (3, 0), (0, -1), 3));  //B
-            gameTargets.Add(new Target((4, 3), (7, 3), (1, 0), 3));  //E
-            gameTargets.Add(new Target((4, 4), (4, 7), (0, 1), 3));  //H
-            gameTargets.Add(new Target((3, 3), (0, 3), (-1, 0), 3));  //L
+            }**/
+            
+            //4 CORNERS CAN ONLY GO IN DIAGONAL DIRECTION
+            
+            gameTargets.Add(new Target((0, 0), (3, 3), (1, 1), 3)); //A
+            gameTargets.Add(new Target((7,0), (4,3), (-1, 1), 3));  //D
+            gameTargets.Add(new Target((7,7), (4,4), (-1, -1), 3));  //G
+            gameTargets.Add(new Target((0,7), (3,4), (1, -1), 3));  //J
 
-            gameTargets.Add(new Target((4, 3), (4, 0), (0, -1), 3));  //C
-            gameTargets.Add(new Target((4, 4), (7, 4), (1, 0), 3));  //F
-            gameTargets.Add(new Target((3, 4), (3, 7), (0, 1), 3));  //I
-            gameTargets.Add(new Target((3, 4), (0, 4), (-1, 0), 3));  //K
+            //I FIND ITS TOO HARD WHEN THE DIRECTION IS DIFFERENT THAN 3, BUT COULD TRY OUT
+            /**
+            gameTargets.Add(new Target((0, 0), (4, 4), (1, 1), 4)); //A
+            gameTargets.Add(new Target((7, 0), (3, 4), (-1, 1), 4));  //D
+            gameTargets.Add(new Target((7, 7), (3, 3), (-1, -1), 4));  //G
+            gameTargets.Add(new Target((0, 7), (4, 3), (1, -1), 4));  //J
+            **/
+            //STARTING ON LEFT SIDE
+            foreach (int i in Enumerable.Range(1, 6)) {
+                //horizontals
+                gameTargets.Add(new Target((0, i), (3, i), (1, 0), 3));
+                if (i < 4)
+                {
+                    //downward diagonal direction
+                    gameTargets.Add(new Target((0, i), (3, i + 3), (1, 1), 3));
+                }
+                else 
+                {
+                    //upward diagonal direction
+                    gameTargets.Add(new Target((0, i), (3, i - 3), (1, -1), 3));
+                }
+            }
+            //STARTING ON RIGHT SIDE
+            foreach (int i in Enumerable.Range(1, 6))
+            {
+                //horizontals
+                gameTargets.Add(new Target((7, i), (4, i), (-1, 0), 3));
+                if (i < 4)
+                {
+                    //downward diagonal direction
+                    gameTargets.Add(new Target((7, i), (4, i + 3), (-1, 1), 3));
+                }
+                else
+                {
+                    //upward diagonal direction
+                    gameTargets.Add(new Target((7, i), (4, i - 3), (-1, -1), 3));
+                }
+            }
+            //STARTING ON TOP
+            foreach (int i in Enumerable.Range(1, 6))
+            {
+                //verticals
+                gameTargets.Add(new Target((i, 0), (i, 3), (0, 1), 3));
+                if (i < 4)
+                {
+                    //right diagonal direction
+                    gameTargets.Add(new Target((i, 0), (i + 3, 3), (1, 1), 3));
+                }
+                else
+                {
+                    //left diagonal direction
+                    gameTargets.Add(new Target((i, 0), (i - 3, 3), (-1, 1), 3));
+                }
+            }
+            //STARTING ON BOTTOM
+            foreach (int i in Enumerable.Range(1, 6))
+            {
+                //verticals
+                gameTargets.Add(new Target((i, 7), (i, 4), (0, -1), 3));
+                if (i < 4)
+                {
+                    //right diagonal direction
+                    gameTargets.Add(new Target((i, 7), (i + 3, 4), (1, -1), 3));
+                }
+                else
+                {
+                    //left diagonal direction
+                    gameTargets.Add(new Target((i, 7), (i - 3, 4), (-1, -1), 3));
+                }
+            }
+
 
 
         }
@@ -126,21 +203,62 @@ namespace PianoTiles.mod
                 {
                     // SENDING A NEW TARGET IN A RANDOM 
                     // MOVE EACH TARGET TO THE NEXT POSITION
-                    for (int i = 0; i < level; i++)
+                    for (int i = 0; i < gameTargets.Count; i++)
                     {
 
                         Target target = gameTargets.ElementAt(i);
 
                         if (target.status == "missed" | target.status == "hit")
-                        {   
+                        {
                             if (random.Next(0, 2) == 1 && Target.inactiveTargets < maxTargetsAtTheTime)
-                            {   
+                            {
+                                if (maxTargetsAtTheTime > 1) {
+                                    while (animationDisplay.endPos == target.endPos) {
+                                        Console.WriteLine("################################################################################");
+
+                                        if (i < gameTargets.Count - 2)
+                                        {
+                                            target = gameTargets.ElementAt(i + 2);
+                                        }
+                                        else {
+                                            target = gameTargets.ElementAt(i - 2);
+                                        }
+                                        
+                                    }
+                                }
                                 target.on();
 
                             }
                         }
                         NextPos(target); // need to figure out when to add targets
-                   
+                        /**
+                        count++;
+                        if(points > 5 && points <10) {
+                            //2 directions every third time
+                            if (maxTargetsAtTheTime == 1 && count > 1)
+                            {
+                                maxTargetsAtTheTime = 2;
+                                count = 0;
+                            }
+                            else
+                            {
+                                maxTargetsAtTheTime = 1;
+                            }
+                        }
+                        if (points >= 10)
+                        {
+                            //2 directions every second time
+                            if (maxTargetsAtTheTime == 1)
+                            {
+                                maxTargetsAtTheTime = 2;
+                            }
+                            else
+                            {
+                                maxTargetsAtTheTime = 1;
+                            }
+                        }**/
+
+
                     }
                     times = 0;
                 }
@@ -194,7 +312,7 @@ namespace PianoTiles.mod
                 // ADDING EXTRA DIRECTIONS AS THE GAME GOES ON
                 if (points < gameTargets.Count() & points != 0 & points % 5 == 0)
                 {
-                    level += 2;
+                    //level += 2;
                     Console.WriteLine($"{points} POINTS!");
                     for (int i = gameTargets.Count - 1; i >= 0; i--)
                     {
@@ -283,6 +401,7 @@ namespace PianoTiles.mod
 
 
         }
+        
         
         public class Target
         {

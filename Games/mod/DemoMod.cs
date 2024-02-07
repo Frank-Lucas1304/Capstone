@@ -1,10 +1,13 @@
 ﻿using A3TTRControl2;
+using OpenTK;
+using OpenTK.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 
 
 namespace A3ttrEngine.mod
@@ -14,11 +17,14 @@ namespace A3ttrEngine.mod
     /// </summary>
     public class DemoMod:A3GameModel
     {
-       private Color ledColor;
-        public DemoMod(Color ledcolor)
+       private System.Drawing.Color ledColor;
+        public DemoMod(System.Drawing.Color ledcolor)
         {
             ledColor = ledcolor;
-           
+            
+
+
+
         }
         /// <summary>
         /// 初始化（提前加载资源）
@@ -27,7 +33,18 @@ namespace A3ttrEngine.mod
         {
             base.Name = "LED测试";
             base.init();
-          
+            /**
+            System.Drawing.Color color1 = System.Drawing.Color.FromArgb(10, 0, 40);
+            base.setLed(color1, 1, 1);
+            System.Drawing.Color color2 = System.Drawing.Color.FromArgb(30, 0, 60);
+            base.setLed(color2, 1, 2);
+            System.Drawing.Color color3 = System.Drawing.Color.FromArgb(80, 0, 100);
+            base.setLed(color3, 1, 3);
+            System.Drawing.Color color4 = System.Drawing.Color.FromArgb(100, 100, 100);
+            base.setLed(color4, 1, 4);
+            **/
+
+
         }
         /// <summary>
         /// 更新事件，mod逻辑处理

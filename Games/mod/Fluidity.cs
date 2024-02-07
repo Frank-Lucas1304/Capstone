@@ -39,7 +39,7 @@ namespace PianoTiles.mod
         public override void init()
         {
             base.Name = "PianoTiles";
-            loadAnimation("gradient2", System.Environment.CurrentDirectory + "\\animation\\gradient2.ttr");
+            loadAnimation("gradient2", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
 
             a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
             base.init();
@@ -55,6 +55,7 @@ namespace PianoTiles.mod
         public override void update(long time)
         {
             // Color Experiments and time variable conditions
+            Console.WriteLine(time);
             times += time;
             if (times%100<50)
             {

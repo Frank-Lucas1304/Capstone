@@ -22,6 +22,7 @@ namespace PianoTiles.mod
         int feedback = 7;
         /*TIME VARIABLES*/
         long times = 0;
+        long update_counter = 0;
             //Music Synchronisation Variables
         int offset = 0;
         static int bpm = 278;
@@ -86,7 +87,8 @@ namespace PianoTiles.mod
 
             //usertime = usertime.Add(new TimeSpan(0, 0, 0, 0, (int)time));
 
-            times += time;
+            times += time; // instead of time put 2?
+            /**/
             if (isAnimationOn & times >= bpm)//switch constraint to times%(speed*0.5)<(speed*0.5 -1)
             {
                 (int x, int y) = animationDisplay.currPos;
@@ -164,7 +166,7 @@ namespace PianoTiles.mod
                 }
             }
             
-            base.update(time);
+            base.update(time);// instead of time  put 2
         }
 
 

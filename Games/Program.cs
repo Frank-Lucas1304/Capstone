@@ -2,6 +2,7 @@
 using A3TTRControl2;
 using A3TTRControl2.mod;
 using A3ttrEngine.mod;
+
 using PianoTiles.mod;
 using System.Drawing;
 
@@ -32,7 +33,7 @@ namespace ConsoleApp1
             {
 
                 //进入DemoMod
-                a3ttrGame.changeGameModel(new Fluidity());
+                a3ttrGame.changeGameModel(new Game1());
             }
         }
     }

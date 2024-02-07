@@ -4,6 +4,7 @@ using System.Drawing;
 
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +13,6 @@ namespace PianoTiles.mod
     public class Game1 : A3GameModel
     {
         List<Target> gameTargets = new List<Target>();
-        static double[] targetProbability = new double[12] {0,0,0,0,0,0,0,0,0,0,0,0};
         Target animationDisplay = new Target((0, 0), (7, 0), (1, 0), 7);
         // we are going to have to manage memory better, we can't just have ever growing list --> later
         bool isAnimationOn = true;
@@ -22,7 +22,6 @@ namespace PianoTiles.mod
         int feedback = 7;
         /*TIME VARIABLES*/
         long times = 0;
-        long update_counter = 0;
             //Music Synchronisation Variables
         int offset = 0;
         static int bpm = 278;
@@ -34,9 +33,10 @@ namespace PianoTiles.mod
         /*GAME PARAMETERS*/
         int points = 0;
         int lives = 10;
+
         int targetNum = 4;
         int level = 1;
-        double speed_incr = 0.01;
+        double speed_incr = 0.20;
         const int maxTargetsAtTheTime = 1; //This variable sends x at the exact same time, not staggered
         Random random = new Random();
 
@@ -59,8 +59,7 @@ namespace PianoTiles.mod
             a3ttrSoundlist.Add("feedback", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\feedback.wav"));
             a3ttrSoundlist["BGM"].Play();
             a3ttrSoundlist.Add("gameover", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\gameover.wav"));
-            //loadAnimation("green", System.Environment.CurrentDirectory + "\\animation\\green.ttr");
-            base.init();
+
 
             gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
             gameTargets.Add(new Target((4, 3), (7, 0), (1, -1), 3));  //D
@@ -76,7 +75,9 @@ namespace PianoTiles.mod
             gameTargets.Add(new Target((4, 4), (7, 4), (1, 0), 3));  //F
             gameTargets.Add(new Target((3, 4), (3, 7), (0, 1), 3));  //I
             gameTargets.Add(new Target((3, 4), (0, 4), (-1, 0), 3));  //K
-            
+
+            base.init();
+
         }
         /// <summary>
         /// 更新事件，mod逻辑处理
@@ -85,10 +86,7 @@ namespace PianoTiles.mod
         public override void update(long time)
         {
 
-            //usertime = usertime.Add(new TimeSpan(0, 0, 0, 0, (int)time));
-
-            times += time; // instead of time put 2?
-            /**/
+            times += time;
             if (isAnimationOn & times >= bpm)//switch constraint to times%(speed*0.5)<(speed*0.5 -1)
             {
                 (int x, int y) = animationDisplay.currPos;
@@ -135,6 +133,16 @@ namespace PianoTiles.mod
                 {
                     if (levelUp)
                     {
+                        //Shuffle list once level up
+                        for (int i = gameTargets.Count - 1; i >= 0; i--)
+                        {
+                            var k = random.Next(i + 1);
+                            var value = gameTargets[k];
+                            gameTargets[k] = gameTargets[i];
+                            gameTargets[i] = value;
+                        }
+                        levelUp = false;
+
                         a3ttrSoundlist["BGM"].Play();
                     }
                     if (gameOver)
@@ -142,7 +150,6 @@ namespace PianoTiles.mod
                         Environment.Exit(0);
 
                     }
-                    levelUp = false;
                     offset = targetSpeed; // updating time condition so that target movement will hit their end position on beat
                     // SENDING A NEW TARGET IN A RANDOM 
                     // MOVE EACH TARGET TO THE NEXT POSITION
@@ -188,7 +195,8 @@ namespace PianoTiles.mod
                     isAnimationOn = false;
                     times = 0;
                 }
-                   
+
+
                 // CHECK IF BUTTON PRESSED IS A TARGET BUTTON
                 foreach (Target target in gameTargets)
                 {
@@ -196,21 +204,41 @@ namespace PianoTiles.mod
                     {
                         target.status = "hit";
                         --Target.inactiveTargets;
-
                         clearFadeLed(x, y);
                         clearLed(x, y);
                         setFadeLed(Color.Green, x, y, keeptime, fadetime);
                         points++;
                         /*Slowly increasing speed*/
+                        levelUp = false;
 
                         offset = (int)(targetSpeed * speed_incr * 4);
                         targetSpeed = (bpm * 4 - offset) / 4; // by 4 because of their length
-                        if (points%2==0)
-                            speed_incr *= 1.1;
+                        Console.WriteLine("speed " + speed_incr);
+                        speed_incr *= 1.1;
+  
+
                         keeptime = (int)(targetSpeed);
                         fadetime = (int)(targetSpeed);
 
                         Console.WriteLine("Your points are now: " + points);
+
+
+                        if (!levelUp && points != 0 & points % 15 == 0)
+                        {
+                            if (points < gameTargets.Count())
+                                targetNum += 2;
+                            level += 1;
+                            Console.WriteLine("level up " + level);
+                            Console.WriteLine($"{points} POINTS!");
+                            
+                            offset += 10 * bpm; // little break
+                            speed_incr = 0.20;
+                            a3ttrSoundlist["BGM"].Stop();
+                            a3ttrSoundlist["levelUp"].Play();
+                            // StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
+                            Console.WriteLine("BREAK");
+                            levelUp = true;
+                        }
 
                     }
 
@@ -226,29 +254,6 @@ namespace PianoTiles.mod
                 }
 
 
-                if (!levelUp && points != 0 & points % 15 == 0)
-                {
-                    if (points < gameTargets.Count())
-                       targetNum += 2;
-                    level += 1;
-                    Console.WriteLine("level up "+level);
-                    Console.WriteLine($"{points} POINTS!");
-                    for (int i = gameTargets.Count - 1; i >= 0; i--)
-                    {
-                        var k = random.Next(i + 1);
-                        var value = gameTargets[k];
-                        gameTargets[k] = gameTargets[i];
-                        gameTargets[i] = value;
-                    }
-                    offset += 10 * bpm; // little break
-                    speed_incr *= 2;
-                    a3ttrSoundlist["BGM"].Stop();
-                    a3ttrSoundlist["levelUp"].Play();
-                    // StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
-                    Console.WriteLine("BREAK");
-                    levelUp = true;
-
-                }
 
 
 
@@ -261,16 +266,11 @@ namespace PianoTiles.mod
             }
 
         }
-        static void NextLevel(ref int times)
-        {
-            
-        }
         public void NextPos(Target target)
         {
 
             (int x, int y) currPos = target.currPos;
             (int x, int y) direction = target.direction;
-            Console.WriteLine(direction);
             int distance = target.distance();
 
             switch (target.status)
@@ -284,7 +284,7 @@ namespace PianoTiles.mod
                         if (distance == 2) {
                             color = Color.BlueViolet;
                         }
-                        base.setFadeLed(color, currPos.x, currPos.y, keeptime, fadetime*2);
+                        setFadeLed(color, currPos.x, currPos.y, keeptime, fadetime*2);
                         target.currPos = (currPos.x + direction.x, currPos.y + direction.y); //moves target to next position
                                                                                              //
                     }
@@ -292,7 +292,7 @@ namespace PianoTiles.mod
                     {   /* TARGET IS ACTIVATED */
                         //I CHANGED THIS SO IT FADES BECAUSE OTHERWISE THE 4 BUTTONS ARE LIT UP WHITE THE WHOLE TIME
 
-                        base.setLed(Color.White, target.currPos.x, target.currPos.y);
+                        setLed(Color.White, target.currPos.x, target.currPos.y);
                         //base.setFadeLed(Color.White, target.currPos.x, target.currPos.y, keeptime, fadetime);
                         target.status = "active"; // Activate it
 
@@ -305,8 +305,8 @@ namespace PianoTiles.mod
                     --Target.inactiveTargets;
 
                     target.status = "missed";
-                    base.clearLed(target.endPos.x, target.endPos.y);
-                    base.setFadeLed(Color.Red, target.endPos.x, target.endPos.y, keeptime, fadetime);
+                    clearLed(target.endPos.x, target.endPos.y);
+                    setFadeLed(Color.Red, target.endPos.x, target.endPos.y, keeptime, fadetime);
                     lives--;
                     Console.WriteLine("You now have " + lives + " lives!");
                     
@@ -332,7 +332,7 @@ namespace PianoTiles.mod
 
 
         }
-        
+  
         public class Target
         {
             public static int colorSpeed = 0;

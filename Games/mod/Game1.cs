@@ -59,7 +59,9 @@ namespace PianoTiles.mod
             a3ttrSoundlist.Add("feedback", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\feedback.wav"));
             a3ttrSoundlist["BGM"].Play();
             a3ttrSoundlist.Add("gameover", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\gameover.wav"));
+            loadAnimation("levelUp", System.Environment.CurrentDirectory + "\\animation\\gradient2.ttr");
 
+            loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
 
             gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
             gameTargets.Add(new Target((4, 3), (7, 0), (1, -1), 3));  //D
@@ -132,8 +134,9 @@ namespace PianoTiles.mod
                 if (times >= offset)
                 {
                     if (levelUp)
-                    {
-                        //Shuffle list once level up
+                    {   //CLEAR ANIMATION
+
+                        /*RANDOMIZING TARGETS*/
                         for (int i = gameTargets.Count - 1; i >= 0; i--)
                         {
                             var k = random.Next(i + 1);
@@ -147,6 +150,8 @@ namespace PianoTiles.mod
                     }
                     if (gameOver)
                     {
+
+
                         Environment.Exit(0);
 
                     }
@@ -208,17 +213,18 @@ namespace PianoTiles.mod
                         clearLed(x, y);
                         setFadeLed(Color.Green, x, y, keeptime, fadetime);
                         points++;
-                        /*Slowly increasing speed*/
-                        levelUp = false;
 
+
+                        /*TIMING ADJUSTMENTS
+                        Ensures that the targets will always hits at the same time as the bpm of the song
+                        Since the length of the trajectory is 4, all the time param need to be adjusted so that the last note is always in sync with music*/
                         offset = (int)(targetSpeed * speed_incr * 4);
                         targetSpeed = (bpm * 4 - offset) / 4; // by 4 because of their length
-                        Console.WriteLine("speed " + speed_incr);
-                        speed_incr *= 1.1;
-  
+                        keeptime = targetSpeed;
+                        fadetime = targetSpeed;
 
-                        keeptime = (int)(targetSpeed);
-                        fadetime = (int)(targetSpeed);
+                        /*Slowly increasing speed*/
+                        speed_incr *= 1.1;
 
                         Console.WriteLine("Your points are now: " + points);
 
@@ -237,7 +243,10 @@ namespace PianoTiles.mod
                             a3ttrSoundlist["levelUp"].Play();
                             // StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
                             Console.WriteLine("BREAK");
+                            StartAnimation("levelUp", 1, 1);
+
                             levelUp = true;
+
                         }
 
                     }
@@ -252,10 +261,6 @@ namespace PianoTiles.mod
                     a3ttrSoundlist["feedback"].Play();
 
                 }
-
-
-
-
 
             }
             else if (action == 2 && type == 1)
@@ -316,9 +321,11 @@ namespace PianoTiles.mod
                         Console.WriteLine("GAME OVER :(");
                         Console.WriteLine("Your score is " + points);
                         a3ttrSoundlist["BGM"].Stop();
-                        a3ttrSoundlist["gameover"].Play();
-                        offset = 10 * bpm;
+                        offset = 20 * bpm;
                         gameOver = true;
+                        StartAnimation("gameover", 0.5, 1);
+                        a3ttrSoundlist["gameover"].Play();
+
                     }
 
 

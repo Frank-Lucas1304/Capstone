@@ -1,12 +1,14 @@
 ﻿using A3TTRControl2;
-
+using Midi.Instruments;
 using System.Drawing;
-
+using Midi.Instruments;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
+using Midi.Devices;
+using Midi.Enums;
 
 namespace PianoTiles.mod
 {
@@ -53,7 +55,7 @@ namespace PianoTiles.mod
         {
             base.Name = "PianoTiles";
 
-            animationDisplay.on(false);
+            animationDisplay.on(false);// what is this??
             a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
             a3ttrSoundlist.Add("levelUp", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\levelUp.wav"));
             a3ttrSoundlist.Add("feedback", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\feedback.wav"));
@@ -62,6 +64,8 @@ namespace PianoTiles.mod
             loadAnimation("levelUp", System.Environment.CurrentDirectory + "\\animation\\gradient2.ttr");
 
             loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
+
+            Target.launchpad = a3ttrPadCell;
 
             gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
             gameTargets.Add(new Target((4, 3), (7, 0), (1, -1), 3));  //D
@@ -87,6 +91,8 @@ namespace PianoTiles.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
+            Note a = new Note("A");
+            a.PitchInOctave(1);
 
             times += time;
             if (isAnimationOn & times >= bpm)//switch constraint to times%(speed*0.5)<(speed*0.5 -1)
@@ -151,6 +157,8 @@ namespace PianoTiles.mod
                     if (gameOver)
                     {
 
+                        //Chord("G");
+                        //NoteOnOffMessage(IDeviceBase device, Channel channel, Pitch pitch, int velocity, float time, Clock clock, float duration);
 
                         Environment.Exit(0);
 
@@ -239,7 +247,7 @@ namespace PianoTiles.mod
                             
                             offset += 10 * bpm; // little break
                             speed_incr = 0.20;
-                            a3ttrSoundlist["BGM"].Stop();
+                            a3ttrSoundlist["BGM"].Pause();
                             a3ttrSoundlist["levelUp"].Play();
                             // StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
                             Console.WriteLine("BREAK");
@@ -342,6 +350,8 @@ namespace PianoTiles.mod
   
         public class Target
         {
+            public static A3ttrPadCell[,] launchpad;
+
             public static int colorSpeed = 0;
 
             public static int inactiveTargets = 0;
@@ -354,7 +364,6 @@ namespace PianoTiles.mod
             public (int x, int y) currPos { get; set; }
             public (int x, int y) direction { get; set; }
             public Color color { get; set; }
-
             public void update(int times)
             {   
                 // This method will be responsible for updating the color of the led
@@ -372,8 +381,8 @@ namespace PianoTiles.mod
             }
             public void on(bool state = true)
             {   
-                this.status = "inactive";
-                this.currPos = this.startPos;
+                status = "inactive";
+                currPos = startPos;
                 if (state)
                     ++inactiveTargets;
             }
@@ -384,6 +393,10 @@ namespace PianoTiles.mod
                 this.direction = direction;
                 this.length = length;
                 this.status = "missed";
+            }
+            public void setFadeLed(Color c, int x, int y, int keeptime, int fadetime) {
+
+                launchpad[x, y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
             }
         }
     }

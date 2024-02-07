@@ -38,11 +38,18 @@ namespace PianoTiles.mod
 
         int targetNum = 4;
         int level = 1;
-        double speed_incr = 0.20;
+        double speed_incr = 0.10;
         const int maxTargetsAtTheTime = 1; //This variable sends x at the exact same time, not staggered
         Random random = new Random();
+        (int,int) prevTargetStart = (100,100);
+        (int, int) prevTargetEnd = (100, 100);
 
         private int state; //Sets value automatically to 0 if not assigned later in the code
+
+        //Nice gradient purple colours
+        System.Drawing.Color color1 = System.Drawing.Color.FromArgb(10, 0, 40);
+        System.Drawing.Color color2 = System.Drawing.Color.FromArgb(30, 0, 60);
+        System.Drawing.Color color3 = System.Drawing.Color.FromArgb(80, 0, 100);
         public Game1()
         {
 
@@ -141,10 +148,12 @@ namespace PianoTiles.mod
                 {
                     if (levelUp)
                     {   //CLEAR ANIMATION
+                       
 
                         /*RANDOMIZING TARGETS*/
                         for (int i = gameTargets.Count - 1; i >= 0; i--)
                         {
+                            Random random = new Random(Guid.NewGuid().GetHashCode());
                             var k = random.Next(i + 1);
                             var value = gameTargets[k];
                             gameTargets[k] = gameTargets[i];
@@ -168,14 +177,23 @@ namespace PianoTiles.mod
                     // MOVE EACH TARGET TO THE NEXT POSITION
                     for (int i = 0; i < targetNum; i++)
                     {
-
                         Target target = gameTargets.ElementAt(i);
 
                         if (target.status == "missed" | target.status == "hit")
-                        {   
+                        {
+                            Random random = new Random(Guid.NewGuid().GetHashCode());
                             if (random.Next(0, 2) == 1 && Target.inactiveTargets < maxTargetsAtTheTime)
-                            {   
-                                target.on();
+                                
+                            {   if (!(target.startPos == prevTargetStart && target.endPos == prevTargetEnd)) 
+                                {
+                                    // if the new generated target is not the previous target
+                                    // to avoid repition of the same target in a row
+                                    target.on();
+                                    // updates previous target
+                                    prevTargetStart = target.startPos;
+                                    prevTargetEnd = target.endPos;
+                                }
+                                
 
                             }
                         }
@@ -251,7 +269,7 @@ namespace PianoTiles.mod
                             a3ttrSoundlist["levelUp"].Play();
                             // StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
                             Console.WriteLine("BREAK");
-                            StartAnimation("levelUp", 1, 1);
+                            //StartAnimation("levelUp", 1, 1);
 
                             levelUp = true;
 
@@ -292,10 +310,20 @@ namespace PianoTiles.mod
 
                     if (distance != 0)
                     {
+                        if (distance == 3) {
+                            //SETTING SUPER FADED WHITE PATH SO THAT EACH SQUARE WILL DISAPPEAR BEFORE IT LIGHTS UP PURPLE
+                            setFadeLed(Color.FromArgb(10, 10, 10), target.startPos.x + target.direction.x, target.startPos.y + target.direction.y, keeptime/2, fadetime);
+                            setFadeLed(Color.FromArgb(10, 10, 10), target.startPos.x + 2 * target.direction.x, target.startPos.y + 2 * target.direction.y, keeptime, fadetime);
+                            setFadeLed(Color.FromArgb(10, 10, 10), target.endPos.x, target.endPos.y, keeptime * 2, fadetime);
+                        }
+                        
                         //ISSUE AT START OF THE GAME HERE
-                        Color color = (distance == 1) ? Color.Aqua : Color.Magenta;
+                        Color color = (distance == 1) ? color3 : color2;
                         if (distance == 2) {
-                            color = Color.BlueViolet;
+                            color = color1;
+                            //setFadeLed(Color.FromArgb(10, 10, 10), target.startPos.x, target.startPos.y, keeptime, fadetime * 2);
+                            //setFadeLed(Color.FromArgb(10, 10, 10), target.startPos.x + 2*target.direction.x, 2*target.startPos.y + target.direction.y, keeptime, fadetime * 2);
+                            
                         }
                         setFadeLed(color, currPos.x, currPos.y, keeptime, fadetime*2);
                         target.currPos = (currPos.x + direction.x, currPos.y + direction.y); //moves target to next position

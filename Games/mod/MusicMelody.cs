@@ -1,6 +1,7 @@
 ﻿using A3TTRControl;
 using A3TTRControl2;
 using Midi.Instruments;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -21,6 +22,7 @@ namespace A3ttrEngine.mod
         List<Target> gameTargets = new List<Target>();
         int note_pos = 0;
         int lives = 3;
+        bool once = true;
         public MusicMelody()
         {
 
@@ -34,10 +36,16 @@ namespace A3ttrEngine.mod
         {
             base.Name = "MusicMelody";
             
-            Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
-;
+           
+            Console.WriteLine("In");
             a3ttrSoundlist.Add("GameOver", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\GameOver.wav"));
-
+            gameTargets.Add(new Target((0, 0), "A"));
+            gameTargets.Add(new Target((0, 1), "A"));
+            gameTargets.Add(new Target((1, 0), "A"));
+            gameTargets.Add(new Target((2, 2), "A"));
+            gameTargets.Add(new Target((2, 3), "A"));
+            gameTargets.Add(new Target((3, 2), "A"));
+            gameTargets.Add(new Target((4, 4), "A"));
             base.init();
 
         }
@@ -46,11 +54,16 @@ namespace A3ttrEngine.mod
         /// </summary>
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
-        {   
-            while (note_pos < level)
+        {
+            if (once) {
+                Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
+                once = false;
+            }
+
+            if (note_pos < level)
             {
                 gameTargets[note_pos].Animate(time,ref note_pos);
-
+                
             } 
 
             base.update(time);
@@ -67,20 +80,21 @@ namespace A3ttrEngine.mod
             if (action == 1 && type == 1)
             {
 
-
-                while (note_pos>= level && note_pos < 2*level)
+                if (note_pos>= level && note_pos < 2*level)
                 {
-                    if (gameTargets[note_pos - level - 1].hit(x, y))
-                    {
+                    Console.WriteLine((gameTargets[note_pos - level].hit(x, y)));
+                    if (gameTargets[note_pos - level].hit(x, y))
+                    {   
+                        Console.WriteLine(note_pos - level);
                         setLed(Color.Green, x, y);
                         note_pos += 1;
                     }
                     else
                     {
-                        setLed(Color.Red, x, y);
+                        setLed(Color.Red, x, y); 
                         lives--;
                         GameOver();
-                        break;
+                      
 
                     }
                 }
@@ -95,7 +109,6 @@ namespace A3ttrEngine.mod
 
                 ClearBoard();//NOT CODED YET --> Will clear entire board of color --> maybe add in the update function
 
-                note_pos = 0;
 
 
             }
@@ -108,7 +121,7 @@ namespace A3ttrEngine.mod
         public void GameCompleted()
         {
             if (gameTargets.Count==level)
-            {
+            {   
                 Console.WriteLine("Sequence Completed");
                 Environment.Exit(0);
             }
@@ -134,7 +147,7 @@ namespace A3ttrEngine.mod
          pos 2 is gradient2 duration
          pos 3 delay for next note
         */
-        int[] timing = new int[3] {50, 100, 200};
+        int[] timing = new int[3] {100, 200, 200};
         const int keeptime = 50;
         const int fadetime = 50;
 
@@ -149,6 +162,7 @@ namespace A3ttrEngine.mod
 
         public string key { get; set; }
         public (int R,int G, int B) currColor { get; set; }
+        public (int R,int G, int B) init_color { get; set; }
         public (int R,int G, int B) gradColor { get; set; }
         public Target((int, int) pos,string key)
         {
@@ -165,13 +179,14 @@ namespace A3ttrEngine.mod
         {
             this.currColor = (0, 0, 0);
             this.gradColor = purple;
+            
 
             this.status = 0;
             this.gradient(timing[status]);
         }
         public void Animate(long time,ref int note_pos) {
-            
-            if (status < 2)
+
+            if (status <= 2)
             {
                 gradient(timing[status] - times);
                 setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B), pos.x, pos.y);
@@ -186,10 +201,12 @@ namespace A3ttrEngine.mod
                         gradColor = white;
                         break;
                     case 2:
-                        reset();
-                        setFadeLed(Color.White, pos.x, pos.y, keeptime, fadetime);
+                        gradColor = black;
+                        //setFadeLed(Color.White, pos.x, pos.y, keeptime, fadetime);
                         break;
                     case 3:
+                        
+                        Console.WriteLine("In");
                         note_pos += 1;
                         reset();
                         break;
@@ -214,13 +231,14 @@ namespace A3ttrEngine.mod
                 timeleft = 1;
             }
             (int R, int G, int B) c;
-            c.R = (int)Math.Ceiling((decimal)(gradColor.R - currColor.R) / timeleft);
-            c.G = (int)Math.Ceiling((decimal)(gradColor.G - currColor.G) / timeleft);
-            c.B = (int)Math.Ceiling((decimal)(gradColor.B - currColor.B) / timeleft);
+            c.R = (int)Math.Ceiling((decimal)(gradColor.R - currColor.R) / timeleft)+currColor.R;
+            c.G = (int)Math.Ceiling((decimal)(gradColor.G - currColor.G) / timeleft)+currColor.G;
+            c.B = (int)Math.Ceiling((decimal)(gradColor.B - currColor.B) / timeleft)+currColor.B;
+            
             currColor = c;
         }
         public bool hit(int x, int y) {
-            return ((pos.y == y) & (pos.y == y));
+            return ((pos.y == y) & (pos.x == x));
 
 
         }

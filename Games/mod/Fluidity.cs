@@ -21,7 +21,7 @@ namespace PianoTiles.mod
     {
 
         long times = 0;// time vs TimeSpan
-        List<Target> gameTargets = new List<Target>();
+        List<Test> gameTargets = new List<Test>();
 
         bool once = true;
         private int state; //Sets value automatically to 0 if not assigned later in the code
@@ -38,12 +38,17 @@ namespace PianoTiles.mod
         /// </summary>
         public override void init()
         {
+            Test x = new Test();
+
+
+            gameTargets.Add(x);
+
             base.Name = "PianoTiles";
-            loadAnimation("gradient2", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
+            loadAnimation("gradient2", System.Environment.CurrentDirectory + "\\animation\\gradient2.ttr");
 
             a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
             base.init();
-            gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
+            //gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
                                                                       //usertime = new TimeSpan(0, 0, 0);
             a3ttrSoundlist["BGM"].Play();
 
@@ -54,6 +59,7 @@ namespace PianoTiles.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
+            Test.launchpad = a3ttrPadCell;// got it to work
             // Color Experiments and time variable conditions
             Console.WriteLine(time);
             times += time;
@@ -75,6 +81,7 @@ namespace PianoTiles.mod
 
 
             }
+            gameTargets[0].setLed();
             setLed(System.Drawing.Color.FromArgb(red, green, red), 1, 1);
 
             base.update(time);
@@ -166,6 +173,18 @@ namespace PianoTiles.mod
                 this.direction = direction;
                 this.length = length;
                 this.status = "missed";
+            }
+        }
+        class Test
+        {
+            public static A3ttrPadCell[,] launchpad;
+            public Test()
+            {
+
+            }
+            public void setLed()
+            {
+                launchpad[0, 1].ledColor = Color.FromArgb(255,255,255);
             }
         }
     }

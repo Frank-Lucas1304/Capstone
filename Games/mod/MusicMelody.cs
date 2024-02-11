@@ -18,11 +18,17 @@ namespace A3ttrEngine.mod
     /// </summary>
     public class MusicMelody : A3GameModel
     {
-        int level = 3;
+
         List<Target> gameTargets = new List<Target>();
         int note_pos = 0;
-        int lives = 3;
-        bool once = true;
+        int lives = 1;
+        int level = 3;
+
+        long quitDelay = 1000;
+        bool quitGame = false;
+
+        long times = 0;
+        bool launchpadSetUp = true;
         public MusicMelody()
         {
 
@@ -46,6 +52,8 @@ namespace A3ttrEngine.mod
             gameTargets.Add(new Target((2, 3), "A"));
             gameTargets.Add(new Target((3, 2), "A"));
             gameTargets.Add(new Target((4, 4), "A"));
+            loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
+
             base.init();
 
         }
@@ -55,16 +63,32 @@ namespace A3ttrEngine.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
-            if (once) {
-                Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
-                once = false;
+            if (quitGame)
+            {
+                if (times++ >= quitDelay) // Force quit delay as well as time increment
+                {
+                    Console.WriteLine("Exit", times);
+                    Environment.Exit(0);
+                }
+
+            }
+            else
+            {
+                if (launchpadSetUp)
+                {
+                    Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
+                    launchpadSetUp = false;
+                }
+
+                if (note_pos < level)
+                {
+                    gameTargets[note_pos].Animate(time, ref note_pos);
+
+                }
+
             }
 
-            if (note_pos < level)
-            {
-                gameTargets[note_pos].Animate(time,ref note_pos);
-                
-            } 
+
 
             base.update(time);
         }
@@ -93,7 +117,9 @@ namespace A3ttrEngine.mod
                     {
                         setLed(Color.Red, x, y); 
                         lives--;
-                        GameOver();
+                        if (lives ==0)
+                            GameOver(); //Executes when liv
+                        note_pos = 0; //Reshow sequence
                       
 
                     }
@@ -121,18 +147,18 @@ namespace A3ttrEngine.mod
         public void GameCompleted()
         {
             if (gameTargets.Count==level)
-            {   
+            {
+                quitGame = true;
                 Console.WriteLine("Sequence Completed");
-                Environment.Exit(0);
             }
         }
         public void GameOver()
-        {   if (lives==0)
-            {
-                Console.WriteLine("Sequence length: " + (level-1));
-                Console.WriteLine("Game Over");
-                Environment.Exit(0);
-            }
+        {
+            quitGame = true;
+            StartAnimation("gameover", 1, 1);
+            Console.WriteLine("Sequence length: " + (level-1));
+            Console.WriteLine("Game Over");
+            
         }
         public void ClearBoard() { 
             //Play an empty animation

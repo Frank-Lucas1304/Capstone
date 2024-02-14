@@ -14,6 +14,9 @@ using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Midi.Devices;
+using Midi.Enums;
+using Midi.Instruments;
 
 namespace PianoTiles.mod
 {
@@ -22,25 +25,40 @@ namespace PianoTiles.mod
         List<Target> gameTargets = new List<Target>();
         static double[] targetProbability = new double[12] {0,0,0,0,0,0,0,0,0,0,0,0};
         Target animationDisplay = new Target((0, 0), (7, 0), (1, 0), 7);
+        //Music Synchronisation Variables
+        int offset = 0;
+        static int bpm = 278;
+        int targetSpeed = bpm;
+        //Animation
+        int keeptime = bpm;
+        int fadetime = bpm;
+
         // we are going to have to manage memory better, we can't just have ever growing list --> later
         bool isAnimationOn = true;
         int animationState = 0;
+        bool gameOver = false;
+        int gameOverCount = 0;
 
         bool firstRun = true;
         Color ledColor = Color.Cyan; //Colour when you touch a key
         long times = 0;// time vs TimeSpan
         int speed = 380;
-        int keeptime = 1000;
-        int fadetime = 200;
+        //int keeptime = 1000;
+        //int fadetime = 200;
         int points = 0;
         int lives = 3;
         //int level = 4;
-        int speed_incr = 12;
+        int speed_incr = 8;
         int maxTargetsAtTheTime = 1; //This variable sends x at the exact same time, not staggered
         int count = 0; //counter to keep track of when 2 targets should be sent out at the same time
         Random random = new Random();
 
         private int state; //Sets value automatically to 0 if not assigned later in the code
+
+        //Nice gradient purple colours
+        System.Drawing.Color color2 = System.Drawing.Color.FromArgb(200, 0, 200); //1
+        System.Drawing.Color color1 = System.Drawing.Color.FromArgb(150, 0, 255); //2
+        System.Drawing.Color color3 = System.Drawing.Color.FromArgb(50, 0, 255); //3
         public Game1Hard()
         {
 
@@ -52,6 +70,17 @@ namespace PianoTiles.mod
         public override void init()
         {
             base.Name = "PianoTiles";
+            a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
+            a3ttrSoundlist.Add("levelUp", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\levelUp.wav"));
+            a3ttrSoundlist.Add("feedback", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\feedback.wav"));
+            a3ttrSoundlist["BGM"].Play();
+            a3ttrSoundlist.Add("gameover", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\gameover.wav"));
+            loadAnimation("levelUp", System.Environment.CurrentDirectory + "\\animation\\gradient2.ttr");
+
+            loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
+
+            //Target.launchpad = a3ttrPadCell;
+
             base.init();
             animationDisplay.on(false);
 
@@ -154,6 +183,8 @@ namespace PianoTiles.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
+            Note a = new Note("A");
+            a.PitchInOctave(1);
             //usertime = usertime.Add(new TimeSpan(0, 0, 0, 0, (int)time));
 
             times += time;
@@ -201,66 +232,82 @@ namespace PianoTiles.mod
             { 
                 if (times >= speed)
                 {
-                    // SENDING A NEW TARGET IN A RANDOM 
-                    // MOVE EACH TARGET TO THE NEXT POSITION
-                    for (int i = 0; i < gameTargets.Count; i++)
+                    if (gameOver)
                     {
-
-                        Target target = gameTargets.ElementAt(i);
-
-                        if (target.status == "missed" | target.status == "hit")
-                        {
-                            if (random.Next(0, 2) == 1 && Target.inactiveTargets < maxTargetsAtTheTime)
-                            {
-                                if (maxTargetsAtTheTime > 1) {
-                                    while (animationDisplay.endPos == target.endPos) {
-                                        Console.WriteLine("################################################################################");
-
-                                        if (i < gameTargets.Count - 2)
-                                        {
-                                            target = gameTargets.ElementAt(i + 2);
-                                        }
-                                        else {
-                                            target = gameTargets.ElementAt(i - 2);
-                                        }
-                                        
-                                    }
-                                }
-                                target.on();
-
-                            }
+                        //needs to wait longer, so adding in a count
+                        gameOverCount += 1;
+                        if (gameOverCount > 8) {
+                            Environment.Exit(0);
                         }
-                        NextPos(target); // need to figure out when to add targets
-                        /**
-                        count++;
-                        if(points > 5 && points <10) {
-                            //2 directions every third time
-                            if (maxTargetsAtTheTime == 1 && count > 1)
-                            {
-                                maxTargetsAtTheTime = 2;
-                                count = 0;
-                            }
-                            else
-                            {
-                                maxTargetsAtTheTime = 1;
-                            }
-                        }
-                        if (points >= 10)
-                        {
-                            //2 directions every second time
-                            if (maxTargetsAtTheTime == 1)
-                            {
-                                maxTargetsAtTheTime = 2;
-                            }
-                            else
-                            {
-                                maxTargetsAtTheTime = 1;
-                            }
-                        }**/
-
+                        
 
                     }
-                    times = 0;
+                    // SENDING A NEW TARGET IN A RANDOM 
+                    // MOVE EACH TARGET TO THE NEXT POSITION
+                    if (gameOverCount == 0) {
+                        for (int i = 0; i < gameTargets.Count; i++)
+                        {
+
+                            Target target = gameTargets.ElementAt(i);
+
+                            if (target.status == "missed" | target.status == "hit")
+                            {
+                                if (random.Next(0, 2) == 1 && Target.inactiveTargets < maxTargetsAtTheTime)
+                                {
+                                    if (maxTargetsAtTheTime > 1)
+                                    {
+                                        while (animationDisplay.endPos == target.endPos)
+                                        {
+                                            Console.WriteLine("################################################################################");
+
+                                            if (i < gameTargets.Count - 2)
+                                            {
+                                                target = gameTargets.ElementAt(i + 2);
+                                            }
+                                            else
+                                            {
+                                                target = gameTargets.ElementAt(i - 2);
+                                            }
+
+                                        }
+                                    }
+                                    target.on();
+
+                                }
+                            }
+                            NextPos(target); // need to figure out when to add targets
+                            /**
+                            count++;
+                            if(points > 5 && points <10) {
+                                //2 directions every third time
+                                if (maxTargetsAtTheTime == 1 && count > 1)
+                                {
+                                    maxTargetsAtTheTime = 2;
+                                    count = 0;
+                                }
+                                else
+                                {
+                                    maxTargetsAtTheTime = 1;
+                                }
+                            }
+                            if (points >= 10)
+                            {
+                                //2 directions every second time
+                                if (maxTargetsAtTheTime == 1)
+                                {
+                                    maxTargetsAtTheTime = 2;
+                                }
+                                else
+                                {
+                                    maxTargetsAtTheTime = 1;
+                                }
+                            }**/
+
+
+                        }
+                        times = 0;
+                    }
+                    
                 }
             }
             
@@ -321,6 +368,7 @@ namespace PianoTiles.mod
                         gameTargets[k] = gameTargets[i];
                         gameTargets[i] = value;
                     }
+                    a3ttrSoundlist["feedback"].Play();
 
 
                 }
@@ -351,11 +399,18 @@ namespace PianoTiles.mod
 
                     if (distance != 0)
                     {
-                        
+                        if (distance == 3)
+                        {
+                            //SETTING SUPER FADED WHITE PATH SO THAT EACH SQUARE WILL DISAPPEAR BEFORE IT LIGHTS UP PURPLE
+                            setFadeLed(Color.FromArgb(25, 25, 25), target.startPos.x + target.direction.x, target.startPos.y + target.direction.y, keeptime / 4, fadetime);
+                            setFadeLed(Color.FromArgb(25, 25, 25), target.startPos.x + 2 * target.direction.x, target.startPos.y + 2 * target.direction.y, keeptime/2, fadetime);
+                            setFadeLed(Color.FromArgb(25, 25, 25), target.endPos.x, target.endPos.y, keeptime, fadetime);
+                        }
 
-                        Color color = (distance == 1) ? Color.Aqua : Color.Magenta;
+
+                        Color color = (distance == 1) ? color3 : color2;
                         if (distance == 2) {
-                            color = Color.BlueViolet;
+                            color = color1;
                         }
                         base.setFadeLed(color, currPos.x, currPos.y, keeptime, fadetime);
                         target.currPos = (currPos.x + direction.x, currPos.y + direction.y); //moves target to next position
@@ -385,9 +440,15 @@ namespace PianoTiles.mod
                     if (lives < 1)
                     {
                         //ONCE THE USER GETS TO ZERO LIVES, THE GAME IS OVER
+                        a3ttrSoundlist["gameover"].Play();
                         Console.WriteLine("GAME OVER :(");
                         Console.WriteLine("Your score is " + points);
-                        Environment.Exit(0);
+                        a3ttrSoundlist["BGM"].Stop();
+                        offset = 20 * bpm;
+                        gameOver = true;
+                        StartAnimation("gameover", 0.5, 1);
+                        //a3ttrSoundlist["gameover"].Play();
+                        //Environment.Exit(0);
                     }
 
 

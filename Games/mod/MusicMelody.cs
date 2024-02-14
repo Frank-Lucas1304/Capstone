@@ -21,7 +21,7 @@ namespace A3ttrEngine.mod
 
         List<Target> gameTargets = new List<Target>();
         int note_pos = 0;
-        int lives = 1;
+        int lives = 3;
         int level = 3;
 
         long quitDelay = 1000;

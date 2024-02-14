@@ -47,8 +47,8 @@ namespace PianoTiles.mod
         private int state; //Sets value automatically to 0 if not assigned later in the code
 
         //Nice gradient purple colours
-        System.Drawing.Color color1 = System.Drawing.Color.FromArgb(10, 0, 40);
-        System.Drawing.Color color2 = System.Drawing.Color.FromArgb(30, 0, 60);
+        System.Drawing.Color color1 = System.Drawing.Color.FromArgb(20, 0, 50);
+        System.Drawing.Color color2 = System.Drawing.Color.FromArgb(40, 0, 70);
         System.Drawing.Color color3 = System.Drawing.Color.FromArgb(80, 0, 100);
         public Game1()
         {
@@ -312,9 +312,9 @@ namespace PianoTiles.mod
                     {
                         if (distance == 3) {
                             //SETTING SUPER FADED WHITE PATH SO THAT EACH SQUARE WILL DISAPPEAR BEFORE IT LIGHTS UP PURPLE
-                            setFadeLed(Color.FromArgb(10, 10, 10), target.startPos.x + target.direction.x, target.startPos.y + target.direction.y, keeptime/2, fadetime);
-                            setFadeLed(Color.FromArgb(10, 10, 10), target.startPos.x + 2 * target.direction.x, target.startPos.y + 2 * target.direction.y, keeptime, fadetime);
-                            setFadeLed(Color.FromArgb(10, 10, 10), target.endPos.x, target.endPos.y, keeptime * 2, fadetime);
+                            setFadeLed(Color.FromArgb(15, 15, 15), target.startPos.x + target.direction.x, target.startPos.y + target.direction.y, keeptime/2, fadetime);
+                            setFadeLed(Color.FromArgb(15, 15, 15), target.startPos.x + 2 * target.direction.x, target.startPos.y + 2 * target.direction.y, keeptime, fadetime);
+                            setFadeLed(Color.FromArgb(15, 15, 15), target.endPos.x, target.endPos.y, keeptime * 2, fadetime);
                         }
                         
                         //ISSUE AT START OF THE GAME HERE

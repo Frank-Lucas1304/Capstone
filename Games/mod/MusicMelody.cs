@@ -4,11 +4,13 @@ using Midi.Instruments;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using static CXO2.Charting.Event;
 
 
 namespace A3ttrEngine.mod
@@ -19,7 +21,9 @@ namespace A3ttrEngine.mod
     public class MusicMelody : A3GameModel
     {
 
-        List<Target> gameTargets = new List<Target>();
+        Target[,] buttonGrid = new Target[8,8];
+
+        List<String> noteList = new List<String>() { "C3", " C3", " D3", " C3", " F3", " E3", "...", " C3", " C3", " D3", " C3", " F3", " E3", "...", " C3", " C3", " C2", " A3", " F3", " E3", " D3", " B3", " B3", " A3", " F3", " G3", " F3" };
         int note_pos = 0;
         int lives = 3;
         int level = 3;
@@ -29,7 +33,7 @@ namespace A3ttrEngine.mod
 
         long times = 0;
         bool launchpadSetUp = true;
-        public MusicMelody()
+        public MusicMelody( )
         {
 
         }
@@ -45,16 +49,23 @@ namespace A3ttrEngine.mod
            
             Console.WriteLine("In");
             a3ttrSoundlist.Add("GameOver", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\GameOver.wav"));
-            gameTargets.Add(new Target((0, 0), "A"));
+            
+            for (int x = 0; x < 8; x++)
+            {
+                for (int y = 0; y < 8; y++) {
+                    buttonGrid[x,y] = new Target((x, y));
+                }
+            }
+            /*gameTargets.Add(new Target((5, 7), "A"));
             gameTargets.Add(new Target((0, 1), "A"));
             gameTargets.Add(new Target((1, 0), "A"));
             gameTargets.Add(new Target((2, 2), "A"));
             gameTargets.Add(new Target((2, 3), "A"));
             gameTargets.Add(new Target((3, 2), "A"));
-            gameTargets.Add(new Target((4, 4), "A"));
+            gameTargets.Add(new Target((4, 4), "A"));*/
             loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
             //names of piano tile sounds correspond to their coordinates on the launchapd
-            //1st Octave
+
             a3ttrSoundlist.Add("5-7", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - A.wav"));
             a3ttrSoundlist.Add("6-6", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - A#.wav"));
             a3ttrSoundlist.Add("6-7", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - B.wav"));
@@ -113,8 +124,13 @@ namespace A3ttrEngine.mod
         /// 更新事件，mod逻辑处理
         /// </summary>
         /// <param name="time">距离上次更新的时间(毫秒)</param>
+        /// 
+
+
+
         public override void update(long time)
         {
+
             if (quitGame)
             {
                 if (times++ >= quitDelay) // Force quit delay as well as time increment
@@ -129,12 +145,14 @@ namespace A3ttrEngine.mod
                 if (launchpadSetUp)
                 {
                     Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
+                    Target.a3ttrSoundlist = a3ttrSoundlist;
                     launchpadSetUp = false;
                 }
-
+                
                 if (note_pos < level)
                 {
-                    gameTargets[note_pos].Animate(time, ref note_pos);
+                    (int x, int y) = KeyMapping(noteList[note_pos]);
+                    buttonGrid[x, y].Animate(time, ref note_pos);
 
                 }
 
@@ -153,28 +171,39 @@ namespace A3ttrEngine.mod
         /// <param name="y">按键Y坐标</param>
         public override void input(int action, int type, int x, int y)
         {
+
             if (action == 1 && type == 1)
             {
-
+                (int x, int y) pos;
                 if (note_pos>= level && note_pos < 2*level)
                 {
-                    Console.WriteLine((gameTargets[note_pos - level].hit(x, y)));
-                    if (gameTargets[note_pos - level].hit(x, y))
+                    pos = KeyMapping(noteList[note_pos]);
+                    bool isTargetHit = buttonGrid[pos.x, pos.y].hit(x, y);
+
+                    if (isTargetHit)
                     {   
                         Console.WriteLine(note_pos - level);
                         setLed(Color.Green, x, y);
-                        a3ttrSoundlist[$"{x}-{y}"].Play();
+                        
                         note_pos += 1;
                     }
                     else
                     {
-                        setLed(Color.Red, x, y); 
+                        setFadeLed(Color.Red, x, y,100,100); 
                         lives--;
                         if (lives ==0)
                             GameOver(); //Executes when liv
                         note_pos = 0; //Reshow sequence
                       
 
+                    }
+                    // Not all notes are there
+                    try {
+                        a3ttrSoundlist[$"{x}-{y}"].Play(); // to play correct and wrong note
+                    }catch(Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        Console.WriteLine("Check Keys, not all of them have sounds linked to them");
                     }
                 }
 
@@ -199,7 +228,7 @@ namespace A3ttrEngine.mod
         }
         public void GameCompleted()
         {
-            if (gameTargets.Count==level)
+            if (noteList.Count==level)
             {
                 quitGame = true;
                 Console.WriteLine("Sequence Completed");
@@ -211,16 +240,84 @@ namespace A3ttrEngine.mod
             StartAnimation("gameover", 1, 1);
             Console.WriteLine("Sequence length: " + (level-1));
             Console.WriteLine("Game Over");
-            
         }
         public void ClearBoard() { 
             //Play an empty animation
         }
+
+        static (int, int) KeyMapping(string key)
+        {
+            //length of string is
+            int x = 0;
+            int y = 0;
+            char letter = key[0];
+            int octave = key[1] - 48;
+
+            if (key.Length < 3)
+            {
+
+                y = 7 - octave * 2;
+
+                switch (letter)
+                {
+
+                    case 'A':
+                        x = 5;
+                        break;
+                    case 'B':
+                        x = 6;
+                        break;
+                    case 'C':
+                        x = 0;
+                        break;
+                    case 'D':
+                        x = 1;
+                        break;
+                    case 'E':
+                        x = 2;
+                        break;
+                    case 'F':
+                        x = 3;
+                        break;
+                    case 'G':
+                        x = 4;
+                        break;
+                }
+            }
+            else
+            { // Sharp notes
+                octave = key[2] - 48;
+
+                y = 6 - octave * 2;
+                switch (letter)
+                {
+                    case 'A':
+                        x = 6;
+                        break;
+                    case 'C':
+                        x = 1;
+                        break;
+                    case 'D':
+                        x = 2;
+                        break;
+                    case 'F':
+                        x = 4;
+                        break;
+                    case 'G':
+                        x = 5;
+                        break;
+                }
+            }
+            Console.WriteLine("Half"+(x, y));
+            return (x, y);
+        }
+
     }
     class Target {
 
         public static A3ttrPadCell[,] launchpad;
- 
+        public static Dictionary<string, A3ttrSound> a3ttrSoundlist;
+
         /*Sequence Display
          pos 1 is gradient1 duration
          pos 2 is gradient2 duration
@@ -243,12 +340,11 @@ namespace A3ttrEngine.mod
         public (int R,int G, int B) currColor { get; set; }
         public (int R,int G, int B) init_color { get; set; }
         public (int R,int G, int B) gradColor { get; set; }
-        public Target((int, int) pos,string key)
+        public Target((int, int) pos)
         {
             this.times = 0;
             this.pos = pos;
             //INSERT AN ERROR IF KEY DOESNT EXIST
-            this.key = key;
 
             //Starting effect
             reset();
@@ -269,7 +365,7 @@ namespace A3ttrEngine.mod
             {
                 gradient(timing[status] - times);
                 setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B), pos.x, pos.y);
-                //a3ttrSoundlist[$"{pos.x}-{pos.y}"].Play();
+
             }
 
             if (times>= timing[status])
@@ -279,6 +375,10 @@ namespace A3ttrEngine.mod
                 {
                     case 1:
                         gradColor = white;
+                        try{
+                            // In case not located in list
+                            a3ttrSoundlist[$"{pos.x}-{pos.y}"].Play();
+                        }catch (Exception e) { }
                         break;
                     case 2:
                         gradColor = black;
@@ -302,6 +402,7 @@ namespace A3ttrEngine.mod
         }
         public void setLed(Color c, int x, int y)
         {
+
             launchpad[x, y].ledColor = c;
         }
 

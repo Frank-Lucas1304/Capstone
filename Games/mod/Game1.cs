@@ -7,8 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
-using Midi.Devices;
-using Midi.Enums;
+
 
 namespace PianoTiles.mod
 {

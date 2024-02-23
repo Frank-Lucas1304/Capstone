@@ -5,8 +5,10 @@ using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,12 +25,13 @@ namespace A3ttrEngine.mod
 
         Target[,] buttonGrid = new Target[8,8];
 
-        List<String> noteList = new List<String>() { "C3", " C3", " D3", " C3", " F3", " E3", "...", " C3", " C3", " D3", " C3", " F3", " E3", "...", " C3", " C3", " C2", " A3", " F3", " E3", " D3", " B3", " B3", " A3", " F3", " G3", " F3" };
+        string[] noteList = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
         int note_pos = 0;
         int lives = 3;
         int level = 3;
-
+        
         long quitDelay = 1000;
+        long betweenLevelDelay;
         bool quitGame = false;
 
         long times = 0;
@@ -46,7 +49,8 @@ namespace A3ttrEngine.mod
         {
             base.Name = "MusicMelody";
             
-           
+
+
             Console.WriteLine("In");
             a3ttrSoundlist.Add("GameOver", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\GameOver.wav"));
             
@@ -56,6 +60,7 @@ namespace A3ttrEngine.mod
                     buttonGrid[x,y] = new Target((x, y));
                 }
             }
+
             /*gameTargets.Add(new Target((5, 7), "A"));
             gameTargets.Add(new Target((0, 1), "A"));
             gameTargets.Add(new Target((1, 0), "A"));
@@ -150,9 +155,16 @@ namespace A3ttrEngine.mod
                 }
                 
                 if (note_pos < level)
-                {
-                    (int x, int y) = KeyMapping(noteList[note_pos]);
-                    buttonGrid[x, y].Animate(time, ref note_pos);
+                {   
+                    if (times++ >= betweenLevelDelay)
+                    {
+                        (int x, int y) = KeyMapping(noteList[note_pos]);
+                        buttonGrid[x, y].Animate(time, ref note_pos);
+                        betweenLevelDelay = 0;
+                        times = 0;
+                    }
+                    
+
 
                 }
 
@@ -176,25 +188,29 @@ namespace A3ttrEngine.mod
             {
                 (int x, int y) pos;
                 if (note_pos>= level && note_pos < 2*level)
-                {
-                    pos = KeyMapping(noteList[note_pos]);
+                {   
+                    pos = KeyMapping(noteList[note_pos-level]);
                     bool isTargetHit = buttonGrid[pos.x, pos.y].hit(x, y);
-
                     if (isTargetHit)
-                    {   
-                        Console.WriteLine(note_pos - level);
+                    {
                         setLed(Color.Green, x, y);
+                        Console.WriteLine("Fade");
                         
                         note_pos += 1;
+
+
                     }
                     else
                     {
-                        setFadeLed(Color.Red, x, y,100,100); 
+                        setFadeLed(Color.Red, x, y ,300, 10);
                         lives--;
-                        if (lives ==0)
-                            GameOver(); //Executes when liv
-                        note_pos = 0; //Reshow sequence
-                      
+                        if (lives == 0)
+                            GameOver(); //Executes when no more lives
+
+                        //Reshow sequence
+                        betweenLevelDelay = Target.duration.Sum();
+                        note_pos = 0;
+                        times = 0;                      
 
                     }
                     // Not all notes are there
@@ -210,9 +226,18 @@ namespace A3ttrEngine.mod
                 // Increase in sequence length
                 if (note_pos == 2 * level)
                 {
-                    GameCompleted();
-                    level += 1;
-                    note_pos = 0;
+                    int size = noteList.Length;
+                    if ( size == level)
+                        GameCompleted();
+                    else
+                    {
+                        //Increasing level and displaying longer sequence
+                        level += level + 2 < size ? 2 : 1; 
+                        betweenLevelDelay = Target.duration.Sum();
+                        note_pos = 0;
+                        times = 0;
+                    }
+ 
                 }
 
                 ClearBoard();//NOT CODED YET --> Will clear entire board of color --> maybe add in the update function
@@ -228,11 +253,8 @@ namespace A3ttrEngine.mod
         }
         public void GameCompleted()
         {
-            if (noteList.Count==level)
-            {
-                quitGame = true;
-                Console.WriteLine("Sequence Completed");
-            }
+            quitGame = true;
+            Console.WriteLine("Sequence Completed");
         }
         public void GameOver()
         {
@@ -247,9 +269,9 @@ namespace A3ttrEngine.mod
 
         static (int, int) KeyMapping(string key)
         {
-            //length of string is
-            int x = 0;
-            int y = 0;
+            int x = 0, y = 0;
+
+            //
             char letter = key[0];
             int octave = key[1] - 48;
 
@@ -308,13 +330,12 @@ namespace A3ttrEngine.mod
                         break;
                 }
             }
-            Console.WriteLine("Half"+(x, y));
             return (x, y);
         }
 
     }
     class Target {
-
+        public static int[] duration = new int[3] { 100, 200, 200 };
         public static A3ttrPadCell[,] launchpad;
         public static Dictionary<string, A3ttrSound> a3ttrSoundlist;
 
@@ -323,7 +344,11 @@ namespace A3ttrEngine.mod
          pos 2 is gradient2 duration
          pos 3 delay for next note
         */
-        int[] timing = new int[3] {100, 200, 200};
+
+        // Performing Shallow Copy
+        int[] timing = (int[])duration.Clone();
+  
+        //int[] timing = new int[3] {100, 200, 200};
         const int keeptime = 50;
         const int fadetime = 50;
 
@@ -340,8 +365,9 @@ namespace A3ttrEngine.mod
         public (int R,int G, int B) currColor { get; set; }
         public (int R,int G, int B) init_color { get; set; }
         public (int R,int G, int B) gradColor { get; set; }
-        public Target((int, int) pos)
-        {
+        public Target((int, int) pos, string key = null)
+        {   
+            this.key = key; 
             this.times = 0;
             this.pos = pos;
             //INSERT AN ERROR IF KEY DOESNT EXIST
@@ -359,12 +385,11 @@ namespace A3ttrEngine.mod
             this.status = 0;
             this.gradient(timing[status]);
         }
-        public void Animate(long time,ref int note_pos) { //did you mean times?
-
+        public void Animate(long time,ref int note_pos) { //did you mean times
             if (status <= 2)
             {
                 gradient(timing[status] - times);
-                setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B), pos.x, pos.y);
+                setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
 
             }
 
@@ -378,11 +403,12 @@ namespace A3ttrEngine.mod
                         try{
                             // In case not located in list
                             a3ttrSoundlist[$"{pos.x}-{pos.y}"].Play();
-                        }catch (Exception e) { }
+                        }catch (Exception e) {
+                            Console.WriteLine(e.Message);
+                        }
                         break;
                     case 2:
                         gradColor = black;
-                        //setFadeLed(Color.White, pos.x, pos.y, keeptime, fadetime);
                         break;
                     case 3:
                         
@@ -395,15 +421,16 @@ namespace A3ttrEngine.mod
             }
             times += time;
         }
-        public void setFadeLed(Color c, int x, int y, int keeptime, int fadetime)
+        
+        public void setFadeLed(Color c, int keeptime, int fadetime)
         {
 
-            launchpad[x, y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
+            launchpad[pos.x, pos.y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
         }
-        public void setLed(Color c, int x, int y)
+        public void setLed(Color c)
         {
 
-            launchpad[x, y].ledColor = c;
+            launchpad[pos.x, pos.y].ledColor = c;
         }
 
         public void gradient(long timeleft)
@@ -420,8 +447,6 @@ namespace A3ttrEngine.mod
         }
         public bool hit(int x, int y) {
             return ((pos.y == y) & (pos.x == x));
-
-
         }
 
     }

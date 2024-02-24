@@ -48,10 +48,7 @@ namespace A3ttrEngine.mod
         public override void init()
         {
             base.Name = "MusicMelody";
-            
 
-
-            Console.WriteLine("In");
             a3ttrSoundlist.Add("GameOver", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\GameOver.wav"));
             
             for (int x = 0; x < 8; x++)
@@ -61,13 +58,6 @@ namespace A3ttrEngine.mod
                 }
             }
 
-            /*gameTargets.Add(new Target((5, 7), "A"));
-            gameTargets.Add(new Target((0, 1), "A"));
-            gameTargets.Add(new Target((1, 0), "A"));
-            gameTargets.Add(new Target((2, 2), "A"));
-            gameTargets.Add(new Target((2, 3), "A"));
-            gameTargets.Add(new Target((3, 2), "A"));
-            gameTargets.Add(new Target((4, 4), "A"));*/
             loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
             //names of piano tile sounds correspond to their coordinates on the launchapd
 
@@ -163,9 +153,6 @@ namespace A3ttrEngine.mod
                         betweenLevelDelay = 0;
                         times = 0;
                     }
-                    
-
-
                 }
 
             }
@@ -195,10 +182,7 @@ namespace A3ttrEngine.mod
                     {
                         setLed(Color.Green, x, y);
                         Console.WriteLine("Fade");
-                        
                         note_pos += 1;
-
-
                     }
                     else
                     {

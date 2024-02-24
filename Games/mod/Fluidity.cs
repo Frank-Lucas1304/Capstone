@@ -44,13 +44,11 @@ namespace PianoTiles.mod
             gameTargets.Add(x);
 
             base.Name = "PianoTiles";
-            loadAnimation("gradient2", System.Environment.CurrentDirectory + "\\animation\\gradient2.ttr");
-
-            a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
+           
             base.init();
             //gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
                                                                       //usertime = new TimeSpan(0, 0, 0);
-            a3ttrSoundlist["BGM"].Play();
+
 
         }
         /// <summary>
@@ -59,9 +57,43 @@ namespace PianoTiles.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
+            int incr = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++) {
+                    int val = 0 + incr;
+                    
+                    if (i < 4)
+                    {
+                        Color color1 = Color.FromArgb(252, 4, 4);
+                        setLed(color1,i, j);
+                    }
+                    else
+                    {
+                        Color color1 = Color.FromArgb(255, 7, 4);
+                        setLed(color1, i, j);
+                    }
+                    if (incr <= 255)
+                    {
+                        Color color1 = Color.FromArgb(val, 0, 0);
+                        //setLed(color1, j, i);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{i} {j}");
+                        break;
+                    }
+                    incr += 1;
+
+                }
+                incr += 1;
+
+            }
             Test.launchpad = a3ttrPadCell;// got it to work
             // Color Experiments and time variable conditions
-            Console.WriteLine(time);
+
+
+        /*
             times += time;
             if (times%100<50)
             {
@@ -83,7 +115,7 @@ namespace PianoTiles.mod
             }
             gameTargets[0].setLed();
             setLed(System.Drawing.Color.FromArgb(red, green, red), 1, 1);
-
+        */
             base.update(time);
             
         }
@@ -103,9 +135,7 @@ namespace PianoTiles.mod
 
             if (action == 1 && type == 1)
             {
-                StartAnimation("gradient2", 1, 1);
-
-                Console.WriteLine(times);
+              
 
             }
             else if (action == 2 && type == 1)
@@ -173,6 +203,10 @@ namespace PianoTiles.mod
                 this.direction = direction;
                 this.length = length;
                 this.status = "missed";
+            }
+            public void Brightness(int opacity)
+            {
+                
             }
         }
         class Test

@@ -19,10 +19,10 @@ using System.Threading.Tasks;
 namespace PianoTiles.mod
 {
     public class Fluidity : A3GameModel
-    {
+    {         
 
         long times = 0;// time vs TimeSpan
-        List<Test> gameTargets = new List<Test>();
+        Target[,] buttonGrid = new Target[8, 8];
 
         bool once = true;
         private int state; //Sets value automatically to 0 if not assigned later in the code
@@ -40,7 +40,13 @@ namespace PianoTiles.mod
         public override void init()
         {
 
-
+            for (int x = 0; x < 8; x++)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    buttonGrid[x, y] = new Target((x, y));
+                }
+            }
             base.Name = "PianoTiles";
            
             base.init();
@@ -77,13 +83,8 @@ namespace PianoTiles.mod
                     if (val<=1)
                     {
                         num += 1;
-                        int R = Target.Gamma(252, val);
-                        int G = Target.Gamma(4, val);
-                        int B = Target.Gamma(4, val);
-                        Console.WriteLine($"{num}: ({R},{G},{B}), {val}, {i},{j}");
-                        Console.WriteLine(val);
-                        Color color1 = Color.FromArgb(R, G, B);
-                        setLed(color1, j, i);
+
+
                     }
                     else
                     {
@@ -164,107 +165,129 @@ namespace PianoTiles.mod
 
         }
 
-        public class Target
+        class Target
         {
-            public static int colorSpeed = 0;
+            public static int[] duration = new int[3] { 100, 200, 200 };
+            public static A3ttrPadCell[,] launchpad;
+            public static Dictionary<string, A3ttrSound> a3ttrSoundlist;
 
-            public static int inactiveTargets = 0;
-            public long ctime { get; set; }
-            public long speed { get; set; } // speed and time window are the same
-            public string status { get; set; }
+            /*Sequence Display
+             pos 1 is gradient1 duration
+             pos 2 is gradient2 duration
+             pos 3 delay for next note
+            */
+
+            // Performing Shallow Copy
+            int[] timing = (int[])duration.Clone();
+
+            //int[] timing = new int[3] {100, 200, 200};
+            const int keeptime = 50;
+            const int fadetime = 50;
+
+            (int R, int G, int B) black = (0, 0, 0);
+            (int R, int G, int B) purple = (50, 0, 50);
+            (int R, int G, int B) white = (255, 255, 255);
+
+            public long times { get; set; }
+            public int status { get; set; }
             public int length { get; set; }
-            public (int x, int y) endPos { get; set; }
-            public (int x, int y) startPos { get; set; }
-            public (int x, int y) currPos { get; set; }
-            public (int x, int y) direction { get; set; }
-            public Color color { get; set; }
-            public void update(int times)
-            {
-                // This method will be responsible for updating the color of the led
+            public (int x, int y) pos { get; set; }
 
-                switch (status)
+            public string key { get; set; }
+            public (int R, int G, int B) currColor { get; set; }
+            public (int R, int G, int B) init_color { get; set; }
+            public (int R, int G, int B) gradColor { get; set; }
+            public Target((int, int) pos, string key = null)
+            {
+                this.key = key;
+                this.times = 0;
+                this.pos = pos;
+                //INSERT AN ERROR IF KEY DOESNT EXIST
+
+                //Starting effect
+                reset();
+
+            }
+            public void reset()
+            {
+                this.currColor = (0, 0, 0);
+                this.gradColor = purple;
+
+
+                this.status = 0;
+                this.gradient(timing[status]);
+            }
+            public void Animate(long time, ref int note_pos)
+            { //did you mean times
+                if (status <= 2)
                 {
-                    case "inactive":
-                        if (times % colorSpeed <= colorSpeed - 1)
-                        {
-                            color = Color.FromArgb(0, 0, 0);
-                        }
+                    gradient(timing[status] - times);
+                    setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
 
-
-                        if (times % speed <= speed - 1)
-                        {
-
-                        }
-
-
-                        break;
                 }
-            }
-            public static int Brightness(int pigment,double opacity)
-            {    
-                return (int)(opacity * pigment);
 
-            }
-            public void CircleAnimation()
-            {
-
-            }
-            public int distance()
-            {
-                int xDiff = Math.Abs(currPos.x - endPos.x);
-                int yDiff = Math.Abs(currPos.y - endPos.y);
-
-                return xDiff > yDiff ? xDiff : yDiff;
-            }
-            public void on(bool state = true)
-            {
-                this.status = "inactive";
-                this.currPos = this.startPos;
-                if (state)
-                    ++inactiveTargets;
-            }
-            public void brightness(int opacity) {
-                /*
-                number of brightness levels = 252/4 = 63
-                this function find the min and max pigment values and defines its brightness from there
-                */
-                /*int R = color.R / 4;
-                int G = color.G / 4;
-                int B = color.B / 4;
-                int[] values = new int[3]{R, G, B};
-
-                int min = 260;
-                int max = 0;
-                foreach (int pigment in values)
+                if (times >= timing[status])
                 {
-                    if (max<pigment)
-                        max = pigment;
-                    if (min>pigment & min!=0) 
-                        min = pigment;
+                    ++status;
+                    switch (status)
+                    {
+                        case 1:
+                            gradColor = white;
+                            try
+                            {
+                                // In case not located in list
+                                a3ttrSoundlist[$"{pos.x}-{pos.y}"].Play();
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e.Message);
+                            }
+                            break;
+                        case 2:
+                            gradColor = black;
+                            break;
+                        case 3:
+
+                            Console.WriteLine("In");
+                            note_pos += 1;
+                            reset();
+                            break;
+                    }
+                    times = 0;
                 }
-                if (min == 260)
-                    min = max;
-                
-                /* 
-                lowest brightness before completely dark would be pigment of 4 and max 63
-                Total number of levels = min-4 + 63-max.
-                The minimum has to be a non zero value */
-                //NORMALIZED VALUES
-                int R = color.R / 255;
-                int G = color.G / 255;
-                int B = color.B / 255;
-                Math.Pow(R, 2.2);
-                Math.Pow(R, 2.2);
-                Math.Pow(R, 2.2);
+                times += time;
             }
-            public Target((int, int) startPos, (int, int) endPos, (int, int) direction, int length)
+
+            public void setFadeLed(Color c, int keeptime, int fadetime)
             {
-                this.startPos = startPos;
-                this.endPos = endPos;
-                this.direction = direction;
-                this.length = length;
-                this.status = "missed";
+
+                launchpad[pos.x, pos.y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
             }
+            public void setLed(Color c)
+            {
+
+                launchpad[pos.x, pos.y].ledColor = c;
+            }
+
+            public void gradient(long timeleft)
+            {
+                if (timeleft <= 0)
+                {
+                    timeleft = 1;
+                }
+                (int R, int G, int B) c;
+                c.R = (int)Math.Ceiling((decimal)(gradColor.R - currColor.R) / timeleft) + currColor.R;
+                c.G = (int)Math.Ceiling((decimal)(gradColor.G - currColor.G) / timeleft) + currColor.G;
+                c.B = (int)Math.Ceiling((decimal)(gradColor.B - currColor.B) / timeleft) + currColor.B;
+
+                currColor = c;
+            }
+
+            public bool hit(int x, int y)
+            {
+                return ((pos.y == y) & (pos.x == x));
+            }
+
         }
         class Test
         {

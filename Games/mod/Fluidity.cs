@@ -25,7 +25,7 @@ namespace PianoTiles.mod
 
         long times = 0;// time vs TimeSpan
         Target[,] buttonGrid = new Target[8, 8];
-
+        int [,] grid = new int[8, 8];
         bool once = true;
         private int state; //Sets value automatically to 0 if not assigned later in the code
         int red = 0x0;
@@ -155,8 +155,12 @@ namespace PianoTiles.mod
             int deltaY = origin.y - pos.y;
 
             double err = Math.Pow(deltaX, 2) + Math.Pow(deltaY, 2) - Math.Pow(radius,2);
-            if (err < 0)
+            if (err > 0)
+                buttonGrid[pos.x, pos.y].setLed(Color.White);
+            else
             {
+
+
                 if (pos.y > 0 & pos.y <= origin.y)
                     CircleAnimation(radius, origin, (pos.x, pos.y - 1));
                 if (pos.x > 0 & pos.x <= origin.x)
@@ -165,9 +169,10 @@ namespace PianoTiles.mod
                     CircleAnimation(radius, origin, (pos.x, pos.y + 1));
                 if (pos.x < 7 & pos.x >= origin.x)
                     CircleAnimation(radius, origin, (pos.x + 1, pos.y));
-                buttonGrid[pos.x, pos.y].setLed(Color.Red);
+                grid[pos.x, pos.y] = 1;
 
             }
+
         }
 
 
@@ -184,7 +189,15 @@ namespace PianoTiles.mod
 
             if (action == 1 && type == 1)
             {
-                CircleAnimation(4, (2, 2), (2, 2));
+                CircleAnimation(2, (x, y), (x, y));
+                for(int i = 0; i < 8; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        Console.Write(grid[i, j]+" ");
+                    }
+                    Console.WriteLine();
+                }
 
             }
             else if (action == 2 && type == 1)

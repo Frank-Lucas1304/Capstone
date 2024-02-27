@@ -1,4 +1,5 @@
-﻿using A3TTRControl2;
+﻿using A3TTRControl;
+using A3TTRControl2;
 using Midi.Devices;
 using OpenTK.Graphics.ES20;
 using OpenTK.Input;
@@ -12,6 +13,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net.NetworkInformation;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -61,10 +63,18 @@ namespace PianoTiles.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         double incr = 0;
         int num = 0;
+        bool launchpadSetUp = true;
         public override void update(long time)
         {
-           
+            if (launchpadSetUp)
+            {
+                Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
+                Target.a3ttrSoundlist = a3ttrSoundlist;
+                launchpadSetUp = false;
+            }
+
             //Color Testing 
+            /*
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++) {
@@ -78,7 +88,7 @@ namespace PianoTiles.mod
                     {
                         Color color1 = Color.FromArgb(255, 7, 4);
                         setLed(color1, i, j);
-                    }*/
+                    }
                     
                     if (val<=1)
                     {
@@ -106,8 +116,8 @@ namespace PianoTiles.mod
 
                 }
                 //incr += 1.0/64;
-
-            }
+                
+            }*/
             Test.launchpad = a3ttrPadCell;// got it to work
             // Color Experiments and time variable conditions
 
@@ -138,6 +148,27 @@ namespace PianoTiles.mod
             
         }
 
+        public void CircleAnimation(int radius, (int x, int y) origin, (int x, int y) pos)
+        {
+            // Each Square is in contact with 8 other squares
+            int deltaX = origin.x - pos.x;
+            int deltaY = origin.y - pos.y;
+
+            double err = Math.Pow(deltaX, 2) + Math.Pow(deltaY, 2) - Math.Pow(radius,2);
+            if (err < 0)
+            {
+                if (pos.y > 0 & pos.y <= origin.y)
+                    CircleAnimation(radius, origin, (pos.x, pos.y - 1));
+                if (pos.x > 0 & pos.x <= origin.x)
+                    CircleAnimation(radius, origin, (pos.x - 1, pos.y));
+                if (pos.y < 7 & pos.y >= origin.y)
+                    CircleAnimation(radius, origin, (pos.x, pos.y + 1));
+                if (pos.x < 7 & pos.x >= origin.x)
+                    CircleAnimation(radius, origin, (pos.x + 1, pos.y));
+                buttonGrid[pos.x, pos.y].setLed(Color.Red);
+
+            }
+        }
 
 
         /// <summary>
@@ -153,7 +184,7 @@ namespace PianoTiles.mod
 
             if (action == 1 && type == 1)
             {
-              
+                CircleAnimation(4, (2, 2), (2, 2));
 
             }
             else if (action == 2 && type == 1)
@@ -288,6 +319,25 @@ namespace PianoTiles.mod
                 return ((pos.y == y) & (pos.x == x));
             }
 
+            /*public void CircleAnimation(int radius)
+            {
+                CircleAnimation(radius, this.pos, this.pos);
+            }
+            /*public void CircleAnimation(int radius, (int x, int y) origin, (int x, int y) curr_pos) {
+
+                int x = pos.x + 1;
+                int y = pos.y + 1;
+                bool inCircle = Math.Pow(origin.Item1)
+                CircleAnimation(radius, pos,(x,y));
+
+            }*/
+            public void brightness(double opacity) {
+                int R = (int)(currColor.R * opacity);
+                int G = (int)(currColor.G * opacity);
+                int B = (int)(currColor.B * opacity);
+                currColor = (R, G, B);
+                
+            }
         }
         class Test
         {

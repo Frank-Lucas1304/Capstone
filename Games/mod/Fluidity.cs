@@ -1,6 +1,7 @@
 ﻿using A3TTRControl;
 using A3TTRControl2;
 using Midi.Devices;
+using OpenTK.Audio.OpenAL;
 using OpenTK.Graphics.ES20;
 using OpenTK.Input;
 using OpenTK.Platform.Windows;
@@ -154,13 +155,19 @@ namespace PianoTiles.mod
             int deltaX = origin.x - pos.x;
             int deltaY = origin.y - pos.y;
 
-            double err = Math.Pow(deltaX, 2) + Math.Pow(deltaY, 2) - Math.Pow(radius,2);
-            if (err > 0)
-                buttonGrid[pos.x, pos.y].setLed(Color.White);
+            double err = Math.Pow(deltaX, 2) + Math.Pow(deltaY, 2) - Math.Pow(radius, 2);
+ 
+            if (err > 0) {
+                 Console.WriteLine(err);
+                 int pigment = (int)(255 * Math.Pow(0.3/err,err));
+                 Color fade = Color.FromArgb(pigment, 0, 0);
+                 setFadeLed(fade, pos.x, pos.y, 1000, 100);
+                }
             else
             {
 
-
+                /* the second condition for each if statement is to prevent an infinite recursion
+                because or else it will go to the next square and then comeback to the previous one*/
                 if (pos.y > 0 & pos.y <= origin.y)
                     CircleAnimation(radius, origin, (pos.x, pos.y - 1));
                 if (pos.x > 0 & pos.x <= origin.x)
@@ -170,6 +177,7 @@ namespace PianoTiles.mod
                 if (pos.x < 7 & pos.x >= origin.x)
                     CircleAnimation(radius, origin, (pos.x + 1, pos.y));
                 grid[pos.x, pos.y] = 1;
+                setFadeLed(Color.Red, pos.x, pos.y, 1000, 100);
 
             }
 

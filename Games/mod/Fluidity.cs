@@ -2,6 +2,7 @@
 using Midi.Devices;
 using OpenTK.Graphics.ES20;
 using OpenTK.Input;
+using OpenTK.Platform.Windows;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -38,10 +39,7 @@ namespace PianoTiles.mod
         /// </summary>
         public override void init()
         {
-            Test x = new Test();
 
-
-            gameTargets.Add(x);
 
             base.Name = "PianoTiles";
            
@@ -55,15 +53,17 @@ namespace PianoTiles.mod
         /// 更新事件，mod逻辑处理
         /// </summary>
         /// <param name="time">距离上次更新的时间(毫秒)</param>
+        double incr = 0;
+        int num = 0;
         public override void update(long time)
         {
-            int incr = 0;
+           
+            //Color Testing 
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++) {
-                    int val = 0 + incr;
-                    
-                    if (i < 4)
+                    double val = 0 + incr;
+                    /*if (i < 4)
                     {
                         Color color1 = Color.FromArgb(252, 4, 4);
                         setLed(color1,i, j);
@@ -72,50 +72,67 @@ namespace PianoTiles.mod
                     {
                         Color color1 = Color.FromArgb(255, 7, 4);
                         setLed(color1, i, j);
-                    }
-                    if (incr <= 255)
+                    }*/
+                    
+                    if (val<=1)
                     {
-                        Color color1 = Color.FromArgb(val, 0, 0);
-                        //setLed(color1, j, i);
+                        num += 1;
+                        int R = Target.Gamma(252, val);
+                        int G = Target.Gamma(4, val);
+                        int B = Target.Gamma(4, val);
+                        Console.WriteLine($"{num}: ({R},{G},{B}), {val}, {i},{j}");
+                        Console.WriteLine(val);
+                        Color color1 = Color.FromArgb(R, G, B);
+                        setLed(color1, j, i);
                     }
                     else
                     {
-                        Console.WriteLine($"{i} {j}");
-                        break;
+                        if (val <= 2)
+                        {
+                            int R = (int)(252 * (val - 1.0));
+                            int G = (int)(4 * (val - 1.0));
+                            int B = (int)(4 * (val - 1.0));
+                            Console.WriteLine($"{num}: ({R},{G},{B}), {val}, {i},{j}");
+                            Color color1 = Color.FromArgb(R, G, B);
+                            setLed(color1, j, i);
+                        }
+                        else
+                            break;
+
                     }
-                    incr += 1;
+                    incr += 2.0 / 64;
+                    
 
                 }
-                incr += 1;
+                //incr += 1.0/64;
 
             }
             Test.launchpad = a3ttrPadCell;// got it to work
             // Color Experiments and time variable conditions
 
-
-        /*
-            times += time;
-            if (times%100<50)
-            {
-
-                if (red < 255)
-                {
-                    red += 1;
-                }
-                else
+            /*
+                times += time;
+                if (times%100<50)
                 {
 
-                    if (green < 255)
-                        green += 1;
+                    if (red < 255)
+                    {
+                        red += 1;
+                    }
+                    else
+                    {
+
+                        if (green < 255)
+                            green += 1;
+
+                    }
+
+
 
                 }
-
-
-
-            }
-            gameTargets[0].setLed();
-            setLed(System.Drawing.Color.FromArgb(red, green, red), 1, 1);
-        */
+                gameTargets[0].setLed();
+                setLed(System.Drawing.Color.FromArgb(red, green, red), 1, 1);
+            */
             base.update(time);
             
         }
@@ -146,6 +163,7 @@ namespace PianoTiles.mod
             }
 
         }
+
         public class Target
         {
             public static int colorSpeed = 0;
@@ -182,6 +200,15 @@ namespace PianoTiles.mod
                         break;
                 }
             }
+            public static int Brightness(int pigment,double opacity)
+            {    
+                return (int)(opacity * pigment);
+
+            }
+            public void CircleAnimation()
+            {
+
+            }
             public int distance()
             {
                 int xDiff = Math.Abs(currPos.x - endPos.x);
@@ -196,6 +223,40 @@ namespace PianoTiles.mod
                 if (state)
                     ++inactiveTargets;
             }
+            public void brightness(int opacity) {
+                /*
+                number of brightness levels = 252/4 = 63
+                this function find the min and max pigment values and defines its brightness from there
+                */
+                /*int R = color.R / 4;
+                int G = color.G / 4;
+                int B = color.B / 4;
+                int[] values = new int[3]{R, G, B};
+
+                int min = 260;
+                int max = 0;
+                foreach (int pigment in values)
+                {
+                    if (max<pigment)
+                        max = pigment;
+                    if (min>pigment & min!=0) 
+                        min = pigment;
+                }
+                if (min == 260)
+                    min = max;
+                
+                /* 
+                lowest brightness before completely dark would be pigment of 4 and max 63
+                Total number of levels = min-4 + 63-max.
+                The minimum has to be a non zero value */
+                //NORMALIZED VALUES
+                int R = color.R / 255;
+                int G = color.G / 255;
+                int B = color.B / 255;
+                Math.Pow(R, 2.2);
+                Math.Pow(R, 2.2);
+                Math.Pow(R, 2.2);
+            }
             public Target((int, int) startPos, (int, int) endPos, (int, int) direction, int length)
             {
                 this.startPos = startPos;
@@ -203,10 +264,6 @@ namespace PianoTiles.mod
                 this.direction = direction;
                 this.length = length;
                 this.status = "missed";
-            }
-            public void Brightness(int opacity)
-            {
-                
             }
         }
         class Test

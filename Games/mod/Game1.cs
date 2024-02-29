@@ -60,13 +60,22 @@ namespace PianoTiles.mod
         public override void init()
         {
             base.Name = "PianoTiles";
+            List<string> songList = new List<string>();
+            songList.Add("BGM");
+            songList.Add("PianoSong");
+            songList.Add("Pickles");
+            int songToPlay = 1;
+            string song = songList[songToPlay];
 
             animationDisplay.on(false);// what is this??
             a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
+            a3ttrSoundlist.Add("PianoSong", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoSong.wav"));
+            a3ttrSoundlist.Add("Pickles", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\Pickles.wav"));
             a3ttrSoundlist.Add("levelUp", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\levelUp.wav"));
             a3ttrSoundlist.Add("feedback", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\feedback.wav"));
-            a3ttrSoundlist["BGM"].Play();
+            a3ttrSoundlist[song].Play();
             a3ttrSoundlist.Add("gameover", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\gameover.wav"));
+            a3ttrSoundlist.Add("Buzzer", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\WrongBuzzer.wav"));
             loadAnimation("levelUp", System.Environment.CurrentDirectory + "\\animation\\gradient2.ttr");
 
             loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
@@ -343,7 +352,7 @@ namespace PianoTiles.mod
                     /* MISSED TARGET
                     When the target enters here it is because the user did not hit the target in time. Therefore the target status is set to "missed" and a visual feedback is ouputed*/
                     --Target.inactiveTargets;
-
+                    a3ttrSoundlist["Buzzer"].Play();
                     target.status = "missed";
                     clearLed(target.endPos.x, target.endPos.y);
                     setFadeLed(Color.Red, target.endPos.x, target.endPos.y, keeptime, fadetime);

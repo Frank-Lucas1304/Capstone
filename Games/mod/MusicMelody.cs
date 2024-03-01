@@ -349,7 +349,7 @@ namespace A3ttrEngine.mod
 
     }
     class Target {
-        public static int[] duration = new int[4] { 100, 200, 200, 1000};
+        public static int[] duration = new int[4] { 100, 200, 200, 200};
         public static A3ttrPadCell[,] launchpad;
         public static Dictionary<string, A3ttrSound> a3ttrSoundlist;
 
@@ -438,8 +438,7 @@ namespace A3ttrEngine.mod
             }
             times += time;
         }
-        public void PositiveFeedback(long time) { 
-
+        public void PositiveFeedback(long time) {
             if ((anim_status!=1) && ((duration[anim_status+3] - times)>=0)) { 
                 int iterations = 360 / (45 / radius);
                 for (int i = 0; i < iterations + 1; i++)
@@ -461,7 +460,13 @@ namespace A3ttrEngine.mod
                         /*The bound condition was discovered through robust testing dont ask why it is like that it just works*/
                         if ((-bound - 1 < err) & (err <= bound) & 0 <= y & y < 8 & 0 <= x & x < 8)
                         {
-                            setLed(Color.Red, x, y);
+                            //Rea
+                            if (launchpad[x, y].ledColor == null) 
+                            {
+                                Console.WriteLine(launchpad[x, y].ledColor);
+                      
+                                setLed(Color.Red, x, y);
+                            }
 
                         }
                     }

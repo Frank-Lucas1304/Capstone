@@ -434,5 +434,13 @@ namespace A3ttrEngine.mod
         }
 
     }
+
+    class Animate
+    {
+        public static A3ttrPadCell[,] launchpad;
+        public Animate() { 
+        
+        }
+    }
 }
 

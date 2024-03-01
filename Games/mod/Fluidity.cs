@@ -1,6 +1,8 @@
 ﻿using A3TTRControl;
 using A3TTRControl2;
 using Midi.Devices;
+using OggVorbisEncoder.Lookups;
+using OggVorbisEncoder.Setup.Templates.FloorBooks;
 using OpenTK.Audio.OpenAL;
 using OpenTK.Graphics.ES20;
 using OpenTK.Input;
@@ -22,11 +24,11 @@ using System.Threading.Tasks;
 namespace PianoTiles.mod
 {
     public class Fluidity : A3GameModel
-    {         
+    {
 
         long times = 0;// time vs TimeSpan
         Target[,] buttonGrid = new Target[8, 8];
-        int [,] grid = new int[8, 8];
+        int[,] grid = new int[8, 8];
         bool once = true;
         private int state; //Sets value automatically to 0 if not assigned later in the code
         int red = 0x0;
@@ -51,10 +53,10 @@ namespace PianoTiles.mod
                 }
             }
             base.Name = "PianoTiles";
-           
+
             base.init();
             //gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
-                                                                      //usertime = new TimeSpan(0, 0, 0);
+            //usertime = new TimeSpan(0, 0, 0);
 
 
         }
@@ -146,17 +148,16 @@ namespace PianoTiles.mod
                 setLed(System.Drawing.Color.FromArgb(red, green, red), 1, 1);
             */
             base.update(time);
-            
+
         }
 
-        public void CircleAnimation(int radius, (int x, int y) origin, (int x, int y) pos)
+        public void CircleAnimation(int radius, (int x, int y) origin)
         {
             // Each Square is in contact with 8 other squares
-            int deltaX = origin.x - pos.x;
-            int deltaY = origin.y - pos.y;
 
-            double err = Math.Pow(deltaX, 2) + Math.Pow(deltaY, 2) - Math.Pow(radius, 2);
- 
+
+
+            /*
             if (err > 0) {
                  Console.WriteLine(err);
                  int pigment = (int)(255 * Math.Pow(0.3/err,err));
@@ -167,7 +168,7 @@ namespace PianoTiles.mod
             {
 
                 /* the second condition for each if statement is to prevent an infinite recursion
-                because or else it will go to the next square and then comeback to the previous one*/
+                because or else it will go to the next square and then comeback to the previous one
                 if (pos.y > 0 & pos.y <= origin.y)
                     CircleAnimation(radius, origin, (pos.x, pos.y - 1));
                 if (pos.x > 0 & pos.x <= origin.x)
@@ -179,7 +180,35 @@ namespace PianoTiles.mod
                 grid[pos.x, pos.y] = 1;
                 setFadeLed(Color.Red, pos.x, pos.y, 1000, 100);
 
+            }*/
+
+            int iterations = 360 / (45 / radius);
+            for (int i = 0; i < iterations + 1; i++)
+            {   //Angle tolerance was determined through testing 
+                for (int tolerance = -1; tolerance < 1; tolerance++) {
+                    /* Idea is that your taking the square that encapsulates the circle. The angle from one of its corner is to its origin is 45 degrees
+                    You then divide it by the number of blocks making up its height*/
+                    double angle = (45 / radius) * i - tolerance;
+                    double rad = angle * Math.PI / 180;
+                    // Finding x and y components relative to the origin
+                    double dy = Math.Round(radius * Math.Sin(rad));
+                    double dx = Math.Round(radius * Math.Cos(rad));
+                    int x = origin.x + (int)dx;
+                    int y = origin.y + (int)dy;
+
+                    double err = Math.Pow(dx, 2) + Math.Pow(dy, 2) - Math.Pow(radius, 2);
+                    int bound = radius - 1;
+                    Console.WriteLine(err);
+                    /*The bound condition was discovered through robust testing dont ask why it is like that it just works*/
+                    if ((-bound - 1 < err) & (err <= bound) & 0 <= y & y < 8 & 0 <= x & x < 8)
+                    {
+                        Console.WriteLine("IN");
+                        buttonGrid[x, y].setFadeLed(Color.Red, 1000, 1000);
+                    }
+                };
             }
+
+
 
         }
 
@@ -197,21 +226,15 @@ namespace PianoTiles.mod
 
             if (action == 1 && type == 1)
             {
-                CircleAnimation(2, (x, y), (x, y));
-                for(int i = 0; i < 8; i++)
-                {
-                    for (int j = 0; j < 8; j++)
-                    {
-                        Console.Write(grid[i, j]+" ");
-                    }
-                    Console.WriteLine();
-                }
+                CircleAnimation(1, (x, y));
+
 
             }
             else if (action == 2 && type == 1)
             {
-                // WHEN USER LIFTS OFF BUTTON, BUTTON GOES BACK TO ORIGINAL COLOUR
-                base.clearLed(x, y);
+                // Goes here when user lifts finger
+
+
                 //清除按钮led灯光
             }
 
@@ -357,8 +380,14 @@ namespace PianoTiles.mod
                 int G = (int)(currColor.G * opacity);
                 int B = (int)(currColor.B * opacity);
                 currColor = (R, G, B);
-                
+
             }
+        }
+        class Event {
+            public static A3ttrPadCell[,] launchpad;
+            
+
+
         }
         class Test
         {

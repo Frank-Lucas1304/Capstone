@@ -1,5 +1,6 @@
 ﻿using A3TTRControl;
 using A3TTRControl2;
+using A3ttrEngine.mod;
 using Midi.Devices;
 using OggVorbisEncoder.Lookups;
 using OggVorbisEncoder.Setup.Templates.FloorBooks;
@@ -28,6 +29,7 @@ namespace PianoTiles.mod
 
         long times = 0;// time vs TimeSpan
         Target[,] buttonGrid = new Target[8, 8];
+        List<Event> Animations = new List<Event>();
         int[,] grid = new int[8, 8];
         bool once = true;
         private int state; //Sets value automatically to 0 if not assigned later in the code
@@ -75,6 +77,7 @@ namespace PianoTiles.mod
                 Target.a3ttrSoundlist = a3ttrSoundlist;
                 launchpadSetUp = false;
             }
+
 
             //Color Testing 
             /*
@@ -226,7 +229,7 @@ namespace PianoTiles.mod
 
             if (action == 1 && type == 1)
             {
-                CircleAnimation(1, (x, y));
+                CircleAnimation(2, (x, y));
 
 
             }
@@ -385,7 +388,17 @@ namespace PianoTiles.mod
         }
         class Event {
             public static A3ttrPadCell[,] launchpad;
+            public string status { get; set; }
+            public (int,int) pos { get; set; }
             
+            public void Animate(long time)
+            {
+                if (status == "active")
+                {
+
+                }
+            }
+
 
 
         }

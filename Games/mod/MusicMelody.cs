@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -27,8 +28,11 @@ namespace A3ttrEngine.mod
 
         string[] noteList = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
         int note_pos = 0;
+        int init_anim_note_pos = 3;
+
         int lives = 3;
         int level = 3;
+
         
         long quitDelay = 1000;
         long betweenLevelDelay;
@@ -149,9 +153,34 @@ namespace A3ttrEngine.mod
                     if (times++ >= betweenLevelDelay)
                     {
                         (int x, int y) = KeyMapping(noteList[note_pos]);
-                        buttonGrid[x, y].Animate(time, ref note_pos);
+                        buttonGrid[x, y].Display(time, ref note_pos);
                         betweenLevelDelay = 0;
                         times = 0;
+                    }
+                }
+                else
+                { /*Animation Effects
+                / so when note_pos = level --> you dont want any effect because it means the user has not yet pressed an input
+                / therefore PositiveFeedback Animation for correctly pressing the first note is activated when note_pos = level+1
+                  this leads to another issue --> the last note
+
+                  EXPECTING ISSUE WITH LAST NOTE --> because indicator of when it is pressed is 0 and not 2*level
+                  the for loop is necessary in the case consecutive correct inputs are pressed and simultaneous animations are activated. PositiveFeedback will have to modify its animation status once animation is complete.
+                */
+
+                    /* when note_pos = level --> not executed
+                       for loop is activated when note_pos = level+1*/
+                    
+                    for (int note = init_anim_note_pos; note < note_pos; note++) {
+                        (int x, int y) pos = KeyMapping(noteList[note - level]);
+                        buttonGrid[pos.x, pos.y].PositiveFeedback(time);
+
+                        //removes unnecessary loop
+                        if (note == init_anim_note_pos & buttonGrid[pos.x, pos.y].anim_status == 1)
+                        {
+                            buttonGrid[pos.x, pos.y].anim_status = 0;
+                            init_anim_note_pos++;
+                        }
                     }
                 }
 
@@ -220,6 +249,7 @@ namespace A3ttrEngine.mod
                         betweenLevelDelay = Target.duration.Sum();
                         note_pos = 0;
                         times = 0;
+                        init_anim_note_pos = level;
                     }
  
                 }
@@ -319,7 +349,7 @@ namespace A3ttrEngine.mod
 
     }
     class Target {
-        public static int[] duration = new int[3] { 100, 200, 200 };
+        public static int[] duration = new int[4] { 100, 200, 200, 1000};
         public static A3ttrPadCell[,] launchpad;
         public static Dictionary<string, A3ttrSound> a3ttrSoundlist;
 
@@ -341,8 +371,10 @@ namespace A3ttrEngine.mod
         (int R, int G, int B) white = (255,255,255);
 
         public long times { get; set; }
-        public int status { get; set; }
+        public int display_status { get; set; }
+        public int anim_status { get; set; }
         public int length { get; set; }
+        public int radius { get; set; }
         public (int x, int y) pos { get; set; }
 
         public string key { get; set; }
@@ -354,6 +386,7 @@ namespace A3ttrEngine.mod
             this.key = key; 
             this.times = 0;
             this.pos = pos;
+            this.radius = 1;
             //INSERT AN ERROR IF KEY DOESNT EXIST
 
             //Starting effect
@@ -366,21 +399,21 @@ namespace A3ttrEngine.mod
             this.gradColor = purple;
             
 
-            this.status = 0;
-            this.gradient(timing[status]);
+            this.display_status = 0;
+            this.gradient(timing[display_status]);
         }
-        public void Animate(long time,ref int note_pos) { //did you mean times
-            if (status <= 2)
+        public void Display(long time,ref int note_pos) { //did you mean times
+            if (display_status <= 2)
             {
-                gradient(timing[status] - times);
+                gradient(timing[display_status] - times);
                 setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
 
             }
 
-            if (times>= timing[status])
+            if (times>= timing[display_status])
             {
-                ++status;
-                switch (status)
+                ++display_status;
+                switch (display_status)
                 {
                     case 1:
                         gradColor = white;
@@ -405,16 +438,70 @@ namespace A3ttrEngine.mod
             }
             times += time;
         }
-        
+        public void PositiveFeedback(long time) { 
+
+            if ((anim_status!=1) && ((duration[anim_status+3] - times)>=0)) { 
+                int iterations = 360 / (45 / radius);
+                for (int i = 0; i < iterations + 1; i++)
+                {   //Angle tolerance was determined through testing 
+                    for (int tolerance = -1; tolerance < 1; tolerance++)
+                    {
+                        /* Idea is that your taking the square that encapsulates the circle. The angle from one of its corner is to its origin is 45 degrees
+                        You then divide it by the number of blocks making up its height*/
+                        double angle = (45 / radius) * i - tolerance;
+                        double rad = angle * Math.PI / 180;
+                        // Finding x and y components relative to the origin
+                        double dy = Math.Round(radius * Math.Sin(rad));
+                        double dx = Math.Round(radius * Math.Cos(rad));
+                        int x = pos.x + (int)dx;
+                        int y = pos.y + (int)dy;
+
+                        double err = Math.Pow(dx, 2) + Math.Pow(dy, 2) - Math.Pow(radius, 2);
+                        int bound = radius - 1;
+                        /*The bound condition was discovered through robust testing dont ask why it is like that it just works*/
+                        if ((-bound - 1 < err) & (err <= bound) & 0 <= y & y < 8 & 0 <= x & x < 8)
+                        {
+                            setLed(Color.Red, x, y);
+
+                        }
+                    }
+                }
+
+                times += time;
+            }
+            else
+            {
+                radius += 1;
+                times = 0;
+            }
+            if (radius == 8)
+            {
+                radius = 1;
+                anim_status = 1;
+            }
+
+
+            //ANIMATION IS DONE
+
+
+        }
         public void setFadeLed(Color c, int keeptime, int fadetime)
         {
 
             launchpad[pos.x, pos.y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
         }
+        public void setFadeLed(Color c,int x,int y, int keeptime, int fadetime)
+        {
+
+            launchpad[x, y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
+        }
         public void setLed(Color c)
         {
 
             launchpad[pos.x, pos.y].ledColor = c;
+        }
+        public void setLed(Color c, int x, int y) {
+            launchpad[x, y].ledColor = c;
         }
 
         public void gradient(long timeleft)
@@ -441,6 +528,7 @@ namespace A3ttrEngine.mod
         public Animate() { 
         
         }
+
     }
 }
 

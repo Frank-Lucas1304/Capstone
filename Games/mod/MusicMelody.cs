@@ -170,13 +170,19 @@ namespace A3ttrEngine.mod
 
                     /* when note_pos = level --> not executed
                        for loop is activated when note_pos = level+1*/
-                    
+                    (int R, int G, int B) red = (255, 0, 0);
+                    (int R, int G, int B) light_purple = (255, 0, 255);
+                    (int R, int G, int B) black = (0, 0, 0);
+                    (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] {black ,red, light_purple, black }; int[] timing = new int[4] { 0,200, 200, 200};
                     for (int note = init_anim_note_pos; note < note_pos; note++) {
                         (int x, int y) pos = KeyMapping(noteList[note - level]);
-                        buttonGrid[pos.x, pos.y].PositiveFeedback(time);
+
+                       
+                        buttonGrid[pos.x, pos.y].Animate(time,color_list,timing);
 
                         //removes unnecessary loop
-                        if (note == init_anim_note_pos & buttonGrid[pos.x, pos.y].animation_status == 1)
+                        
+                        if (note == init_anim_note_pos & buttonGrid[pos.x, pos.y].animation_status == -1)
                         {
                             buttonGrid[pos.x, pos.y].animation_status = 0;
                             init_anim_note_pos++;
@@ -209,7 +215,7 @@ namespace A3ttrEngine.mod
                     bool isTargetHit = buttonGrid[pos.x, pos.y].hit(x, y);
                     if (isTargetHit)
                     {
-                        setLed(Color.Green, x, y);
+                        //setLed(Color.Green, x, y);
                         Console.WriteLine("Fade");
                         note_pos += 1;
                     }
@@ -223,7 +229,11 @@ namespace A3ttrEngine.mod
                         //Reshow sequence
                         betweenLevelDelay = Target.duration.Sum();
                         note_pos = 0;
-                        times = 0;                      
+                        times = 0;
+
+                        //Reset animation for loop
+                        init_anim_note_pos = level;// in case input was remove from loop since it was completed
+
 
                     }
                     // Not all notes are there
@@ -387,6 +397,7 @@ namespace A3ttrEngine.mod
             this.times = 0;
             this.pos = pos;
             this.radius = 1;
+            this.animation_status = 0;
             //INSERT AN ERROR IF KEY DOESNT EXIST
 
             //Starting effect
@@ -439,30 +450,36 @@ namespace A3ttrEngine.mod
             times += time;
         }
 
-        public void Animate(long time,Color[] color_list, int[] timing_list) {
+        public void Animate(long time, (int R, int G, int B)[] color_list, int[] timing_list) {
             if (color_list.Length != timing_list.Length)
             {
                 throw new ArgumentException("Color list and Timing list need to be the same size");
             }
-            if (animation_status < timing_list.Length)
+            if (0 <= animation_status)
             {
-                gradient(timing_list[animation_status] - times);
-                setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
-            }
-            if (times >= timing_list[animation_status])
-            {
-                ++animation_status;
-
-                if (animation_status != timing_list.Length)
-                    gradColor = color_list[animation_status];
-                else
+                if (animation_status < timing_list.Length)
                 {
-                    animation_status = 0;
+                    gradient(timing_list[animation_status] - times);
+                    setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
                 }
-                times = 0;
-            }
-            times += time;
 
+                if (times >= timing_list[animation_status])
+                {
+                    ++animation_status;
+
+                    if (animation_status != timing_list.Length)
+                        gradColor = color_list[animation_status];
+                    else
+                    {
+                        animation_status = -1;
+                    }
+                    times = 0;
+                }
+
+                    
+                
+                times += time;
+            }
         }
         public void PositiveFeedback(long time) {
             if ((animation_status != 1) && ((duration[animation_status + 3] - times)>=0)) { 

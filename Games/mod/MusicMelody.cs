@@ -170,6 +170,7 @@ namespace A3ttrEngine.mod
 
                     /* when note_pos = level --> not executed
                        for loop is activated when note_pos = level+1*/
+                    //This is for testing purposes
                     (int R, int G, int B) red = (255, 0, 0);
                     (int R, int G, int B) light_purple = (255, 0, 255);
                     (int R, int G, int B) black = (0, 0, 0);
@@ -233,7 +234,6 @@ namespace A3ttrEngine.mod
 
                         //Reset animation for loop
                         init_anim_note_pos = level;// in case input was remove from loop since it was completed
-
 
                     }
                     // Not all notes are there
@@ -451,6 +451,7 @@ namespace A3ttrEngine.mod
         }
 
         public void Animate(long time, (int R, int G, int B)[] color_list, int[] timing_list) {
+            //To define the starting color of button set up the 1st position in timing_list to 0
             if (color_list.Length != timing_list.Length)
             {
                 throw new ArgumentException("Color list and Timing list need to be the same size");
@@ -482,6 +483,7 @@ namespace A3ttrEngine.mod
             }
         }
         public void PositiveFeedback(long time) {
+            //TO BE REDONE
             if ((animation_status != 1) && ((duration[animation_status + 3] - times)>=0)) { 
                 int iterations = 360 / (45 / radius);
                 for (int i = 0; i < iterations + 1; i++)

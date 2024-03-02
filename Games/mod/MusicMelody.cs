@@ -176,9 +176,9 @@ namespace A3ttrEngine.mod
                         buttonGrid[pos.x, pos.y].PositiveFeedback(time);
 
                         //removes unnecessary loop
-                        if (note == init_anim_note_pos & buttonGrid[pos.x, pos.y].anim_status == 1)
+                        if (note == init_anim_note_pos & buttonGrid[pos.x, pos.y].animation_status == 1)
                         {
-                            buttonGrid[pos.x, pos.y].anim_status = 0;
+                            buttonGrid[pos.x, pos.y].animation_status = 0;
                             init_anim_note_pos++;
                         }
                     }
@@ -372,7 +372,7 @@ namespace A3ttrEngine.mod
 
         public long times { get; set; }
         public int display_status { get; set; }
-        public int anim_status { get; set; }
+        public int animation_status { get; set; }
         public int length { get; set; }
         public int radius { get; set; }
         public (int x, int y) pos { get; set; }
@@ -438,8 +438,34 @@ namespace A3ttrEngine.mod
             }
             times += time;
         }
+
+        public void Animate(long time,Color[] color_list, int[] timing_list) {
+            if (color_list.Length != timing_list.Length)
+            {
+                throw new ArgumentException("Color list and Timing list need to be the same size");
+            }
+            if (animation_status < timing_list.Length)
+            {
+                gradient(timing_list[animation_status] - times);
+                setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
+            }
+            if (times >= timing_list[animation_status])
+            {
+                ++animation_status;
+
+                if (animation_status != timing_list.Length)
+                    gradColor = color_list[animation_status];
+                else
+                {
+                    animation_status = 0;
+                }
+                times = 0;
+            }
+            times += time;
+
+        }
         public void PositiveFeedback(long time) {
-            if ((anim_status!=1) && ((duration[anim_status+3] - times)>=0)) { 
+            if ((animation_status != 1) && ((duration[animation_status + 3] - times)>=0)) { 
                 int iterations = 360 / (45 / radius);
                 for (int i = 0; i < iterations + 1; i++)
                 {   //Angle tolerance was determined through testing 
@@ -482,7 +508,7 @@ namespace A3ttrEngine.mod
             if (radius == 8)
             {
                 radius = 1;
-                anim_status = 1;
+                animation_status = 1;
             }
 
 
@@ -535,5 +561,5 @@ namespace A3ttrEngine.mod
         }
 
     }
-}
+    }
 

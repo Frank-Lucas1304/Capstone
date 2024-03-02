@@ -40,6 +40,8 @@ namespace A3ttrEngine.mod
 
         long times = 0;
         bool launchpadSetUp = true;
+
+        Event PositiveFeedback = new Event();
         public MusicMelody( )
         {
 
@@ -61,7 +63,7 @@ namespace A3ttrEngine.mod
                     buttonGrid[x,y] = new Target((x, y));
                 }
             }
-
+           
             loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
             //names of piano tile sounds correspond to their coordinates on the launchapd
 
@@ -177,9 +179,9 @@ namespace A3ttrEngine.mod
                     (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] {black ,red, light_purple, black }; int[] timing = new int[4] { 0,200, 200, 200};
                     for (int note = init_anim_note_pos; note < note_pos; note++) {
                         (int x, int y) pos = KeyMapping(noteList[note - level]);
+                        PositiveFeedback.Animate(time, pos, 100, buttonGrid, color_list, timing);
 
-                       
-                        buttonGrid[pos.x, pos.y].Animate(time,color_list,timing);
+                        //buttonGrid[pos.x, pos.y].Animate(time,color_list,timing);
 
                         //removes unnecessary loop
                         
@@ -359,7 +361,7 @@ namespace A3ttrEngine.mod
 
     }
     class Target {
-        public static int[] duration = new int[4] { 100, 200, 200, 200};
+        public static int[] duration = new int[3] { 100, 200, 200};
         public static A3ttrPadCell[,] launchpad;
         public static Dictionary<string, A3ttrSound> a3ttrSoundlist;
 
@@ -384,7 +386,6 @@ namespace A3ttrEngine.mod
         public int display_status { get; set; }
         public int animation_status { get; set; }
         public int length { get; set; }
-        public int radius { get; set; }
         public (int x, int y) pos { get; set; }
 
         public string key { get; set; }
@@ -396,7 +397,6 @@ namespace A3ttrEngine.mod
             this.key = key; 
             this.times = 0;
             this.pos = pos;
-            this.radius = 1;
             this.animation_status = 0;
             //INSERT AN ERROR IF KEY DOESNT EXIST
 
@@ -482,59 +482,10 @@ namespace A3ttrEngine.mod
                 times += time;
             }
         }
-        public void PositiveFeedback(long time) {
-            //TO BE REDONE
-            if ((animation_status != 1) && ((duration[animation_status + 3] - times)>=0)) { 
-                int iterations = 360 / (45 / radius);
-                for (int i = 0; i < iterations + 1; i++)
-                {   //Angle tolerance was determined through testing 
-                    for (int tolerance = -1; tolerance < 1; tolerance++)
-                    {
-                        /* Idea is that your taking the square that encapsulates the circle. The angle from one of its corner is to its origin is 45 degrees
-                        You then divide it by the number of blocks making up its height*/
-                        double angle = (45 / radius) * i - tolerance;
-                        double rad = angle * Math.PI / 180;
-                        // Finding x and y components relative to the origin
-                        double dy = Math.Round(radius * Math.Sin(rad));
-                        double dx = Math.Round(radius * Math.Cos(rad));
-                        int x = pos.x + (int)dx;
-                        int y = pos.y + (int)dy;
-
-                        double err = Math.Pow(dx, 2) + Math.Pow(dy, 2) - Math.Pow(radius, 2);
-                        int bound = radius - 1;
-                        /*The bound condition was discovered through robust testing dont ask why it is like that it just works*/
-                        if ((-bound - 1 < err) & (err <= bound) & 0 <= y & y < 8 & 0 <= x & x < 8)
-                        {
-                            //Rea
-                            if (launchpad[x, y].ledColor == null) 
-                            {
-                                Console.WriteLine(launchpad[x, y].ledColor);
-                      
-                                setLed(Color.Red, x, y);
-                            }
-
-                        }
-                    }
-                }
-
-                times += time;
-            }
-            else
-            {
-                radius += 1;
-                times = 0;
-            }
-            if (radius == 8)
-            {
-                radius = 1;
-                animation_status = 1;
-            }
+       
 
 
-            //ANIMATION IS DONE
 
-
-        }
         public void setFadeLed(Color c, int keeptime, int fadetime)
         {
 
@@ -572,11 +523,71 @@ namespace A3ttrEngine.mod
 
     }
 
-    class Animate
+    class Event
     {
-        public static A3ttrPadCell[,] launchpad;
-        public Animate() { 
-        
+        public long times { get; set; }
+        public long speed { get; set; }
+        public int radius { get; set; }
+        public int status { get; set; }
+
+        public Event() {
+            radius = 1;
+            status = 0;
+        }
+        public void Animate(long time,(int x,int y) origin, int speed, Target[,] Grid, (int,int,int)[] color_list,int[] timing) {
+
+            if ((status != 1) && ((speed - times) >= 0))
+            {   
+                for (int r = 1; r < radius; r++) { 
+                    int iterations = 360 / (45 / r);
+                    for (int i = 0; i < iterations + 1; i++)
+                    {   //Angle tolerance was determined through testing 
+                        for (int tolerance = -1; tolerance < 1; tolerance++)
+                        {
+                            /* Idea is that your taking the square that encapsulates the circle. The angle from one of its corner is to its origin is 45 degrees
+                            You then divide it by the number of blocks making up its height*/
+                            double angle = (45 / r) * i - tolerance;
+                            double rad = angle * Math.PI / 180;
+                            // Finding x and y components relative to the origin
+                            double dy = Math.Round(r * Math.Sin(rad));
+                            double dx = Math.Round(r * Math.Cos(rad));
+                            int x = origin.x + (int)dx;
+                            int y = origin.y + (int)dy;
+
+                            double err = Math.Pow(dx, 2) + Math.Pow(dy, 2) - Math.Pow(r, 2);
+                            int bound = r - 1;
+                            /*The bound condition was discovered through robust testing dont ask why it is like that it just works*/
+                            if ((-bound - 1 < err) & (err <= bound) & 0 <= y & y < 8 & 0 <= x & x < 8)
+                            {
+                                //Rea
+                            
+                                Grid[x, y].Animate(time, color_list, timing);
+                            
+                               /* if (launchpad[x, y].ledColor == null)
+                                {
+                                    Console.WriteLine(launchpad[x, y].ledColor);
+
+                                    setLed(Color.Red, x, y);
+                                }*/
+
+                            }
+                        }
+                    }
+                }
+
+                times += time;
+            }
+            else
+            {
+                radius += 1;
+                times = 0;
+            }
+            if (radius == 10)
+            {
+                radius = 1;
+                status = 1;
+            }
+
         }
 
     }

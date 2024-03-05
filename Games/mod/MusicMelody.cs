@@ -25,7 +25,7 @@ namespace A3ttrEngine.mod
     {
 
         Target[,] buttonGrid = new Target[8,8];
-
+        
         string[] noteList = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
         int note_pos = 0;
         int init_anim_note_pos = 3;
@@ -177,20 +177,24 @@ namespace A3ttrEngine.mod
                     (int R, int G, int B) light_purple = (255, 0, 255);
                     (int R, int G, int B) black = (0, 0, 0);
                     (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] {black ,red, light_purple, black }; int[] timing = new int[4] { 0,200, 200, 200};
+   
                     for (int note = init_anim_note_pos; note < note_pos; note++) {
+                        Console.WriteLine($"{init_anim_note_pos},{note},{note_pos}");
                         (int x, int y) pos = KeyMapping(noteList[note - level]);
+            
                         PositiveFeedback.Animate(time, pos, 100, buttonGrid, color_list, timing);
 
-                        //buttonGrid[pos.x, pos.y].Animate(time,color_list,timing);
 
-                        //removes unnecessary loop
-                        
-                        if (note == init_anim_note_pos & buttonGrid[pos.x, pos.y].animation_status == -1)
-                        {
-                            buttonGrid[pos.x, pos.y].animation_status = 0;
-                            init_anim_note_pos++;
-                        }
                     }
+           
+                    foreach (Target button in Event.animatedButtons)
+                    {
+                        button.Animate(time);
+                    }
+                    // Reduces Size of Queue as Animations are completed
+
+
+
                 }
 
             }
@@ -392,6 +396,11 @@ namespace A3ttrEngine.mod
         public (int R,int G, int B) currColor { get; set; }
         public (int R,int G, int B) init_color { get; set; }
         public (int R,int G, int B) gradColor { get; set; }
+   
+        // Animation Set Up
+        public (int R, int G, int B)[] animation_color_sequence {get; set; }
+        public int[] animation_timing_sequence { get; set; }
+
         public Target((int, int) pos, string key = null)
         {   
             this.key = key; 
@@ -450,29 +459,39 @@ namespace A3ttrEngine.mod
             times += time;
         }
 
-        public void Animate(long time, (int R, int G, int B)[] color_list, int[] timing_list) {
+        public void SetUpAnimation((int R, int G, int B)[] color_list, int[] timing_list)
+        {
+            animation_color_sequence = color_list;
+            animation_timing_sequence = timing_list;
+            animation_status = 0;
+        }
+        public void Animate(long time) {
             //To define the starting color of button set up the 1st position in timing_list to 0
-            if (color_list.Length != timing_list.Length)
+            if ((animation_color_sequence.Length != animation_timing_sequence.Length))
             {
                 throw new ArgumentException("Color list and Timing list need to be the same size");
             }
-            if (0 <= animation_status)
-            {
-                if (animation_status < timing_list.Length)
+            //Since animation_color_sequence and animation_timing_sequence are the same size due to previous condition if one is 0 the other is also 0
+            if (animation_status >= 0 & animation_color_sequence.Length !=0)
+            {   
+                if (animation_status < animation_timing_sequence.Length)
                 {
-                    gradient(timing_list[animation_status] - times);
+                    gradient(animation_timing_sequence[animation_status] - times);
                     setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
                 }
 
-                if (times >= timing_list[animation_status])
+                if (times >= animation_timing_sequence[animation_status])
                 {
                     ++animation_status;
 
-                    if (animation_status != timing_list.Length)
-                        gradColor = color_list[animation_status];
+                    if (animation_status != animation_timing_sequence.Length)
+                        gradColor = animation_color_sequence[animation_status];
                     else
                     {
-                        animation_status = -1;
+                        // Resetting values
+                        animation_color_sequence = new (int R, int G, int B)[0];
+                        animation_timing_sequence = new int[0];
+                        animation_status = 0;
                     }
                     times = 0;
                 }
@@ -525,6 +544,7 @@ namespace A3ttrEngine.mod
 
     class Event
     {
+        public static Queue<Target> animatedButtons = new Queue<Target>();
         public long times { get; set; }
         public long speed { get; set; }
         public int radius { get; set; }
@@ -535,45 +555,43 @@ namespace A3ttrEngine.mod
             status = 0;
         }
         public void Animate(long time,(int x,int y) origin, int speed, Target[,] Grid, (int,int,int)[] color_list,int[] timing) {
-
+            //Make this two for loops, implement it so that you store 
             if ((status != 1) && ((speed - times) >= 0))
             {   
-                for (int r = 1; r < radius; r++) { 
-                    int iterations = 360 / (45 / r);
+
+                    int iterations = 360 / (45 / radius);
                     for (int i = 0; i < iterations + 1; i++)
                     {   //Angle tolerance was determined through testing 
                         for (int tolerance = -1; tolerance < 1; tolerance++)
                         {
                             /* Idea is that your taking the square that encapsulates the circle. The angle from one of its corner is to its origin is 45 degrees
                             You then divide it by the number of blocks making up its height*/
-                            double angle = (45 / r) * i - tolerance;
+                            double angle = (45 / radius) * i - tolerance;
                             double rad = angle * Math.PI / 180;
                             // Finding x and y components relative to the origin
-                            double dy = Math.Round(r * Math.Sin(rad));
-                            double dx = Math.Round(r * Math.Cos(rad));
+                            double dy = Math.Round(radius * Math.Sin(rad));
+                            double dx = Math.Round(radius * Math.Cos(rad));
                             int x = origin.x + (int)dx;
                             int y = origin.y + (int)dy;
 
-                            double err = Math.Pow(dx, 2) + Math.Pow(dy, 2) - Math.Pow(r, 2);
-                            int bound = r - 1;
+                            double err = Math.Pow(dx, 2) + Math.Pow(dy, 2) - Math.Pow(radius, 2);
+                            int bound = radius - 1;
                             /*The bound condition was discovered through robust testing dont ask why it is like that it just works*/
                             if ((-bound - 1 < err) & (err <= bound) & 0 <= y & y < 8 & 0 <= x & x < 8)
                             {
                                 //Rea
-                            
-                                Grid[x, y].Animate(time, color_list, timing);
-                            
-                               /* if (launchpad[x, y].ledColor == null)
+                                
+                                Grid[x, y].SetUpAnimation(color_list, timing);
+                                animatedButtons.Enqueue(Grid[x, y]);
+                                if (Grid[x, y].animation_color_sequence.Length == 0)
                                 {
-                                    Console.WriteLine(launchpad[x, y].ledColor);
+                                 animatedButtons.Enqueue(Grid[x, y]);
+                                }
 
-                                    setLed(Color.Red, x, y);
-                                }*/
-
-                            }
                         }
                     }
-                }
+                    }
+                
 
                 times += time;
             }
@@ -586,6 +604,7 @@ namespace A3ttrEngine.mod
             {
                 radius = 1;
                 status = 1;
+                times = 0;
             }
 
         }

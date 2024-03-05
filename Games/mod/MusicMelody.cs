@@ -177,7 +177,7 @@ namespace A3ttrEngine.mod
                     (int R, int G, int B) light_purple = (255, 0, 255);
                     (int R, int G, int B) black = (0, 0, 0);
                     (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] {black ,red, light_purple, black }; int[] timing = new int[4] { 0,200, 200, 200};
-   
+                    
                     for (int note = init_anim_note_pos; note < note_pos; note++) {
                         //Console.WriteLine($"{init_anim_note_pos},{note},{note_pos}");
                         (int x, int y) pos = KeyMapping(noteList[note - level]);
@@ -186,6 +186,7 @@ namespace A3ttrEngine.mod
 
 
                     }
+                    // Reducing Queue Size when required
                     if (Event.animatedButtons.Count > 0)
                     {
                         if (Event.animatedButtons.Peek().animation_color_sequence.Length ==0) {

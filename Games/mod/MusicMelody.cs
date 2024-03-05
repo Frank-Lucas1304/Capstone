@@ -179,14 +179,19 @@ namespace A3ttrEngine.mod
                     (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] {black ,red, light_purple, black }; int[] timing = new int[4] { 0,200, 200, 200};
    
                     for (int note = init_anim_note_pos; note < note_pos; note++) {
-                        Console.WriteLine($"{init_anim_note_pos},{note},{note_pos}");
+                        //Console.WriteLine($"{init_anim_note_pos},{note},{note_pos}");
                         (int x, int y) pos = KeyMapping(noteList[note - level]);
             
                         PositiveFeedback.Animate(time, pos, 100, buttonGrid, color_list, timing);
 
 
                     }
-           
+                    if (Event.animatedButtons.Count > 0)
+                    {
+                        if (Event.animatedButtons.Peek().animation_color_sequence.Length ==0) {
+                            Event.animatedButtons.Dequeue();
+                        }
+                    }
                     foreach (Target button in Event.animatedButtons)
                     {
                         button.Animate(time);
@@ -482,22 +487,25 @@ namespace A3ttrEngine.mod
 
                 if (times >= animation_timing_sequence[animation_status])
                 {
+                    //DO I ALSO NEE TO MAKE SURE COLOR IS THE SAME?
                     ++animation_status;
 
                     if (animation_status != animation_timing_sequence.Length)
                         gradColor = animation_color_sequence[animation_status];
                     else
                     {
+                        Console.WriteLine($"{currColor},{gradColor}");
                         // Resetting values
                         animation_color_sequence = new (int R, int G, int B)[0];
                         animation_timing_sequence = new int[0];
                         animation_status = 0;
                     }
                     times = 0;
+                    
                 }
 
-                    
-                
+
+
                 times += time;
             }
         }
@@ -579,14 +587,13 @@ namespace A3ttrEngine.mod
                             /*The bound condition was discovered through robust testing dont ask why it is like that it just works*/
                             if ((-bound - 1 < err) & (err <= bound) & 0 <= y & y < 8 & 0 <= x & x < 8)
                             {
-                                //Rea
+
                                 
                                 Grid[x, y].SetUpAnimation(color_list, timing);
-                                animatedButtons.Enqueue(Grid[x, y]);
-                                if (Grid[x, y].animation_color_sequence.Length == 0)
-                                {
-                                 animatedButtons.Enqueue(Grid[x, y]);
-                                }
+                                //To avoid animating same item multiple times
+                                if (!animatedButtons.Contains(Grid[x, y]))
+                                    animatedButtons.Enqueue(Grid[x, y]);
+
 
                         }
                     }

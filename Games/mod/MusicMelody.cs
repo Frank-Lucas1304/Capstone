@@ -28,7 +28,7 @@ namespace A3ttrEngine.mod
         Queue<Target> animatedButtons = new Queue<Target>();
         Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
         string[] noteList = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
-
+        Random random_radii = new Random();
         int note_pos = 0;
         int init_anim_note_pos = 3;
 
@@ -131,10 +131,6 @@ namespace A3ttrEngine.mod
         /// 更新事件，mod逻辑处理
         /// </summary>
         /// <param name="time">距离上次更新的时间(毫秒)</param>
-        /// 
-
-
-
         public override void update(long time)
         {
 
@@ -167,22 +163,11 @@ namespace A3ttrEngine.mod
                     }
                 }
                 else
-                { /*Animation Effects
-                / so when note_pos = level --> you dont want any effect because it means the user has not yet pressed an input
-                / therefore PositiveFeedback Animation for correctly pressing the first note is activated when note_pos = level+1
-                  this leads to another issue --> the last note
-
-                  EXPECTING ISSUE WITH LAST NOTE --> because indicator of when it is pressed is 0 and not 2*level
-                  the for loop is necessary in the case consecutive correct inputs are pressed and simultaneous animations are activated. PositiveFeedback will have to modify its animation status once animation is complete.
-                */
-
-                    /* when note_pos = level --> not executed
-                       for loop is activated when note_pos = level+1*/
-                    //This is for testing purposes
-                    (int R, int G, int B) red = (255, 0, 0);
-                    (int R, int G, int B) light_purple = (255, 0, 255);
+                {
+                    (int R, int G, int B) light_red = (40, 0, 0);
+                    (int R, int G, int B) red = (255, 100, 0);
                     (int R, int G, int B) black = (0, 0, 0);
-                    (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] { black, red, light_purple, black }; int[] timing = new int[4] { 0, 200, 200, 200 };
+                    (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black,(255,80,255),(40, 0, 40), (10, 0, 10),black }; int[] timing = new int[5] { 0,10, 200, 200, 200 };
 
                     // Displays all circle animations
                     foreach (Circle circle in positiveFeedbackEffects) {
@@ -555,9 +540,12 @@ namespace A3ttrEngine.mod
 
     class Circle
     {
+        public Random random_radii = new Random();
         public long times { get; set; }
         public long speed { get; set; }
         public int radius { get; set; }
+
+        int max_radius {  get; set; }
         public int status { get; set; }
 
         public (int x, int y) origin;
@@ -566,6 +554,7 @@ namespace A3ttrEngine.mod
         {
             radius = 1;
             status = 0;
+            max_radius = random_radii.Next(1,4);
             this.origin = origin;
         }
         public void Animate(Queue<Target> animatedButtons,long time, int speed, Target[,] Grid, (int,int,int)[] color_list,int[] timing) {
@@ -613,7 +602,7 @@ namespace A3ttrEngine.mod
                 radius += 1;
                 times = 0;
             }
-            if (radius == 10)
+            if (radius == (max_radius * 2 + 1))
             {
                 radius = 1;
                 status = 1;

@@ -43,9 +43,8 @@ namespace A3ttrEngine.mod
 
    
         public MusicMelody( )
-        {
+        {  }
 
-        }
         /// <summary>
         /// 初始化（提前加载资源）
         /// </summary>
@@ -162,6 +161,7 @@ namespace A3ttrEngine.mod
                 }
                 else
                 {
+                    //Optimisation: using Animation Curve/ function or different colors
                     (int R, int G, int B) light_red = (40, 0, 0);
                     (int R, int G, int B) red = (255, 100, 0);
                     (int R, int G, int B) black = (0, 0, 0);
@@ -264,24 +264,6 @@ namespace A3ttrEngine.mod
                         Console.WriteLine("Check Keys, not all of them have sounds linked to them");
                     }
                 }
-                /*
-                // Increase in sequence length
-                if (note_pos == 2 * level)
-                {
-                    int size = noteList.Length;
-                    if ( size == level)
-                        GameCompleted();
-                    else
-                    {
-                        //Increasing level and displaying longer sequence
-                        level += level + 2 < size ? 2 : 1; 
-                        betweenLevelDelay = Target.duration.Sum();
-                        note_pos = 0;
-                        times = 0;
-                        init_anim_note_pos = level;
-                    }
- 
-                }*/
 
                 ClearBoard();//NOT CODED YET --> Will clear entire board of color --> maybe add in the update function
 
@@ -548,7 +530,7 @@ namespace A3ttrEngine.mod
 
         public Circle((int x, int y) origin)
         {
-            radius = 1;
+            radius = 0;
             status = 0;
             max_radius = random_radii.Next(1,4);
             this.origin = origin;
@@ -557,7 +539,8 @@ namespace A3ttrEngine.mod
             //Make this two for loops, implement it so that you store 
             if ((status != 1) && ((speed - times) >= 0))
             {   
-
+                    
+                if (radius != 0) { 
                     int iterations = 360 / (45 / radius);
                     for (int i = 0; i < iterations + 1; i++)
                     {   //Angle tolerance was determined through testing 
@@ -586,10 +569,19 @@ namespace A3ttrEngine.mod
                                     animatedButtons.Enqueue(Grid[x, y]);
 
 
+                            }
                         }
                     }
-                    }
-                
+                }
+                else
+                {
+                    //Animation for pressed button
+                    Grid[origin.x, origin.y].animation_sequence.Enqueue(new Effect(color_list, timing));
+                    //To avoid animating same item multiple times
+                    if (!animatedButtons.Contains(Grid[origin.x, origin.y]))
+                        animatedButtons.Enqueue(Grid[origin.x, origin.y]);
+                }
+
 
                 times += time;
             }
@@ -600,7 +592,7 @@ namespace A3ttrEngine.mod
             }
             if (radius == (max_radius * 2 + 1))
             {
-                radius = 1;
+                radius = 0;
                 status = 1;
                 times = 0;
             }

@@ -26,7 +26,7 @@ namespace A3ttrEngine.mod
 
         Target[,] buttonGrid = new Target[8,8];
         Queue<Target> animatedButtons = new Queue<Target>();
-        Queue<Circle> animatedCircles = new Queue<Circle>();
+        Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
         string[] noteList = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
 
         int note_pos = 0;
@@ -184,15 +184,37 @@ namespace A3ttrEngine.mod
                     (int R, int G, int B) black = (0, 0, 0);
                     (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] { black, red, light_purple, black }; int[] timing = new int[4] { 0, 200, 200, 200 };
 
-                    // TO MODIFY FOR LOOP
-                    foreach (Circle circle in animatedCircles) {
-                        //(int x, int y) pos = KeyMapping(noteList[note_pos-1 - 3]);
-                        // Why doesn't level work?
-                        // Why is there an offset with note_pos - level 
-                        // Why is there an issue on the second run with note_pos-1 -level
+                    // Displays all circle animations
+                    foreach (Circle circle in positiveFeedbackEffects) {
                         circle.Animate(animatedButtons, time, 100, buttonGrid, color_list, timing);
                     }
+                    if (positiveFeedbackEffects.Count > 0)
+                    {
+                        if (positiveFeedbackEffects.Peek().status == 1)
+                        {
+                            positiveFeedbackEffects.Dequeue();
+                        }
+                    }
+                    else
+                    {
+                        // Letting animation finish before increasing level
+                        if (note_pos == 2 * level & animatedButtons.Count == 0)
+                        {
+                            int size = noteList.Length;
+                            if (size == level)
+                                GameCompleted();
+                            else
+                            {
+                                //Increasing level and displaying longer sequence
+                                level += level + 2 < size ? 2 : 1;
+                                betweenLevelDelay = Target.duration.Sum();
+                                note_pos = 0;
+                                times = 0;
+                                init_anim_note_pos = level;
+                            }
 
+                        }
+                    }
 
                     // Reducing Queue Size when required
                     if (animatedButtons.Count > 0)
@@ -231,10 +253,10 @@ namespace A3ttrEngine.mod
                     bool isTargetHit = buttonGrid[pos.x, pos.y].hit(x, y);
                     if (isTargetHit)
                     {
-                        //setLed(Color.Green, x, y);
                         Console.WriteLine("Fade");
+                        positiveFeedbackEffects.Enqueue(new Circle(pos));
                         note_pos += 1;
-                        animatedCircles.Enqueue(new Circle(pos));
+
                     }
                     else
                     {
@@ -261,7 +283,7 @@ namespace A3ttrEngine.mod
                         Console.WriteLine("Check Keys, not all of them have sounds linked to them");
                     }
                 }
-
+                /*
                 // Increase in sequence length
                 if (note_pos == 2 * level)
                 {
@@ -278,7 +300,7 @@ namespace A3ttrEngine.mod
                         init_anim_note_pos = level;
                     }
  
-                }
+                }*/
 
                 ClearBoard();//NOT CODED YET --> Will clear entire board of color --> maybe add in the update function
 

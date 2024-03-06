@@ -28,9 +28,7 @@ namespace A3ttrEngine.mod
         Queue<Target> animatedButtons = new Queue<Target>();
         Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
         string[] noteList = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
-        Random random_radii = new Random();
         int note_pos = 0;
-        int init_anim_note_pos = 3;
 
         int lives = 3;
         int level = 3;
@@ -192,10 +190,9 @@ namespace A3ttrEngine.mod
                             {
                                 //Increasing level and displaying longer sequence
                                 level += level + 2 < size ? 2 : 1;
-                                betweenLevelDelay = Target.duration.Sum();
+                                /*betweenLevelDelay = Target.duration.Sum();*/
                                 note_pos = 0;
                                 times = 0;
-                                init_anim_note_pos = level;
                             }
 
                         }
@@ -256,7 +253,6 @@ namespace A3ttrEngine.mod
                         times = 0;
 
                         //Reset animation for loop
-                        init_anim_note_pos = level;// in case input was remove from loop since it was completed
 
                     }
                     // Not all notes are there

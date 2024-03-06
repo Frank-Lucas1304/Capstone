@@ -25,8 +25,10 @@ namespace A3ttrEngine.mod
     {
 
         Target[,] buttonGrid = new Target[8,8];
-        
+        Queue<Target> animatedButtons = new Queue<Target>();
+        Queue<Circle> animatedCircles = new Queue<Circle>();
         string[] noteList = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
+
         int note_pos = 0;
         int init_anim_note_pos = 3;
 
@@ -41,7 +43,7 @@ namespace A3ttrEngine.mod
         long times = 0;
         bool launchpadSetUp = true;
 
-        Event PositiveFeedback = new Event();
+   
         public MusicMelody( )
         {
 
@@ -50,22 +52,8 @@ namespace A3ttrEngine.mod
         /// 初始化（提前加载资源）
         /// </summary>
         /// 
-        
-        public override void init()
+        public void loadPianoWaveFiles()
         {
-            base.Name = "MusicMelody";
-
-            a3ttrSoundlist.Add("GameOver", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\GameOver.wav"));
-            
-            for (int x = 0; x < 8; x++)
-            {
-                for (int y = 0; y < 8; y++) {
-                    buttonGrid[x,y] = new Target((x, y));
-                }
-            }
-           
-            loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
-            //names of piano tile sounds correspond to their coordinates on the launchapd
 
             a3ttrSoundlist.Add("5-7", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - A.wav"));
             a3ttrSoundlist.Add("6-6", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - A#.wav"));
@@ -118,6 +106,24 @@ namespace A3ttrEngine.mod
             a3ttrSoundlist.Add("4-0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - F#.wav"));
             a3ttrSoundlist.Add("4-1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - G.wav"));
             a3ttrSoundlist.Add("5-0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - G#.wav"));
+        }
+        public override void init()
+        {
+            base.Name = "MusicMelody";
+
+            a3ttrSoundlist.Add("GameOver", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\GameOver.wav"));
+            
+            for (int x = 0; x < 8; x++)
+            {
+                for (int y = 0; y < 8; y++) {
+                    buttonGrid[x,y] = new Target((x, y));
+                }
+            }
+           
+            loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
+            //names of piano tile sounds correspond to their coordinates on the launchapd
+            loadPianoWaveFiles();
+
             base.init();
 
         }
@@ -149,9 +155,9 @@ namespace A3ttrEngine.mod
                     Target.a3ttrSoundlist = a3ttrSoundlist;
                     launchpadSetUp = false;
                 }
-                
-                if (note_pos < level)
-                {   
+
+                if (note_pos < level & note_pos < noteList.Length)
+                {
                     if (times++ >= betweenLevelDelay)
                     {
                         (int x, int y) = KeyMapping(noteList[note_pos]);
@@ -176,37 +182,34 @@ namespace A3ttrEngine.mod
                     (int R, int G, int B) red = (255, 0, 0);
                     (int R, int G, int B) light_purple = (255, 0, 255);
                     (int R, int G, int B) black = (0, 0, 0);
-                    (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] {black ,red, light_purple, black }; int[] timing = new int[4] { 0,200, 200, 200};
-                    
-                    for (int note = init_anim_note_pos; note < note_pos; note++) {
-                        //Console.WriteLine($"{init_anim_note_pos},{note},{note_pos}");
-                        (int x, int y) pos = KeyMapping(noteList[note - level]);
-            
-                        PositiveFeedback.Animate(time, pos, 100, buttonGrid, color_list, timing);
+                    (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] { black, red, light_purple, black }; int[] timing = new int[4] { 0, 200, 200, 200 };
 
-
+                    // TO MODIFY FOR LOOP
+                    foreach (Circle circle in animatedCircles) {
+                        (int x, int y) pos = KeyMapping(noteList[note_pos-1 - 3]);
+                        // Why doesn't level work?
+                        // Why is there an offset with note_pos - level 
+                        // Why is there an issue on the second run with note_pos-1 -level
+                        circle.Animate(animatedButtons, time, pos, 100, buttonGrid, color_list, timing);
                     }
+
+
                     // Reducing Queue Size when required
-                    if (Event.animatedButtons.Count > 0)
+                    if (animatedButtons.Count > 0)
                     {
-                        if (Event.animatedButtons.Peek().animation_color_sequence.Length ==0) {
-                            Event.animatedButtons.Dequeue();
+                        if (animatedButtons.Peek().animation_sequence.Count == 0)
+                        {
+                            animatedButtons.Dequeue();
                         }
                     }
-                    foreach (Target button in Event.animatedButtons)
+                    foreach (Target button in animatedButtons)
                     {
                         button.Animate(time);
                     }
                     // Reduces Size of Queue as Animations are completed
-
-
-
                 }
 
             }
-
-
-
             base.update(time);
         }
         /// <summary>
@@ -231,6 +234,7 @@ namespace A3ttrEngine.mod
                         //setLed(Color.Green, x, y);
                         Console.WriteLine("Fade");
                         note_pos += 1;
+                        animatedCircles.Enqueue(new Circle());
                     }
                     else
                     {
@@ -384,9 +388,6 @@ namespace A3ttrEngine.mod
         // Performing Shallow Copy
         int[] timing = (int[])duration.Clone();
   
-        //int[] timing = new int[3] {100, 200, 200};
-        const int keeptime = 50;
-        const int fadetime = 50;
 
         (int R, int G, int B) black = (0, 0, 0);
         (int R, int G, int B) purple = (50, 0, 50);
@@ -394,7 +395,7 @@ namespace A3ttrEngine.mod
 
         public long times { get; set; }
         public int display_status { get; set; }
-        public int animation_status { get; set; }
+        //public int animation_status { get; set; }
         public int length { get; set; }
         public (int x, int y) pos { get; set; }
 
@@ -402,9 +403,9 @@ namespace A3ttrEngine.mod
         public (int R,int G, int B) currColor { get; set; }
         public (int R,int G, int B) init_color { get; set; }
         public (int R,int G, int B) gradColor { get; set; }
-   
-        // Animation Set Up
-        public (int R, int G, int B)[] animation_color_sequence {get; set; }
+
+        public Queue<Effect> animation_sequence = new Queue<Effect>();
+
         public int[] animation_timing_sequence { get; set; }
 
         public Target((int, int) pos, string key = null)
@@ -412,7 +413,7 @@ namespace A3ttrEngine.mod
             this.key = key; 
             this.times = 0;
             this.pos = pos;
-            this.animation_status = 0;
+            //this.animation_status = 0;
             //INSERT AN ERROR IF KEY DOESNT EXIST
 
             //Starting effect
@@ -464,59 +465,42 @@ namespace A3ttrEngine.mod
             }
             times += time;
         }
-
-        public void SetUpAnimation((int R, int G, int B)[] color_list, int[] timing_list)
-        {
-            animation_color_sequence = color_list;
-            animation_timing_sequence = timing_list;
-            animation_status = 0;
-        }
+        
         public void Animate(long time) {
-            //To define the starting color of button set up the 1st position in timing_list to 0
-            if ((animation_color_sequence.Length != animation_timing_sequence.Length))
-            {
-                throw new ArgumentException("Color list and Timing list need to be the same size");
-            }
-            //Since animation_color_sequence and animation_timing_sequence are the same size due to previous condition if one is 0 the other is also 0
-            if (animation_status >= 0 & animation_color_sequence.Length !=0)
-            {   
-                if (animation_status < animation_timing_sequence.Length)
-                {
-                    gradient(animation_timing_sequence[animation_status] - times);
-                    setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
-                }
+            int size = animation_sequence.Count();
+            if (size > 0) {
 
-                if (times >= animation_timing_sequence[animation_status])
-                {
-                    //DO I ALSO NEE TO MAKE SURE COLOR IS THE SAME?
-                    ++animation_status;
+                (int R, int G, int B) temp = (0, 0, 0);
 
-                    if (animation_status != animation_timing_sequence.Length)
-                        gradColor = animation_color_sequence[animation_status];
-                    else
+                foreach (Effect effect in animation_sequence)
+                {
+                    if (effect.checkCurrColor(time) == 0)
                     {
-                        Console.WriteLine($"{currColor},{gradColor}");
-                        // Resetting values
-                        animation_color_sequence = new (int R, int G, int B)[0];
-                        animation_timing_sequence = new int[0];
-                        animation_status = 0;
+
+                        temp.R += effect.currColor.R;
+                        temp.G += effect.currColor.G;
+                        temp.B += effect.currColor.B;
                     }
-                    times = 0;
-                    
+                    /*else
+                    {
+                        //Verify if this works
+                        Console.WriteLine("REMOVING EFFECT FROM QUEUE");
+                        animation_sequence.Dequeue();
+                    }*/
                 }
-
-
-
-                times += time;
+                if (animation_sequence.Peek().color_sequence.Length == 0)
+                {
+                    animation_sequence.Dequeue();
+          
+                }
+                currColor = (temp.R / size, temp.G / size, temp.B / size);
+                
+                setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
             }
+        
         }
-       
-
-
-
         public void setFadeLed(Color c, int keeptime, int fadetime)
         {
-
             launchpad[pos.x, pos.y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
         }
         public void setFadeLed(Color c,int x,int y, int keeptime, int fadetime)
@@ -551,19 +535,19 @@ namespace A3ttrEngine.mod
 
     }
 
-    class Event
+    class Circle
     {
-        public static Queue<Target> animatedButtons = new Queue<Target>();
+        
         public long times { get; set; }
         public long speed { get; set; }
         public int radius { get; set; }
         public int status { get; set; }
 
-        public Event() {
+        public Circle() {
             radius = 1;
             status = 0;
         }
-        public void Animate(long time,(int x,int y) origin, int speed, Target[,] Grid, (int,int,int)[] color_list,int[] timing) {
+        public void Animate(Queue<Target> animatedButtons,long time,(int x,int y) origin, int speed, Target[,] Grid, (int,int,int)[] color_list,int[] timing) {
             //Make this two for loops, implement it so that you store 
             if ((status != 1) && ((speed - times) >= 0))
             {   
@@ -590,7 +574,7 @@ namespace A3ttrEngine.mod
                             {
 
                                 
-                                Grid[x, y].SetUpAnimation(color_list, timing);
+                                Grid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
                                 //To avoid animating same item multiple times
                                 if (!animatedButtons.Contains(Grid[x, y]))
                                     animatedButtons.Enqueue(Grid[x, y]);
@@ -618,5 +602,79 @@ namespace A3ttrEngine.mod
         }
 
     }
+
+
+    class Effect
+    {
+        // for animation --> each has currColor, status, 
+        // Animation Set Up
+       
+        public long times;
+        public int[] timing_sequence { get; set; }
+        public int offset {  get; set; }
+
+        public (int R, int G, int B)[] color_sequence { get; set; }
+        public (int R, int G, int B) currColor { get; set; }
+        public (int R, int G, int B) init_color { get; set; }
+        public (int R, int G, int B) gradColor { get; set; }
+        public int status { get; set; }
+        public Effect((int R, int G, int B)[] color_list, int[] timing_list) {
+            color_sequence = color_list;
+            timing_sequence = timing_list;
+            status = 0;
+            times = 0;
+        }
+        public int checkCurrColor(long time) {
+
+            if (status >= 0 & color_sequence.Length != 0)
+            {
+                if (status < timing_sequence.Length)
+                {
+                    gradient(timing_sequence[status] - times);
+
+                }
+
+                if (times >= timing_sequence[status])
+                {
+                    //DO I ALSO NEE TO MAKE SURE COLOR IS THE SAME?
+                    ++status;
+
+                    if (status != timing_sequence.Length)
+                        gradColor = color_sequence[status];
+                    else
+                    {
+                        // Resetting values
+
+                        color_sequence = new (int R, int G, int B)[0];
+                        timing_sequence = new int[0];
+                        status = 0;
+                        times = 0;
+                        return -1;
+                    }
+                    times = 0;
+
+                }
+                times += time;
+            }
+            // Need to check also color_sequence to see if currColor is a valid input
+            return 0;//Discard Effect
+        }
+
+        public void gradient(long timeleft)
+        {
+            if (timeleft <= 0)
+            {
+                timeleft = 1;
+            }
+            (int R, int G, int B) c;
+            c.R = (int)Math.Ceiling((decimal)(gradColor.R - currColor.R) / timeleft) + currColor.R;
+            c.G = (int)Math.Ceiling((decimal)(gradColor.G - currColor.G) / timeleft) + currColor.G;
+            c.B = (int)Math.Ceiling((decimal)(gradColor.B - currColor.B) / timeleft) + currColor.B;
+
+            currColor = c;
+        }
     }
+        
+    }
+    
 

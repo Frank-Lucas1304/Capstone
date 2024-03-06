@@ -186,11 +186,11 @@ namespace A3ttrEngine.mod
 
                     // TO MODIFY FOR LOOP
                     foreach (Circle circle in animatedCircles) {
-                        (int x, int y) pos = KeyMapping(noteList[note_pos-1 - 3]);
+                        //(int x, int y) pos = KeyMapping(noteList[note_pos-1 - 3]);
                         // Why doesn't level work?
                         // Why is there an offset with note_pos - level 
                         // Why is there an issue on the second run with note_pos-1 -level
-                        circle.Animate(animatedButtons, time, pos, 100, buttonGrid, color_list, timing);
+                        circle.Animate(animatedButtons, time, 100, buttonGrid, color_list, timing);
                     }
 
 
@@ -234,7 +234,7 @@ namespace A3ttrEngine.mod
                         //setLed(Color.Green, x, y);
                         Console.WriteLine("Fade");
                         note_pos += 1;
-                        animatedCircles.Enqueue(new Circle());
+                        animatedCircles.Enqueue(new Circle(pos));
                     }
                     else
                     {
@@ -398,14 +398,12 @@ namespace A3ttrEngine.mod
         //public int animation_status { get; set; }
         public int length { get; set; }
         public (int x, int y) pos { get; set; }
-
         public string key { get; set; }
         public (int R,int G, int B) currColor { get; set; }
         public (int R,int G, int B) init_color { get; set; }
         public (int R,int G, int B) gradColor { get; set; }
 
         public Queue<Effect> animation_sequence = new Queue<Effect>();
-
         public int[] animation_timing_sequence { get; set; }
 
         public Target((int, int) pos, string key = null)
@@ -505,12 +503,10 @@ namespace A3ttrEngine.mod
         }
         public void setFadeLed(Color c,int x,int y, int keeptime, int fadetime)
         {
-
             launchpad[x, y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
         }
         public void setLed(Color c)
         {
-
             launchpad[pos.x, pos.y].ledColor = c;
         }
         public void setLed(Color c, int x, int y) {
@@ -537,17 +533,20 @@ namespace A3ttrEngine.mod
 
     class Circle
     {
-        
         public long times { get; set; }
         public long speed { get; set; }
         public int radius { get; set; }
         public int status { get; set; }
 
-        public Circle() {
+        public (int x, int y) origin;
+
+        public Circle((int x, int y) origin)
+        {
             radius = 1;
             status = 0;
+            this.origin = origin;
         }
-        public void Animate(Queue<Target> animatedButtons,long time,(int x,int y) origin, int speed, Target[,] Grid, (int,int,int)[] color_list,int[] timing) {
+        public void Animate(Queue<Target> animatedButtons,long time, int speed, Target[,] Grid, (int,int,int)[] color_list,int[] timing) {
             //Make this two for loops, implement it so that you store 
             if ((status != 1) && ((speed - times) >= 0))
             {   
@@ -606,9 +605,6 @@ namespace A3ttrEngine.mod
 
     class Effect
     {
-        // for animation --> each has currColor, status, 
-        // Animation Set Up
-       
         public long times;
         public int[] timing_sequence { get; set; }
         public int offset {  get; set; }
@@ -675,6 +671,6 @@ namespace A3ttrEngine.mod
         }
     }
         
-    }
+}
     
 

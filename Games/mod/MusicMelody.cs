@@ -30,13 +30,17 @@ namespace A3ttrEngine.mod
         string[] noteList = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
         int note_pos = 0;
 
+        bool isInvalidInput = false;
+        (int x, int y) invalidPos;
         int lives = 3;
         int level = 3;
 
-        
-        long quitDelay = 1000;
+
+        (int R, int G, int B) red = (255, 0, 0);
+        (int R, int G, int B) purple = (255, 0, 255);
+        (int R, int G, int B) black = (0, 0, 0);
+
         long betweenLevelDelay;
-        bool quitGame = false;
 
         long times = 0;
         bool launchpadSetUp = true;
@@ -116,7 +120,6 @@ namespace A3ttrEngine.mod
                     buttonGrid[x,y] = new Target((x, y));
                 }
             }
-           
             loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
             //names of piano tile sounds correspond to their coordinates on the launchapd
             loadPianoWaveFiles();
@@ -130,90 +133,100 @@ namespace A3ttrEngine.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
-
-            if (quitGame)
+            if (launchpadSetUp)
             {
-                if (times++ >= quitDelay) // Force quit delay as well as time increment
+                Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
+                Target.a3ttrSoundlist = a3ttrSoundlist;
+                launchpadSetUp = false;
+            }
+            
+            if (note_pos < level & note_pos < noteList.Length)
+            {
+                if (times++ >= betweenLevelDelay)
                 {
-                    Console.WriteLine("Exit", times);
-                    Environment.Exit(0);
+                    (int x, int y) = KeyMapping(noteList[note_pos]);
+                    buttonGrid[x, y].Display(time, ref note_pos);
+                    betweenLevelDelay = 0;
+                    times = 0;
                 }
-
             }
             else
             {
-                if (launchpadSetUp)
-                {
-                    Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
-                    Target.a3ttrSoundlist = a3ttrSoundlist;
-                    launchpadSetUp = false;
-                }
+                //Optimisation: using Animation Curve/ function or different colors
 
-                if (note_pos < level & note_pos < noteList.Length)
+                (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black,(80,80,255),(40, 0, 40), (10, 0, 10),black }; int[] timing = new int[5] { 0,10, 200, 200, 200 };
+
+                // Displays all circle animations
+                foreach (Circle circle in positiveFeedbackEffects) {
+                    circle.Animate(animatedButtons, time, 100, buttonGrid, color_list, timing);
+                }
+                if (positiveFeedbackEffects.Count > 0)
                 {
-                    if (times++ >= betweenLevelDelay)
+                    if (positiveFeedbackEffects.Peek().status == 1)
                     {
-                        (int x, int y) = KeyMapping(noteList[note_pos]);
-                        buttonGrid[x, y].Display(time, ref note_pos);
-                        betweenLevelDelay = 0;
-                        times = 0;
+                        positiveFeedbackEffects.Dequeue();
                     }
                 }
                 else
                 {
-                    //Optimisation: using Animation Curve/ function or different colors
-                    (int R, int G, int B) light_red = (40, 0, 0);
-                    (int R, int G, int B) red = (255, 100, 0);
-                    (int R, int G, int B) black = (0, 0, 0);
-                    (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black,(255,80,255),(40, 0, 40), (10, 0, 10),black }; int[] timing = new int[5] { 0,10, 200, 200, 200 };
+                    // Checking if animation queue is cleared before proceeding to display memory sequence
+                    if (animatedButtons.Count == 0) {
 
-                    // Displays all circle animations
-                    foreach (Circle circle in positiveFeedbackEffects) {
-                        circle.Animate(animatedButtons, time, 100, buttonGrid, color_list, timing);
-                    }
-                    if (positiveFeedbackEffects.Count > 0)
-                    {
-                        if (positiveFeedbackEffects.Peek().status == 1)
-                        {
-                            positiveFeedbackEffects.Dequeue();
-                        }
-                    }
-                    else
-                    {
-                        // Letting animation finish before increasing level
-                        if (note_pos == 2 * level & animatedButtons.Count == 0)
+                        if (note_pos == 2 * level)
                         {
                             int size = noteList.Length;
                             if (size == level)
                                 GameCompleted();
                             else
                             {
-                                //Increasing level and displaying longer sequence
+                                // Increasing level and displaying longer sequence
                                 level += level + 2 < size ? 2 : 1;
-                                /*betweenLevelDelay = Target.duration.Sum();*/
                                 note_pos = 0;
                                 times = 0;
                             }
-
                         }
-                    }
-
-                    // Reducing Queue Size when required
-                    if (animatedButtons.Count > 0)
-                    {
-                        if (animatedButtons.Peek().animation_sequence.Count == 0)
+                        else
                         {
-                            animatedButtons.Dequeue();
+                            // Checking if invalid input
+                            if (isInvalidInput)
+                            { 
+                                isInvalidInput = !isInvalidInput;
+                                
+                                note_pos = 0;
+                                times = 0;
+                            }
                         }
+
                     }
-                    foreach (Target button in animatedButtons)
+                    else
                     {
-                        button.Animate(time);
+
                     }
-                    // Reduces Size of Queue as Animations are completed
                 }
 
+                // Reducing Queue Size when required
+                if (animatedButtons.Count > 0)
+                {
+                    if (animatedButtons.Peek().animation_sequence.Count == 0)
+                    {
+                        animatedButtons.Dequeue();
+                    }
+                }
+ 
+                foreach (Target button in animatedButtons)
+                {
+                    button.AnimateTarget(time);
+                }
+                // Animate Error Button
+                if (lives == 0)
+                {
+                    Console.WriteLine("DEAD");
+                    GameOver(); //Executes when no more lives
+                }
+                // Reduces Size of Queue as Animations are completed
             }
+
+            
             base.update(time);
         }
         /// <summary>
@@ -242,17 +255,17 @@ namespace A3ttrEngine.mod
                     }
                     else
                     {
-                        setFadeLed(Color.Red, x, y ,300, 10);
+                        (int R, int G, int B) red = (255, 0, 0);
+                        (int R, int G, int B) black = (0, 0, 0);
+                        (int R, int G, int B)[] color_list = { red, red, black };
+                        int[] timing = new int[] { 0, 500, 100 };
+                        buttonGrid[x, y].animation_sequence = new Queue<Effect>();
+                        buttonGrid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
+                        if (!animatedButtons.Contains(buttonGrid[x, y]))
+                            animatedButtons.Enqueue(buttonGrid[x, y]);
+
                         lives--;
-                        if (lives == 0)
-                            GameOver(); //Executes when no more lives
-
-                        //Reshow sequence
-                        betweenLevelDelay = Target.duration.Sum();
-                        note_pos = 0;
-                        times = 0;
-
-                        //Reset animation for loop
+                        isInvalidInput = true;
 
                     }
                     // Not all notes are there
@@ -266,9 +279,6 @@ namespace A3ttrEngine.mod
                 }
 
                 ClearBoard();//NOT CODED YET --> Will clear entire board of color --> maybe add in the update function
-
-
-
             }
             else if (action == 2 && type == 1)
             {
@@ -278,13 +288,13 @@ namespace A3ttrEngine.mod
         }
         public void GameCompleted()
         {
-            quitGame = true;
             Console.WriteLine("Sequence Completed");
         }
         public void GameOver()
         {
-            quitGame = true;
-            StartAnimation("gameover", 1, 1);
+            Console.WriteLine("Animation Length");
+            Console.WriteLine(animatedButtons.Count());
+            //StartAnimation("gameover", 1, 1);
             Console.WriteLine("Sequence length: " + (level-1));
             Console.WriteLine("Game Over");
         }
@@ -385,11 +395,9 @@ namespace A3ttrEngine.mod
         public (int x, int y) pos { get; set; }
         public string key { get; set; }
         public (int R,int G, int B) currColor { get; set; }
-        public (int R,int G, int B) init_color { get; set; }
         public (int R,int G, int B) gradColor { get; set; }
 
         public Queue<Effect> animation_sequence = new Queue<Effect>();
-        public int[] animation_timing_sequence { get; set; }
 
         public Target((int, int) pos, string key = null)
         {   
@@ -412,6 +420,7 @@ namespace A3ttrEngine.mod
             this.display_status = 0;
             this.gradient(timing[display_status]);
         }
+
         public void Display(long time,ref int note_pos) { //did you mean times
             if (display_status <= 2)
             {
@@ -449,7 +458,7 @@ namespace A3ttrEngine.mod
             times += time;
         }
         
-        public void Animate(long time) {
+        public void AnimateTarget(long time) {
             int size = animation_sequence.Count();
             if (size > 0) {
 
@@ -457,19 +466,13 @@ namespace A3ttrEngine.mod
 
                 foreach (Effect effect in animation_sequence)
                 {
-                    if (effect.checkCurrColor(time) == 0)
+                    if (effect.ChangeCurrColor(time))
                     {
 
                         temp.R += effect.currColor.R;
                         temp.G += effect.currColor.G;
                         temp.B += effect.currColor.B;
                     }
-                    /*else
-                    {
-                        //Verify if this works
-                        Console.WriteLine("REMOVING EFFECT FROM QUEUE");
-                        animation_sequence.Dequeue();
-                    }*/
                 }
                 if (animation_sequence.Peek().color_sequence.Length == 0)
                 {
@@ -480,8 +483,9 @@ namespace A3ttrEngine.mod
                 
                 setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
             }
-        
         }
+
+        /*
         public void setFadeLed(Color c, int keeptime, int fadetime)
         {
             launchpad[pos.x, pos.y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
@@ -489,14 +493,15 @@ namespace A3ttrEngine.mod
         public void setFadeLed(Color c,int x,int y, int keeptime, int fadetime)
         {
             launchpad[x, y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
-        }
+        }*/
         public void setLed(Color c)
         {
             launchpad[pos.x, pos.y].ledColor = c;
         }
+        /*
         public void setLed(Color c, int x, int y) {
             launchpad[x, y].ledColor = c;
-        }
+        }*/
 
         public void gradient(long timeleft)
         {   if (timeleft <= 0)
@@ -532,7 +537,7 @@ namespace A3ttrEngine.mod
         {
             radius = 0;
             status = 0;
-            max_radius = random_radii.Next(1,4);
+            max_radius = random_radii.Next(3,4);
             this.origin = origin;
         }
         public void Animate(Queue<Target> animatedButtons,long time, int speed, Target[,] Grid, (int,int,int)[] color_list,int[] timing) {
@@ -567,8 +572,6 @@ namespace A3ttrEngine.mod
                                 //To avoid animating same item multiple times
                                 if (!animatedButtons.Contains(Grid[x, y]))
                                     animatedButtons.Enqueue(Grid[x, y]);
-
-
                             }
                         }
                     }
@@ -581,7 +584,6 @@ namespace A3ttrEngine.mod
                     if (!animatedButtons.Contains(Grid[origin.x, origin.y]))
                         animatedButtons.Enqueue(Grid[origin.x, origin.y]);
                 }
-
 
                 times += time;
             }
@@ -606,20 +608,17 @@ namespace A3ttrEngine.mod
     {
         public long times;
         public int[] timing_sequence { get; set; }
-        public int offset {  get; set; }
-
+        public int status { get; set; }
         public (int R, int G, int B)[] color_sequence { get; set; }
         public (int R, int G, int B) currColor { get; set; }
-        public (int R, int G, int B) init_color { get; set; }
         public (int R, int G, int B) gradColor { get; set; }
-        public int status { get; set; }
         public Effect((int R, int G, int B)[] color_list, int[] timing_list) {
             color_sequence = color_list;
             timing_sequence = timing_list;
             status = 0;
             times = 0;
         }
-        public int checkCurrColor(long time) {
+        public bool ChangeCurrColor(long time) {
 
             if (status >= 0 & color_sequence.Length != 0)
             {
@@ -644,7 +643,7 @@ namespace A3ttrEngine.mod
                         timing_sequence = new int[0];
                         status = 0;
                         times = 0;
-                        return -1;
+                        return false;
                     }
                     times = 0;
 
@@ -652,7 +651,7 @@ namespace A3ttrEngine.mod
                 times += time;
             }
             // Need to check also color_sequence to see if currColor is a valid input
-            return 0;//Discard Effect
+            return true;//Discard Effect
         }
 
         public void gradient(long timeleft)

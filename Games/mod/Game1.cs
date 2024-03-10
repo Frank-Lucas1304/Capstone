@@ -38,7 +38,8 @@ namespace PianoTiles.mod
 
         int targetNum = 4;
         int level = 1;
-        double speed_incr = 0.10;
+        double speed_incr = 0.06;
+        //int speed_incr = 8;
         const int maxTargetsAtTheTime = 1; //This variable sends x at the exact same time, not staggered
         Random random = new Random();
         (int,int) prevTargetStart = (100,100);
@@ -47,9 +48,12 @@ namespace PianoTiles.mod
         private int state; //Sets value automatically to 0 if not assigned later in the code
 
         //Nice gradient purple colours
-        System.Drawing.Color color1 = System.Drawing.Color.FromArgb(20, 0, 50);
-        System.Drawing.Color color2 = System.Drawing.Color.FromArgb(40, 0, 70);
-        System.Drawing.Color color3 = System.Drawing.Color.FromArgb(80, 0, 100);
+        //System.Drawing.Color color1 = System.Drawing.Color.FromArgb(20, 0, 50);
+        //System.Drawing.Color color2 = System.Drawing.Color.FromArgb(40, 0, 70);
+        //System.Drawing.Color color3 = System.Drawing.Color.FromArgb(80, 0, 100);
+        System.Drawing.Color color2 = System.Drawing.Color.FromArgb(200, 0, 200); //1
+        System.Drawing.Color color1 = System.Drawing.Color.FromArgb(150, 0, 255); //2
+        System.Drawing.Color color3 = System.Drawing.Color.FromArgb(50, 0, 255); //3
         public Game1()
         {
 
@@ -168,7 +172,8 @@ namespace PianoTiles.mod
 
                         //Chord("G");
                         //NoteOnOffMessage(IDeviceBase device, Channel channel, Pitch pitch, int velocity, float time, Clock clock, float duration);
-
+                        Console.WriteLine("GAME OVER :(");
+                        Console.WriteLine("Your score is " + points);
                         Environment.Exit(0);
 
                     }
@@ -312,9 +317,9 @@ namespace PianoTiles.mod
                     {
                         if (distance == 3) {
                             //SETTING SUPER FADED WHITE PATH SO THAT EACH SQUARE WILL DISAPPEAR BEFORE IT LIGHTS UP PURPLE
-                            setFadeLed(Color.FromArgb(15, 15, 15), target.startPos.x + target.direction.x, target.startPos.y + target.direction.y, keeptime/2, fadetime);
-                            setFadeLed(Color.FromArgb(15, 15, 15), target.startPos.x + 2 * target.direction.x, target.startPos.y + 2 * target.direction.y, keeptime, fadetime);
-                            setFadeLed(Color.FromArgb(15, 15, 15), target.endPos.x, target.endPos.y, keeptime * 2, fadetime);
+                            setFadeLed(Color.FromArgb(25, 25, 25), target.startPos.x + target.direction.x, target.startPos.y + target.direction.y, keeptime/2, fadetime);
+                            setFadeLed(Color.FromArgb(25, 25, 25), target.startPos.x + 2 * target.direction.x, target.startPos.y + 2 * target.direction.y, keeptime, fadetime);
+                            setFadeLed(Color.FromArgb(25, 25, 25), target.endPos.x, target.endPos.y, keeptime * 2, fadetime);
                         }
                         
                         //ISSUE AT START OF THE GAME HERE

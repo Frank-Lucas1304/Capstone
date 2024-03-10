@@ -75,6 +75,8 @@ namespace PianoTiles.mod
             a3ttrSoundlist.Add("feedback", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\feedback.wav"));
             a3ttrSoundlist["BGM"].Play();
             a3ttrSoundlist.Add("gameover", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\gameover.wav"));
+            a3ttrSoundlist.Add("Buzzer", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\WrongBuzzer.wav"));
+
             loadAnimation("levelUp", System.Environment.CurrentDirectory + "\\animation\\gradient2.ttr");
 
             loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
@@ -431,7 +433,7 @@ namespace PianoTiles.mod
                     /* MISSED TARGET
                     When the target enters here it is because the user did not hit the target in time. Therefore the target status is set to "missed" and a visual feedback is ouputed*/
                     --Target.inactiveTargets;
-
+                    a3ttrSoundlist["Buzzer"].Play();
                     target.status = "missed";
                     base.clearLed(target.endPos.x, target.endPos.y);
                     base.setFadeLed(Color.Red, target.endPos.x, target.endPos.y, keeptime, fadetime);

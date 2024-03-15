@@ -154,7 +154,7 @@ namespace A3ttrEngine.mod
             {
                 //Optimisation: using Animation Curve/ function or different colors
 
-                (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black,(80,80,255),(40, 0, 40), (10, 0, 10),black }; int[] timing = new int[5] { 0,10, 200, 200, 200 };
+                (int R, int G, int B)[] color_list = new (int R, int G, int B)[3] { black,(255,255,255),black }; int[] timing = new int[3] {0,400, 400 };
 
                 // Displays all circle animations
                 foreach (Circle circle in positiveFeedbackEffects) {
@@ -540,6 +540,7 @@ namespace A3ttrEngine.mod
             max_radius = random_radii.Next(3,4);
             this.origin = origin;
         }
+        bool lol = true;
         public void Animate(Queue<Target> animatedButtons,long time, int speed, Target[,] Grid, (int,int,int)[] color_list,int[] timing) {
             //Make this two for loops, implement it so that you store 
             if ((status != 1) && ((speed - times) >= 0))
@@ -567,22 +568,25 @@ namespace A3ttrEngine.mod
                             if ((-bound - 1 < err) & (err <= bound) & 0 <= y & y < 8 & 0 <= x & x < 8)
                             {
 
-                                
-                                Grid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
-                                //To avoid animating same item multiple times
-                                if (!animatedButtons.Contains(Grid[x, y]))
-                                    animatedButtons.Enqueue(Grid[x, y]);
+                                if (lol)
+                                {
+                                    Grid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
+                                    //To avoid animating same item multiple times
+                                    if (!animatedButtons.Contains(Grid[x, y]))
+                                        animatedButtons.Enqueue(Grid[x, y]);
+                                    lol = false;
+                                }
                             }
                         }
                     }
                 }
                 else
-                {
+                {/*
                     //Animation for pressed button
                     Grid[origin.x, origin.y].animation_sequence.Enqueue(new Effect(color_list, timing));
                     //To avoid animating same item multiple times
                     if (!animatedButtons.Contains(Grid[origin.x, origin.y]))
-                        animatedButtons.Enqueue(Grid[origin.x, origin.y]);
+                        animatedButtons.Enqueue(Grid[origin.x, origin.y]);*/
                 }
 
                 times += time;
@@ -633,7 +637,7 @@ namespace A3ttrEngine.mod
                     //DO I ALSO NEE TO MAKE SURE COLOR IS THE SAME?
                     ++status;
 
-                    if (status != timing_sequence.Length)
+                    if (status < timing_sequence.Length)
                         gradColor = color_sequence[status];
                     else
                     {
@@ -661,11 +665,15 @@ namespace A3ttrEngine.mod
                 timeleft = 1;
             }
             (int R, int G, int B) c;
+            //Problem with negative sign
             c.R = (int)Math.Ceiling((decimal)(gradColor.R - currColor.R) / timeleft) + currColor.R;
             c.G = (int)Math.Ceiling((decimal)(gradColor.G - currColor.G) / timeleft) + currColor.G;
             c.B = (int)Math.Ceiling((decimal)(gradColor.B - currColor.B) / timeleft) + currColor.B;
 
             currColor = c;
+            Console.WriteLine(currColor.ToString()+" "+ gradColor.ToString() + " " + timeleft.ToString());
+            Console.WriteLine((int)Math.Ceiling((decimal)(gradColor.G - currColor.G) / timeleft));
+
         }
     }
         

@@ -153,8 +153,11 @@ namespace A3ttrEngine.mod
             else
             {
                 //Optimisation: using Animation Curve/ function or different colors
-
-                (int R, int G, int B)[] color_list = new (int R, int G, int B)[3] { black,(255,255,255),black }; int[] timing = new int[3] {0,400, 400 };
+                (int R, int G, int B) light_red = (40, 0, 0);
+                (int R, int G, int B) red = (255, 100, 100);
+                (int R, int G, int B) black = (0, 0, 0);
+                (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] { black, red, light_red, black }; int[] timing = new int[4] { 0, 200, 200, 200 };
+                //(int R, int G, int B)[] color_list = new (int R, int G, int B)[3] { black,(200,0,200),black }; int[] timing = new int[3] {0,100, 100 };
 
                 // Displays all circle animations
                 foreach (Circle circle in positiveFeedbackEffects) {
@@ -258,7 +261,7 @@ namespace A3ttrEngine.mod
                         (int R, int G, int B) red = (255, 0, 0);
                         (int R, int G, int B) black = (0, 0, 0);
                         (int R, int G, int B)[] color_list = { red, red, black };
-                        int[] timing = new int[] { 0, 500, 100 };
+                        int[] timing = new int[] { 0, 100, 100 };
                         buttonGrid[x, y].animation_sequence = new Queue<Effect>();
                         buttonGrid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
                         if (!animatedButtons.Contains(buttonGrid[x, y]))
@@ -509,10 +512,13 @@ namespace A3ttrEngine.mod
                 timeleft = 1;
             }
             (int R, int G, int B) c;
-            c.R = (int)Math.Ceiling((decimal)(gradColor.R - currColor.R) / timeleft)+currColor.R;
-            c.G = (int)Math.Ceiling((decimal)(gradColor.G - currColor.G) / timeleft)+currColor.G;
-            c.B = (int)Math.Ceiling((decimal)(gradColor.B - currColor.B) / timeleft)+currColor.B;
-            
+            // Need Math.Sign and Math.Abs because when Math.Ceiling curves negative values. Therefore when the difference is smaller than 0 it considers it as 0 and no change occurs. 
+            c.R = Math.Sign(gradColor.R - currColor.R) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.R - currColor.R) / timeleft) + currColor.R;
+            c.G = Math.Sign(gradColor.G - currColor.G) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.G - currColor.G) / timeleft) + currColor.G;
+            c.B = Math.Sign(gradColor.B - currColor.B) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.B - currColor.B) / timeleft) + currColor.B;
+
+
+            Console.WriteLine(currColor.ToString() + " " + gradColor.ToString() + " " + timeleft.ToString());
             currColor = c;
         }
         public bool hit(int x, int y) {
@@ -545,7 +551,6 @@ namespace A3ttrEngine.mod
             //Make this two for loops, implement it so that you store 
             if ((status != 1) && ((speed - times) >= 0))
             {   
-                    
                 if (radius != 0) { 
                     int iterations = 360 / (45 / radius);
                     for (int i = 0; i < iterations + 1; i++)
@@ -567,26 +572,25 @@ namespace A3ttrEngine.mod
                             /*The bound condition was discovered through robust testing dont ask why it is like that it just works*/
                             if ((-bound - 1 < err) & (err <= bound) & 0 <= y & y < 8 & 0 <= x & x < 8)
                             {
-
                                 if (lol)
                                 {
                                     Grid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
                                     //To avoid animating same item multiple times
                                     if (!animatedButtons.Contains(Grid[x, y]))
                                         animatedButtons.Enqueue(Grid[x, y]);
-                                    lol = false;
+                                    
                                 }
                             }
                         }
                     }
                 }
                 else
-                {/*
-                    //Animation for pressed button
+                {
+                  //Animation for pressed button
                     Grid[origin.x, origin.y].animation_sequence.Enqueue(new Effect(color_list, timing));
                     //To avoid animating same item multiple times
                     if (!animatedButtons.Contains(Grid[origin.x, origin.y]))
-                        animatedButtons.Enqueue(Grid[origin.x, origin.y]);*/
+                        animatedButtons.Enqueue(Grid[origin.x, origin.y]);
                 }
 
                 times += time;
@@ -596,7 +600,7 @@ namespace A3ttrEngine.mod
                 radius += 1;
                 times = 0;
             }
-            if (radius == (max_radius * 2 + 1))
+            if (radius >= (max_radius * 2 + 1))
             {
                 radius = 0;
                 status = 1;
@@ -665,14 +669,15 @@ namespace A3ttrEngine.mod
                 timeleft = 1;
             }
             (int R, int G, int B) c;
-            //Problem with negative sign
-            c.R = (int)Math.Ceiling((decimal)(gradColor.R - currColor.R) / timeleft) + currColor.R;
-            c.G = (int)Math.Ceiling((decimal)(gradColor.G - currColor.G) / timeleft) + currColor.G;
-            c.B = (int)Math.Ceiling((decimal)(gradColor.B - currColor.B) / timeleft) + currColor.B;
 
-            currColor = c;
+            // Need Math.Sign and Math.Abs because when Math.Ceiling curves negative values. Therefore when the difference is smaller than 0 it considers it as 0 and no change occurs. 
+            c.R = Math.Sign(gradColor.R - currColor.R) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.R - currColor.R) / timeleft) + currColor.R;
+            c.G = Math.Sign(gradColor.G - currColor.G) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.G - currColor.G) / timeleft) + currColor.G;
+            c.B = Math.Sign(gradColor.B - currColor.B) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.B - currColor.B) / timeleft) + currColor.B;
+
+            
             Console.WriteLine(currColor.ToString()+" "+ gradColor.ToString() + " " + timeleft.ToString());
-            Console.WriteLine((int)Math.Ceiling((decimal)(gradColor.G - currColor.G) / timeleft));
+            currColor = c;
 
         }
     }

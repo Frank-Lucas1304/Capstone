@@ -39,6 +39,10 @@ namespace A3ttrEngine.mod
         (int R, int G, int B) red = (255, 0, 0);
         (int R, int G, int B) purple = (255, 0, 255);
         (int R, int G, int B) black = (0, 0, 0);
+        (int R, int G, int B) light = (255, 0, 255);
+        (int R, int G, int B) mid = (120, 50, 120);
+        (int R, int G, int B) neutral = (10, 10, 10);
+        (int R, int G, int B) white = (10, 10, 10);
 
         long betweenLevelDelay;
 
@@ -153,15 +157,14 @@ namespace A3ttrEngine.mod
             else
             {
                 //Optimisation: using Animation Curve/ function or different colors
-                (int R, int G, int B) light = (255, 0, 255);
-                (int R, int G, int B) neutral = (40, 0, 40);
-                (int R, int G, int B) black = (0, 0, 0);
-                (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] { black, neutral, light, black }; int[] timing = new int[4] { 0, 100, 100, 300 };
+
+                (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral,mid, light, black };
+                int[] timing = new int[5] { 0, 100,100, 100, 100};
                 //(int R, int G, int B)[] color_list = new (int R, int G, int B)[3] { black,(200,0,200),black }; int[] timing = new int[3] {0,100, 100 };
 
                 // Displays all circle animations
                 foreach (Circle circle in positiveFeedbackEffects) {
-                    circle.Animate(animatedButtons, time, 300, buttonGrid, color_list, timing);
+                    circle.Animate(animatedButtons, time, 60, buttonGrid, color_list, timing);
                 }
                 if (positiveFeedbackEffects.Count > 0)
                 {
@@ -250,18 +253,29 @@ namespace A3ttrEngine.mod
                     pos = KeyMapping(noteList[note_pos-level]);
                     bool isTargetHit = buttonGrid[pos.x, pos.y].hit(x, y);
                     if (isTargetHit)
-                    {
-                        Console.WriteLine("Fade");
-                        positiveFeedbackEffects.Enqueue(new Circle(pos));
-                        note_pos += 1;
+                    {   
 
+                        Console.WriteLine("Fade");
+                        note_pos += 1;
+                        if (note_pos == 2*level) 
+                            positiveFeedbackEffects.Enqueue(new Circle(pos));
+                        else
+                        {
+                            (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral, mid, light, black };
+                            int[] timing = new int[5] { 0, 100, 100, 100, 100 };
+                            buttonGrid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
+                            //To avoid animating same item multiple times
+                            if (!animatedButtons.Contains(buttonGrid[x, y]))
+                                animatedButtons.Enqueue(buttonGrid[x, y]);
+                        }
+                        
                     }
                     else
                     {
                         (int R, int G, int B) red = (255, 0, 0);
                         (int R, int G, int B) black = (0, 0, 0);
                         (int R, int G, int B)[] color_list = { red, red, black };
-                        int[] timing = new int[] { 0, 100, 100 };
+                        int[] timing = new int[] { 0, 200, 100 };
                         buttonGrid[x, y].animation_sequence = new Queue<Effect>();
                         buttonGrid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
                         if (!animatedButtons.Contains(buttonGrid[x, y]))
@@ -487,24 +501,11 @@ namespace A3ttrEngine.mod
                 setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
             }
         }
-
-        /*
-        public void setFadeLed(Color c, int keeptime, int fadetime)
-        {
-            launchpad[pos.x, pos.y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
-        }
-        public void setFadeLed(Color c,int x,int y, int keeptime, int fadetime)
-        {
-            launchpad[x, y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
-        }*/
         public void setLed(Color c)
         {
             launchpad[pos.x, pos.y].ledColor = c;
         }
-        /*
-        public void setLed(Color c, int x, int y) {
-            launchpad[x, y].ledColor = c;
-        }*/
+
 
         public void gradient(long timeleft)
         {   if (timeleft <= 0)
@@ -518,7 +519,7 @@ namespace A3ttrEngine.mod
             c.B = Math.Sign(gradColor.B - currColor.B) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.B - currColor.B) / timeleft) + currColor.B;
 
 
-            Console.WriteLine(currColor.ToString() + " " + gradColor.ToString() + " " + timeleft.ToString());
+            //Console.WriteLine(currColor.ToString() + " " + gradColor.ToString() + " " + timeleft.ToString());
             currColor = c;
         }
         public bool hit(int x, int y) {
@@ -546,7 +547,6 @@ namespace A3ttrEngine.mod
             max_radius = random_radii.Next(3,4);
             this.origin = origin;
         }
-        bool lol = true;
         public void Animate(Queue<Target> animatedButtons,long time, int speed, Target[,] Grid, (int,int,int)[] color_list,int[] timing) {
             //Make this two for loops, implement it so that you store 
             if ((status != 1) && ((speed - times) >= 0))
@@ -675,7 +675,7 @@ namespace A3ttrEngine.mod
             c.B = Math.Sign(gradColor.B - currColor.B) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.B - currColor.B) / timeleft) + currColor.B;
 
             
-            Console.WriteLine(currColor.ToString()+" "+ gradColor.ToString() + " " + timeleft.ToString());
+            //Console.WriteLine(currColor.ToString()+" "+ gradColor.ToString() + " " + timeleft.ToString());
             currColor = c;
 
         }

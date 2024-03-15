@@ -282,19 +282,22 @@ namespace A3ttrEngine.mod
                     }
                     else
                     {
-                        (int R, int G, int B) red = (255, 0, 0);
-                        (int R, int G, int B) black = (0, 0, 0);
-                        (int R, int G, int B)[] color_list = { red, red, black };
-                        int[] timing = new int[] { 0, 200, 100 };
-                        buttonGrid[x, y].animation_sequence = new Queue<Effect>();
-                        buttonGrid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
-                        if (!animatedButtons.Contains(buttonGrid[x, y]))
-                            animatedButtons.Enqueue(buttonGrid[x, y]);
-                        Console.WriteLine(animatedButtons.Count);
+                        // Avoids incrementing lives and stalling game before displaying Game Over Sequence
+                        if (!quitGame)
+                        {
+                            (int R, int G, int B) red = (255, 0, 0);
+                            (int R, int G, int B) black = (0, 0, 0);
+                            (int R, int G, int B)[] color_list = { red, red, black };
+                            int[] timing = new int[] { 0, 200, 100 };
+                            buttonGrid[x, y].animation_sequence = new Queue<Effect>();
+                            buttonGrid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
+                            if (!animatedButtons.Contains(buttonGrid[x, y]))
+                                animatedButtons.Enqueue(buttonGrid[x, y]);
+                            Console.WriteLine(animatedButtons.Count);
 
-                        lives--;
-                        isInvalidInput = true;
-
+                            lives--;
+                            isInvalidInput = true;
+                        }
                     }
                     // Not all notes are there
                     try {

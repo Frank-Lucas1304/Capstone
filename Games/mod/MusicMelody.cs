@@ -47,7 +47,7 @@ namespace A3ttrEngine.mod
 
      
         long betweenLevelDelay;
-        long quitDelay = 1000;
+        long quitDelay = 1200;
         bool quitGame = false; 
 
         long times = 0;
@@ -147,6 +147,7 @@ namespace A3ttrEngine.mod
                 Target.a3ttrSoundlist = a3ttrSoundlist;
                 launchpadSetUp = false;
             }
+
             if (quitGame)
             {
                 if (times++ >= quitDelay) // Force quit delay as well as time increment
@@ -170,16 +171,15 @@ namespace A3ttrEngine.mod
                 else
                 {
                     //Optimisation: using Animation Curve/ function or different colors
-
                     (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral, mid, light, black };
                     int[] timing = new int[5] { 0, 100, 100, 100, 100 };
-                    //(int R, int G, int B)[] color_list = new (int R, int G, int B)[3] { black,(200,0,200),black }; int[] timing = new int[3] {0,100, 100 };
 
                     // Displays all circle animations
                     foreach (Circle circle in positiveFeedbackEffects)
                     {
                         circle.Animate(animatedButtons, time, 60, buttonGrid, color_list, timing);
                     }
+                    //Reducing size of queue if needed
                     if (positiveFeedbackEffects.Count > 0)
                     {
                         if (positiveFeedbackEffects.Peek().status == 1)
@@ -192,12 +192,13 @@ namespace A3ttrEngine.mod
                         // Making sure all animation is done before moving on
                         if (animatedButtons.Count == 0)
                         {
-
                             if (note_pos == 2 * level)
                             {
                                 int size = noteList.Length;
                                 if (size == level)
+                                {
                                     GameCompleted();
+                                }
                                 else
                                 {
                                     // Increasing level and displaying longer sequence
@@ -222,10 +223,6 @@ namespace A3ttrEngine.mod
                             }
 
                         }
-                        else
-                        {
-
-                        }
                     }
 
                     // Reducing Queue Size when required
@@ -241,12 +238,7 @@ namespace A3ttrEngine.mod
                     {
                         button.AnimateTarget(time);
                     }
-                    // Animate Error Button
-                    if (lives == 0)
-                    {
-                        Console.WriteLine("DEAD");
-                        GameOver(); //Executes when no more lives
-                    }
+
                     // Reduces Size of Queue as Animations are completed
                 }
             }
@@ -330,9 +322,9 @@ namespace A3ttrEngine.mod
         public void GameOver()
         {
             quitGame = true;
+            StartAnimation("gameover", 1, 1);
             Console.WriteLine("Animation Length");
             Console.WriteLine(animatedButtons.Count());
-            StartAnimation("gameover", 1, 1);
             Console.WriteLine("Sequence length: " + (level-1));
             Console.WriteLine("Game Over");
         }

@@ -153,15 +153,15 @@ namespace A3ttrEngine.mod
             else
             {
                 //Optimisation: using Animation Curve/ function or different colors
-                (int R, int G, int B) light_red = (40, 0, 0);
-                (int R, int G, int B) red = (255, 100, 100);
+                (int R, int G, int B) light = (255, 0, 255);
+                (int R, int G, int B) neutral = (40, 0, 40);
                 (int R, int G, int B) black = (0, 0, 0);
-                (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] { black, red, light_red, black }; int[] timing = new int[4] { 0, 200, 200, 200 };
+                (int R, int G, int B)[] color_list = new (int R, int G, int B)[4] { black, neutral, light, black }; int[] timing = new int[4] { 0, 100, 100, 300 };
                 //(int R, int G, int B)[] color_list = new (int R, int G, int B)[3] { black,(200,0,200),black }; int[] timing = new int[3] {0,100, 100 };
 
                 // Displays all circle animations
                 foreach (Circle circle in positiveFeedbackEffects) {
-                    circle.Animate(animatedButtons, time, 100, buttonGrid, color_list, timing);
+                    circle.Animate(animatedButtons, time, 300, buttonGrid, color_list, timing);
                 }
                 if (positiveFeedbackEffects.Count > 0)
                 {
@@ -572,14 +572,13 @@ namespace A3ttrEngine.mod
                             /*The bound condition was discovered through robust testing dont ask why it is like that it just works*/
                             if ((-bound - 1 < err) & (err <= bound) & 0 <= y & y < 8 & 0 <= x & x < 8)
                             {
-                                if (lol)
-                                {
+                             
                                     Grid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
                                     //To avoid animating same item multiple times
                                     if (!animatedButtons.Contains(Grid[x, y]))
                                         animatedButtons.Enqueue(Grid[x, y]);
                                     
-                                }
+                                
                             }
                         }
                     }

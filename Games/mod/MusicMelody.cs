@@ -283,7 +283,7 @@ namespace A3ttrEngine.mod
                     else
                     {
                         // Avoids incrementing lives and stalling game before displaying Game Over Sequence
-                        if (!quitGame)
+                        if (!isInvalidInput)
                         {
                             (int R, int G, int B) red = (255, 0, 0);
                             (int R, int G, int B) black = (0, 0, 0);
@@ -293,8 +293,6 @@ namespace A3ttrEngine.mod
                             buttonGrid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
                             if (!animatedButtons.Contains(buttonGrid[x, y]))
                                 animatedButtons.Enqueue(buttonGrid[x, y]);
-                            Console.WriteLine(animatedButtons.Count);
-
                             lives--;
                             isInvalidInput = true;
                         }

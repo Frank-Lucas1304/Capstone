@@ -44,7 +44,11 @@ namespace A3ttrEngine.mod
         (int R, int G, int B) neutral = (10, 10, 10);
         (int R, int G, int B) white = (10, 10, 10);
 
+
+     
         long betweenLevelDelay;
+        long quitDelay = 1000;
+        bool quitGame = false; 
 
         long times = 0;
         bool launchpadSetUp = true;
@@ -143,95 +147,109 @@ namespace A3ttrEngine.mod
                 Target.a3ttrSoundlist = a3ttrSoundlist;
                 launchpadSetUp = false;
             }
-            
-            if (note_pos < level & note_pos < noteList.Length)
+            if (quitGame)
             {
-                if (times++ >= betweenLevelDelay)
+                if (times++ >= quitDelay) // Force quit delay as well as time increment
                 {
-                    (int x, int y) = KeyMapping(noteList[note_pos]);
-                    buttonGrid[x, y].Display(time, ref note_pos);
-                    betweenLevelDelay = 0;
-                    times = 0;
+                    Console.WriteLine("Exit", times);
+                    Environment.Exit(0);
                 }
             }
             else
             {
-                //Optimisation: using Animation Curve/ function or different colors
-
-                (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral,mid, light, black };
-                int[] timing = new int[5] { 0, 100,100, 100, 100};
-                //(int R, int G, int B)[] color_list = new (int R, int G, int B)[3] { black,(200,0,200),black }; int[] timing = new int[3] {0,100, 100 };
-
-                // Displays all circle animations
-                foreach (Circle circle in positiveFeedbackEffects) {
-                    circle.Animate(animatedButtons, time, 60, buttonGrid, color_list, timing);
-                }
-                if (positiveFeedbackEffects.Count > 0)
-                {
-                    if (positiveFeedbackEffects.Peek().status == 1)
+                if (note_pos < level & note_pos < noteList.Length)
+                {   // Display Sequence
+                    if (times++ >= betweenLevelDelay)
                     {
-                        positiveFeedbackEffects.Dequeue();
+                        (int x, int y) = KeyMapping(noteList[note_pos]);
+                        buttonGrid[x, y].Display(time, ref note_pos);
+                        betweenLevelDelay = 0;
+                        times = 0;
                     }
                 }
                 else
                 {
-                    // Checking if animation queue is cleared before proceeding to display memory sequence
-                    if (animatedButtons.Count == 0) {
+                    //Optimisation: using Animation Curve/ function or different colors
 
-                        if (note_pos == 2 * level)
-                        {
-                            int size = noteList.Length;
-                            if (size == level)
-                                GameCompleted();
-                            else
-                            {
-                                // Increasing level and displaying longer sequence
-                                level += level + 2 < size ? 2 : 1;
-                                note_pos = 0;
-                                times = 0;
-                            }
-                        }
-                        else
-                        {
-                            // Checking if invalid input
-                            if (isInvalidInput)
-                            { 
-                                isInvalidInput = !isInvalidInput;
-                                
-                                note_pos = 0;
-                                times = 0;
-                            }
-                        }
+                    (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral, mid, light, black };
+                    int[] timing = new int[5] { 0, 100, 100, 100, 100 };
+                    //(int R, int G, int B)[] color_list = new (int R, int G, int B)[3] { black,(200,0,200),black }; int[] timing = new int[3] {0,100, 100 };
 
+                    // Displays all circle animations
+                    foreach (Circle circle in positiveFeedbackEffects)
+                    {
+                        circle.Animate(animatedButtons, time, 60, buttonGrid, color_list, timing);
+                    }
+                    if (positiveFeedbackEffects.Count > 0)
+                    {
+                        if (positiveFeedbackEffects.Peek().status == 1)
+                        {
+                            positiveFeedbackEffects.Dequeue();
+                        }
                     }
                     else
                     {
+                        // Making sure all animation is done before moving on
+                        if (animatedButtons.Count == 0)
+                        {
 
+                            if (note_pos == 2 * level)
+                            {
+                                int size = noteList.Length;
+                                if (size == level)
+                                    GameCompleted();
+                                else
+                                {
+                                    // Increasing level and displaying longer sequence
+                                    level += level + 2 < size ? 2 : 1;
+                                    note_pos = 0;
+                                    times = 0;
+                                }
+                            }
+                            else
+                            {
+                                // Checking if invalid input
+                                if (isInvalidInput)
+                                {
+                                    isInvalidInput = !isInvalidInput;
+                                    if (lives == 0)
+                                    {
+                                        GameOver();
+                                    }
+                                    note_pos = 0;
+                                    times = 0;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+
+                        }
                     }
-                }
 
-                // Reducing Queue Size when required
-                if (animatedButtons.Count > 0)
-                {
-                    if (animatedButtons.Peek().animation_sequence.Count == 0)
+                    // Reducing Queue Size when required
+                    if (animatedButtons.Count > 0)
                     {
-                        animatedButtons.Dequeue();
+                        if (animatedButtons.Peek().animation_sequence.Count == 0)
+                        {
+                            animatedButtons.Dequeue();
+                        }
                     }
-                }
- 
-                foreach (Target button in animatedButtons)
-                {
-                    button.AnimateTarget(time);
-                }
-                // Animate Error Button
-                if (lives == 0)
-                {
-                    Console.WriteLine("DEAD");
-                    GameOver(); //Executes when no more lives
-                }
-                // Reduces Size of Queue as Animations are completed
-            }
 
+                    foreach (Target button in animatedButtons)
+                    {
+                        button.AnimateTarget(time);
+                    }
+                    // Animate Error Button
+                    if (lives == 0)
+                    {
+                        Console.WriteLine("DEAD");
+                        GameOver(); //Executes when no more lives
+                    }
+                    // Reduces Size of Queue as Animations are completed
+                }
+            }
             
             base.update(time);
         }
@@ -280,6 +298,7 @@ namespace A3ttrEngine.mod
                         buttonGrid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
                         if (!animatedButtons.Contains(buttonGrid[x, y]))
                             animatedButtons.Enqueue(buttonGrid[x, y]);
+                        Console.WriteLine(animatedButtons.Count);
 
                         lives--;
                         isInvalidInput = true;
@@ -305,13 +324,15 @@ namespace A3ttrEngine.mod
         }
         public void GameCompleted()
         {
+            quitGame = true;
             Console.WriteLine("Sequence Completed");
         }
         public void GameOver()
         {
+            quitGame = true;
             Console.WriteLine("Animation Length");
             Console.WriteLine(animatedButtons.Count());
-            //StartAnimation("gameover", 1, 1);
+            StartAnimation("gameover", 1, 1);
             Console.WriteLine("Sequence length: " + (level-1));
             Console.WriteLine("Game Over");
         }

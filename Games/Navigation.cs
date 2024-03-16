@@ -17,30 +17,24 @@ namespace ConsoleApp1
 {
     internal class Navigation
     {
-        static bool terminateLoop = false;
+
         static A3ttrGame a3ttrGame = new A3ttrGame();
-        static void Test(string[] args)
+        static bool _continue;
+        static SerialPort _serialPort;
+
+
+        public static void Main(string[] args)
         {
-            while (!terminateLoop)
-            {
-                //I dont get what this does if it returns void
-                a3ttrGame.a3ttr_ConnectChangedEvent += A3ttrGame_a3ttr_ConnectChangedEvent;
-                //Stall the program from terminating
-                var command = Console.ReadLine();
-
-                if (command == "exit")
-                {
-                    terminateLoop = true;
-                }
-
-            }
-
-            Console.WriteLine("Quit Game");
+            a3ttrGame.a3ttr_ConnectChangedEvent += A3ttrGame_a3ttr_ConnectChangedEvent;
+            string name;
+            string message;
+            StringComparer stringComparer = StringComparer.OrdinalIgnoreCase;
+           
         }
 
         private static void A3ttrGame_a3ttr_ConnectChangedEvent(bool connected)
         {
-            Console.WriteLine("连接状态:"+ connected);
+            Console.WriteLine("连接状态:" + connected);
             if (connected)
             {
 
@@ -50,4 +44,5 @@ namespace ConsoleApp1
             }
         }
     }
+    
 }

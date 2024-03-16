@@ -23,7 +23,7 @@ namespace ConsoleApp1
         static SerialPort _serialPort;
 
 
-        public static void Main(string[] args)
+        public static void lol(string[] args)
         {
             a3ttrGame.a3ttr_ConnectChangedEvent += A3ttrGame_a3ttr_ConnectChangedEvent;
             string name;

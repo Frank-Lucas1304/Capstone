@@ -11,7 +11,7 @@ namespace ConsoleApp1
     internal class Program
     {
         static A3ttrGame a3ttrGame = new A3ttrGame();
-        static void lol(string[] args)
+        static void Main(string[] args)
         {
 
             

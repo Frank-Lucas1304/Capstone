@@ -35,7 +35,6 @@ namespace A3ttrEngine.mod
         int lives = 3;
         int level = 3;
 
-
         (int R, int G, int B) red = (255, 0, 0);
         (int R, int G, int B) purple = (255, 0, 255);
         (int R, int G, int B) black = (0, 0, 0);
@@ -43,8 +42,6 @@ namespace A3ttrEngine.mod
         (int R, int G, int B) mid = (120, 50, 120);
         (int R, int G, int B) neutral = (10, 10, 10);
         (int R, int G, int B) white = (10, 10, 10);
-
-
      
         long betweenLevelDelay;
         long quitDelay = 1200;
@@ -264,8 +261,6 @@ namespace A3ttrEngine.mod
                     bool isTargetHit = buttonGrid[pos.x, pos.y].hit(x, y);
                     if (isTargetHit)
                     {   
-
-                        Console.WriteLine("Fade");
                         note_pos += 1;
                         if (note_pos == 2*level) 
                             positiveFeedbackEffects.Enqueue(new Circle(pos));
@@ -306,8 +301,6 @@ namespace A3ttrEngine.mod
                         Console.WriteLine("Check Keys, not all of them have sounds linked to them");
                     }
                 }
-
-                ClearBoard();//NOT CODED YET --> Will clear entire board of color --> maybe add in the update function
             }
             else if (action == 2 && type == 1)
             {
@@ -325,7 +318,6 @@ namespace A3ttrEngine.mod
             quitGame = true;
             StartAnimation("gameover", 1, 1);
             Console.WriteLine("Animation Length");
-            Console.WriteLine(animatedButtons.Count());
             Console.WriteLine("Sequence length: " + (level-1));
             Console.WriteLine("Game Over");
         }
@@ -414,7 +406,6 @@ namespace A3ttrEngine.mod
         // Performing Shallow Copy
         int[] timing = (int[])duration.Clone();
   
-
         (int R, int G, int B) black = (0, 0, 0);
         (int R, int G, int B) purple = (50, 0, 50);
         (int R, int G, int B) white = (255,255,255);
@@ -440,7 +431,6 @@ namespace A3ttrEngine.mod
 
             //Starting effect
             reset();
-
         }
         public void reset()
         {
@@ -683,13 +673,11 @@ namespace A3ttrEngine.mod
             }
             (int R, int G, int B) c;
 
-            // Need Math.Sign and Math.Abs because when Math.Ceiling curves negative values. Therefore when the difference is smaller than 0 it considers it as 0 and no change occurs. 
+            // Need Math.Sign and Math.Abs because when Math.Ceiling curves negative values. Therefore when the difference is smaller than 0 it considers it as 0 and no change occurs.
             c.R = Math.Sign(gradColor.R - currColor.R) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.R - currColor.R) / timeleft) + currColor.R;
             c.G = Math.Sign(gradColor.G - currColor.G) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.G - currColor.G) / timeleft) + currColor.G;
             c.B = Math.Sign(gradColor.B - currColor.B) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.B - currColor.B) / timeleft) + currColor.B;
-
             
-            //Console.WriteLine(currColor.ToString()+" "+ gradColor.ToString() + " " + timeleft.ToString());
             currColor = c;
 
         }

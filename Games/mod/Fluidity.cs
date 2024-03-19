@@ -237,7 +237,6 @@ namespace PianoTiles.mod
             {
                 // Goes here when user lifts finger
 
-
                 //清除按钮led灯光
             }
 

@@ -137,7 +137,7 @@ namespace A3ttrEngine.mod
         /// </summary>
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
-        {
+        {   
             if (launchpadSetUp)
             {
                 Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
@@ -155,6 +155,7 @@ namespace A3ttrEngine.mod
             }
             else
             {
+
                 if (note_pos < level & note_pos < noteList.Length)
                 {   // Display Sequence
                     if (times++ >= betweenLevelDelay)

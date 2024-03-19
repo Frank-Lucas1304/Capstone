@@ -1,6 +1,7 @@
 ﻿using A3TTRControl2;
 using OpenTK;
 using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -66,14 +67,15 @@ namespace A3ttrEngine.mod
             if (action==1&&type==1)
             {
                 //设置按钮led灯光
-
+                Console.WriteLine("Lmao");
                 base.setLed(ledColor, x, y);
                
             }
-            else if (action == 2 && type == 1)
+            else if (action == 2 && type == 2)
             {
+                Console.WriteLine($"{x},{y}");
+
                 //清除按钮led灯光
-                base.clearLed(x, y);
             }
             base.input(action, type, x, y);
         }

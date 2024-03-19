@@ -5,6 +5,7 @@ using A3ttrEngine.mod;
 using Cgen.Audio;
 using PianoTiles.mod;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 namespace ConsoleApp1
 {
@@ -17,6 +18,7 @@ namespace ConsoleApp1
             
             //launchpad 连接状态
             a3ttrGame.a3ttr_ConnectChangedEvent += A3ttrGame_a3ttr_ConnectChangedEvent;
+            
             var rollType = Console.ReadKey(); // I think its to exit
 
             if (true)
@@ -33,7 +35,9 @@ namespace ConsoleApp1
             {
 
                 //进入DemoMod
-                a3ttrGame.changeGameModel(new Drawing());
+                a3ttrGame.changeGameModel(new DemoMod(Color.Red));
+                
+
                 //a3ttrGame.changeGameModel(new DemoMod(Color.Aqua));
             }
         }

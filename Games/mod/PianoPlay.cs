@@ -86,6 +86,65 @@ namespace A3ttrEngine.mod
             a3ttrSoundlist.Add("4-1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - G.wav"));
             a3ttrSoundlist.Add("5-0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - G#.wav"));
         }
+        public void colorLaunchpad()
+        {
+            setFadeLed(Color.White, 7, 0, keeptime, fadetime);
+            setFadeLed(Color.White, 7, 1, keeptime, fadetime);
+            setFadeLed(Color.White, 7, 2, keeptime, fadetime);
+            setFadeLed(Color.White, 7, 3, keeptime, fadetime);
+            setFadeLed(Color.White, 7, 4, keeptime, fadetime);
+            setFadeLed(Color.White, 7, 5, keeptime, fadetime);
+            setFadeLed(Color.White, 7, 6, keeptime, fadetime);
+
+            setFadeLed(Color.Black, 6, 1, keeptime, fadetime);
+            setFadeLed(Color.Black, 6, 2, keeptime, fadetime);
+            setFadeLed(Color.Black, 6, 4, keeptime, fadetime);
+            setFadeLed(Color.Black, 6, 5, keeptime, fadetime);
+            setFadeLed(Color.Black, 6, 6, keeptime, fadetime);
+
+            setFadeLed(Color.White, 5, 0, keeptime, fadetime);
+            setFadeLed(Color.White, 5, 1, keeptime, fadetime);
+            setFadeLed(Color.White, 5, 2, keeptime, fadetime);
+            setFadeLed(Color.White, 5, 3, keeptime, fadetime);
+            setFadeLed(Color.White, 5, 4, keeptime, fadetime);
+            setFadeLed(Color.White, 5, 5, keeptime, fadetime);
+            setFadeLed(Color.White, 5, 6, keeptime, fadetime);
+
+            setFadeLed(Color.Black, 4, 1, keeptime, fadetime);
+            setFadeLed(Color.Black, 4, 2, keeptime, fadetime);
+            setFadeLed(Color.Black, 4, 4, keeptime, fadetime);
+            setFadeLed(Color.Black, 4, 5, keeptime, fadetime);
+            setFadeLed(Color.Black, 4, 6, keeptime, fadetime);
+
+            setFadeLed(Color.White, 3, 0, keeptime, fadetime);
+            setFadeLed(Color.White, 3, 1, keeptime, fadetime);
+            setFadeLed(Color.White, 3, 2, keeptime, fadetime);
+            setFadeLed(Color.White, 3, 3, keeptime, fadetime);
+            setFadeLed(Color.White, 3, 4, keeptime, fadetime);
+            setFadeLed(Color.White, 3, 5, keeptime, fadetime);
+            setFadeLed(Color.White, 3, 6, keeptime, fadetime);
+
+            setFadeLed(Color.Black, 2, 1, keeptime, fadetime);
+            setFadeLed(Color.Black, 2, 2, keeptime, fadetime);
+            setFadeLed(Color.Black, 2, 4, keeptime, fadetime);
+            setFadeLed(Color.Black, 2, 5, keeptime, fadetime);
+            setFadeLed(Color.Black, 2, 6, keeptime, fadetime);
+
+            setFadeLed(Color.White, 1, 0, keeptime, fadetime);
+            setFadeLed(Color.White, 1, 1, keeptime, fadetime);
+            setFadeLed(Color.White, 1, 2, keeptime, fadetime);
+            setFadeLed(Color.White, 1, 3, keeptime, fadetime);
+            setFadeLed(Color.White, 1, 4, keeptime, fadetime);
+            setFadeLed(Color.White, 1, 5, keeptime, fadetime);
+            setFadeLed(Color.White, 1, 6, keeptime, fadetime);
+
+            setFadeLed(Color.Black, 0, 1, keeptime, fadetime);
+            setFadeLed(Color.Black, 0, 2, keeptime, fadetime);
+            setFadeLed(Color.Black, 0, 4, keeptime, fadetime);
+            setFadeLed(Color.Black, 0, 5, keeptime, fadetime);
+            setFadeLed(Color.Black, 0, 6, keeptime, fadetime);
+
+        }
 
         public override void init()
         {
@@ -97,6 +156,10 @@ namespace A3ttrEngine.mod
             base.init();
 
         }
+        public override void update(long time)
+        {
+            colorLaunchpad();
+        }
         public override void input(int action, int type, int x, int y)
         {
             if (action == 1 && type == 1)
@@ -107,6 +170,7 @@ namespace A3ttrEngine.mod
                 try
                     {
                         a3ttrSoundlist[$"{x}-{y}"].Play(); // to play correct and wrong note
+                    setFadeLed(Color.Green, x, y, keeptime, fadetime);
                     }
                     catch (Exception e)
                     {

@@ -12,37 +12,49 @@ using System.Drawing;
 using System;
 using System.IO.Ports;
 using System.Threading;
+using System.Diagnostics;
 
 namespace ConsoleApp1
 {
     internal class Navigation
     {
 
-        static A3ttrGame a3ttrGame = new A3ttrGame();
+        //static A3ttrGame a3ttrGame = new A3ttrGame();
         static bool _continue;
         static SerialPort _serialPort;
+        static string _serialPortName;
 
 
-        public static void lol(string[] args)
+        public static void DisplayPorts()
         {
-            a3ttrGame.a3ttr_ConnectChangedEvent += A3ttrGame_a3ttr_ConnectChangedEvent;
+            string[] ports = SerialPort.GetPortNames();
+
+            Console.WriteLine("The following serial ports were found:");
+
+            // Display each port name to the console.
+            foreach (string port in ports)
+            {
+                Console.WriteLine(port);
+            }
+        }
+        public static void Main(string[] args)
+        {
+            DisplayPorts();
+
+
+
+
+            //_serialPort = new SerialPort("COM", 9600);
+            //_serialPort.Close();
+            //a3ttrGame.a3ttr_ConnectChangedEvent += A3ttrGame_a3ttr_ConnectChangedEvent;
             string name;
             string message;
             StringComparer stringComparer = StringComparer.OrdinalIgnoreCase;
-           
+            
+
         }
 
-        private static void A3ttrGame_a3ttr_ConnectChangedEvent(bool connected)
-        {
-            Console.WriteLine("连接状态:" + connected);
-            if (connected)
-            {
-
-                //进入DemoMod
-                a3ttrGame.changeGameModel(new MusicMelody());
-                //a3ttrGame.changeGameModel(new DemoMod(Color.Aqua));
-            }
-        }
+        
     }
     
 }

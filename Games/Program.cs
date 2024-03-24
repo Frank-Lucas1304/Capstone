@@ -35,7 +35,7 @@ namespace ConsoleApp1
             {
 
                 //进入DemoMod
-                a3ttrGame.changeGameModel(new DemoMod(Color.Red));
+                a3ttrGame.changeGameModel(new PianoPlay());
                 
 
                 //a3ttrGame.changeGameModel(new DemoMod(Color.Aqua));

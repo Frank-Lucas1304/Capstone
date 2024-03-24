@@ -88,6 +88,7 @@ namespace A3ttrEngine.mod
         }
         public void colorLaunchpad()
         {
+            //setLed
             setFadeLed(Color.White, 7, 0, keeptime, fadetime);
             setFadeLed(Color.White, 7, 1, keeptime, fadetime);
             setFadeLed(Color.White, 7, 2, keeptime, fadetime);
@@ -170,7 +171,7 @@ namespace A3ttrEngine.mod
                 try
                     {
                         a3ttrSoundlist[$"{x}-{y}"].Play(); // to play correct and wrong note
-                    setFadeLed(Color.Green, x, y, keeptime, fadetime);
+                        setFadeLed(Color.Green, x, y, keeptime, fadetime);
                     }
                     catch (Exception e)
                     {

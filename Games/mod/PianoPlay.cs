@@ -88,62 +88,61 @@ namespace A3ttrEngine.mod
         }
         public void colorLaunchpad()
         {
-            //setLed
-            setFadeLed(Color.White, 7, 0, keeptime, fadetime);
-            setFadeLed(Color.White, 7, 1, keeptime, fadetime);
-            setFadeLed(Color.White, 7, 2, keeptime, fadetime);
-            setFadeLed(Color.White, 7, 3, keeptime, fadetime);
-            setFadeLed(Color.White, 7, 4, keeptime, fadetime);
-            setFadeLed(Color.White, 7, 5, keeptime, fadetime);
-            setFadeLed(Color.White, 7, 6, keeptime, fadetime);
+            setLed(Color.White, 0, 7);
+            setLed(Color.White, 1, 7);
+            setLed(Color.White, 2, 7);
+            setLed(Color.White, 3, 7);
+            setLed(Color.White, 4, 7);
+            setLed(Color.White, 5, 7);
+            setLed(Color.White, 6, 7);
 
-            setFadeLed(Color.Black, 6, 1, keeptime, fadetime);
-            setFadeLed(Color.Black, 6, 2, keeptime, fadetime);
-            setFadeLed(Color.Black, 6, 4, keeptime, fadetime);
-            setFadeLed(Color.Black, 6, 5, keeptime, fadetime);
-            setFadeLed(Color.Black, 6, 6, keeptime, fadetime);
+            setLed(Color.BlueViolet, 1, 6);
+            setLed(Color.BlueViolet, 2, 6);
+            setLed(Color.BlueViolet, 4, 6);
+            setLed(Color.BlueViolet, 5, 6);
+            setLed(Color.BlueViolet, 6, 6);
 
-            setFadeLed(Color.White, 5, 0, keeptime, fadetime);
-            setFadeLed(Color.White, 5, 1, keeptime, fadetime);
-            setFadeLed(Color.White, 5, 2, keeptime, fadetime);
-            setFadeLed(Color.White, 5, 3, keeptime, fadetime);
-            setFadeLed(Color.White, 5, 4, keeptime, fadetime);
-            setFadeLed(Color.White, 5, 5, keeptime, fadetime);
-            setFadeLed(Color.White, 5, 6, keeptime, fadetime);
+            setLed(Color.White, 0, 5);
+            setLed(Color.White, 1, 5);
+            setLed(Color.White, 2, 5);
+            setLed(Color.White, 3, 5);
+            setLed(Color.White, 4, 5);
+            setLed(Color.White, 5, 5);
+            setLed(Color.White, 6, 5);
 
-            setFadeLed(Color.Black, 4, 1, keeptime, fadetime);
-            setFadeLed(Color.Black, 4, 2, keeptime, fadetime);
-            setFadeLed(Color.Black, 4, 4, keeptime, fadetime);
-            setFadeLed(Color.Black, 4, 5, keeptime, fadetime);
-            setFadeLed(Color.Black, 4, 6, keeptime, fadetime);
+            setLed(Color.BlueViolet, 1, 4);
+            setLed(Color.BlueViolet, 2, 4);
+            setLed(Color.BlueViolet, 4, 4);
+            setLed(Color.BlueViolet, 5, 4);
+            setLed(Color.BlueViolet, 6, 4);
 
-            setFadeLed(Color.White, 3, 0, keeptime, fadetime);
-            setFadeLed(Color.White, 3, 1, keeptime, fadetime);
-            setFadeLed(Color.White, 3, 2, keeptime, fadetime);
-            setFadeLed(Color.White, 3, 3, keeptime, fadetime);
-            setFadeLed(Color.White, 3, 4, keeptime, fadetime);
-            setFadeLed(Color.White, 3, 5, keeptime, fadetime);
-            setFadeLed(Color.White, 3, 6, keeptime, fadetime);
+            setLed(Color.White, 0, 3);
+            setLed(Color.White, 1, 3);
+            setLed(Color.White, 2, 3);
+            setLed(Color.White, 3, 3);
+            setLed(Color.White, 4, 3);
+            setLed(Color.White, 5, 3);
+            setLed(Color.White, 6, 3);
 
-            setFadeLed(Color.Black, 2, 1, keeptime, fadetime);
-            setFadeLed(Color.Black, 2, 2, keeptime, fadetime);
-            setFadeLed(Color.Black, 2, 4, keeptime, fadetime);
-            setFadeLed(Color.Black, 2, 5, keeptime, fadetime);
-            setFadeLed(Color.Black, 2, 6, keeptime, fadetime);
+            setLed(Color.BlueViolet, 1, 2);
+            setLed(Color.BlueViolet, 2, 2);
+            setLed(Color.BlueViolet, 4, 2);
+            setLed(Color.BlueViolet, 5, 2);
+            setLed(Color.BlueViolet, 6, 2);
 
-            setFadeLed(Color.White, 1, 0, keeptime, fadetime);
-            setFadeLed(Color.White, 1, 1, keeptime, fadetime);
-            setFadeLed(Color.White, 1, 2, keeptime, fadetime);
-            setFadeLed(Color.White, 1, 3, keeptime, fadetime);
-            setFadeLed(Color.White, 1, 4, keeptime, fadetime);
-            setFadeLed(Color.White, 1, 5, keeptime, fadetime);
-            setFadeLed(Color.White, 1, 6, keeptime, fadetime);
+            setLed(Color.White, 0, 1);
+            setLed(Color.White, 1, 1);
+            setLed(Color.White, 2, 1);
+            setLed(Color.White, 3, 1);
+            setLed(Color.White, 4, 1);
+            setLed(Color.White, 5, 1);
+            setLed(Color.White, 6, 1);
 
-            setFadeLed(Color.Black, 0, 1, keeptime, fadetime);
-            setFadeLed(Color.Black, 0, 2, keeptime, fadetime);
-            setFadeLed(Color.Black, 0, 4, keeptime, fadetime);
-            setFadeLed(Color.Black, 0, 5, keeptime, fadetime);
-            setFadeLed(Color.Black, 0, 6, keeptime, fadetime);
+            setLed(Color.BlueViolet, 1, 0);
+            setLed(Color.BlueViolet, 2, 0);
+            setLed(Color.BlueViolet, 4, 0);
+            setLed(Color.BlueViolet, 5, 0);
+            setLed(Color.BlueViolet, 6, 0);
 
         }
 
@@ -166,18 +165,18 @@ namespace A3ttrEngine.mod
             if (action == 1 && type == 1)
             {
                 (int x, int y) pos;
-           
+
                 //light up the key that you just pressed 
                 try
-                    {
-                        a3ttrSoundlist[$"{x}-{y}"].Play(); // to play correct and wrong note
-                        setFadeLed(Color.Green, x, y, keeptime, fadetime);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-                        Console.WriteLine("Check Keys, not all of them have sounds linked to them");
-                    }
+                {
+                    a3ttrSoundlist[$"{x}-{y}"].Play(); // to play correct and wrong note
+                    setFadeLed(Color.Green, x, y, keeptime, fadetime);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    Console.WriteLine("Check Keys, not all of them have sounds linked to them");
+                }
             }
             else if (action == 2 && type == 1)
             {
@@ -188,4 +187,3 @@ namespace A3ttrEngine.mod
         }
     }
 }
-

@@ -47,6 +47,11 @@ namespace PianoTiles.mod
 
         private int state; //Sets value automatically to 0 if not assigned later in the code
 
+
+        //TIMER FOR LEVEL UP ANIMATION
+        int levelUpDuration = 1000; // 1 second in milliseconds
+        int levelUpTimer = 0;
+
         //Nice gradient purple colours
         //System.Drawing.Color color1 = System.Drawing.Color.FromArgb(20, 0, 50);
         //System.Drawing.Color color2 = System.Drawing.Color.FromArgb(40, 0, 70);
@@ -116,6 +121,9 @@ namespace PianoTiles.mod
             Note a = new Note("A");
             a.PitchInOctave(1);
 
+
+
+
             times += time;
             if (isAnimationOn & times >= bpm)//switch constraint to times%(speed*0.5)<(speed*0.5 -1)
             {
@@ -163,7 +171,15 @@ namespace PianoTiles.mod
                 {
                     if (levelUp)
                     {   //CLEAR ANIMATION
-                       
+                        for (int x = 0; x < 8; x++)
+                        {
+                            for (int y = 0; y < 8; y++)
+                            {
+                                base.clearLed(x, y);
+                                base.clearFadeLed(x, y);
+                            }
+                        }
+
 
                         /*RANDOMIZING TARGETS*/
                         for (int i = gameTargets.Count - 1; i >= 0; i--)
@@ -283,9 +299,10 @@ namespace PianoTiles.mod
                             speed_incr = 0.20;
                             a3ttrSoundlist["BGM"].Pause();
                             a3ttrSoundlist["levelUp"].Play();
-                            // StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
+                            //StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
                             Console.WriteLine("BREAK");
                             //StartAnimation("levelUp", 1, 1);
+                            HappyFace(Color.Black, Color.Magenta);
 
                             levelUp = true;
 
@@ -441,6 +458,26 @@ namespace PianoTiles.mod
             public void setFadeLed(Color c, int x, int y, int keeptime, int fadetime) {
 
                 launchpad[x, y].fadeLedlist.Add(new A3ttrFadeled(fadetime, keeptime, c));
+            }
+        }
+        public void HappyFace(Color color1, Color color2) {
+            Color[,] happyFace = {
+            { color1, color1, color1, color1, color1, color1, color1, color1 },
+            { color1, color1, color1, color1, color1, color2, color1, color1 },
+            { color1, color2, color2, color1, color1, color1, color2, color1 },
+            { color1, color1, color1, color1, color1, color1, color2, color1 },
+            { color1, color1, color1, color1, color1, color1, color2, color1 },
+            { color1, color2, color2, color1, color1, color1, color2, color1 },
+            { color1, color1, color1, color1, color1, color2, color1, color1 },
+            { color1, color1, color1, color1, color1, color1, color1, color1 }
+            };
+            // Set LEDs to form the happy face
+            for (int x = 0; x < 8; x++)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    base.setLed(happyFace[x, y], x, y);
+                }
             }
         }
     }

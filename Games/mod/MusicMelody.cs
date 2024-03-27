@@ -1,19 +1,7 @@
-﻿using A3TTRControl;
-using A3TTRControl2;
-using Midi.Instruments;
-using OpenTK.Graphics.OpenGL;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Data;
-using System.Diagnostics.CodeAnalysis;
+﻿using A3TTRControl2;
+using NAudio.Wave;
 using System.Drawing;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using static CXO2.Charting.Event;
+using NAudio.Wave.SampleProviders;
 
 
 namespace A3ttrEngine.mod
@@ -27,13 +15,21 @@ namespace A3ttrEngine.mod
         Target[,] buttonGrid = new Target[8,8];
         Queue<Target> animatedButtons = new Queue<Target>();
         Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
-        string[] noteList = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
+        static string[] happyBirthday = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
+
+        static string[] happy = new string[] { "C3", "F3", "F3", "F3", "C3", "C3", "F3", "C3", "F3" };
+
+        static string[] auClairDeLaLune = new string[] { };
+        static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3"};
+
+        string[] noteList = happy;
+
         int note_pos = 0;
 
         bool isInvalidInput = false;
         (int x, int y) invalidPos;
         int lives = 3;
-        int level = 3;
+        int level = 9;
 
         (int R, int G, int B) red = (255, 0, 0);
         (int R, int G, int B) purple = (255, 0, 255);

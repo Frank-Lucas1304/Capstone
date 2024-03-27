@@ -14,8 +14,6 @@ using System.IO.Ports;
 using System.Threading;
 using System.Diagnostics;
 using Newtonsoft.Json.Linq;
-using OggVorbisEncoder.Setup.Templates.BookBlocks.Stereo44.Coupled.ManagedChapter1;
-using Microsoft.VisualBasic.FileIO;
 
 namespace ConsoleApp1
 {
@@ -40,7 +38,7 @@ namespace ConsoleApp1
                 Console.WriteLine(port);
             }
         }
-        public static void Main(string[] args)
+        public static void lol(string[] args)
         {
             DisplayPorts();
             // Need to make a command class just in case thing change and I could easily update format without worrying too much

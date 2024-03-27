@@ -2,6 +2,7 @@
 using A3TTRControl2;
 using A3ttrEngine.mod;
 using Midi.Devices;
+using NAudio.Wave;
 using OggVorbisEncoder.Lookups;
 using OggVorbisEncoder.Setup.Templates.FloorBooks;
 using OpenTK.Audio.OpenAL;
@@ -36,10 +37,12 @@ namespace PianoTiles.mod
         int red = 0x0;
         int blue = 0x0;
         int green = 0x0;
+        Sound lol = new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - B.wav");
+
         public Fluidity()
         {
 
-
+           
         }
         /// <summary>
         /// 初始化（提前加载资源）
@@ -71,6 +74,14 @@ namespace PianoTiles.mod
         bool launchpadSetUp = true;
         public override void update(long time)
         {
+ 
+
+            
+ 
+            
+                //Console.WriteLine(time);
+            lol.update(time);
+            
             if (launchpadSetUp)
             {
                 Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
@@ -229,8 +240,8 @@ namespace PianoTiles.mod
 
             if (action == 1 && type == 1)
             {
-                CircleAnimation(2, (x, y));
-
+                //CircleAnimation(2, (x, y));
+                lol.Play(0, 0, 10000, 1);
 
             }
             else if (action == 2 && type == 1)
@@ -413,8 +424,125 @@ namespace PianoTiles.mod
                 launchpad[0, 1].ledColor = Color.FromArgb(255,255,255);
             }
         }
-    }
 
+
+        class Sound
+        {
+            public WaveOutEvent device { get; }
+            public MediaFoundationReader reader { get; }
+            private long times { get; set; }
+            private float volume { get; set; }
+            private float currVolume { get; set; }
+            private float volumeGradient { get; set; }
+            private long keepTime { get; set; }
+            private long fadeInTime { get; set; }
+            private long fadeOutTime { get; set; }
+            private int status { get; set; }
+
+            public Sound(string path)
+            {
+                device = new WaveOutEvent();
+                reader = new MediaFoundationReader(path);
+                device.Init(reader.ToSampleProvider());
+
+                currVolume = 0.0f;
+                fadeInTime = 0;
+                fadeOutTime = 0;
+                keepTime = 0;
+                times = 0;
+                status = 0;
+            }
+
+            public void update(long time)
+            {
+                if (device.PlaybackState == PlaybackState.Playing)
+                {
+                    times += time;
+                    switch (status)
+                    {
+
+                        case 0:
+                            volumeGradient = gradient(fadeInTime - times);
+                            currVolume += volumeGradient;
+                            if (volume == currVolume)
+                            {
+                                Console.WriteLine(status);
+                                times = 0;
+                                status++;
+                            }
+                            break;
+                        case 1:
+                            if (times >= keepTime)
+                            {
+                                Console.WriteLine(status);
+
+                                times = 0;
+                                status++;
+                                volume = 0.0f;
+                            }
+                            break;
+                        case 2:
+                            volumeGradient = gradient(fadeInTime - times);
+                            currVolume += volumeGradient;
+                            if (volume == currVolume)
+                            {
+                                Console.WriteLine(status);
+
+                                times = 0;
+                                status = 0;
+                                device.Stop();
+                            }
+                            break;
+                    }
+                }
+            }
+            public float gradient(long timeLeft)
+            {
+                if ((timeLeft) <= 0)
+                {
+                    return (volume - currVolume);
+                }
+                else { return (volume - currVolume) / (timeLeft); }
+
+            }
+            public void fadeIn(int fadeInTime)
+            {
+                this.volume = 1.0f;
+                this.fadeInTime = fadeInTime;
+            }
+            public void fadeOut(int fadeOutTime)
+            {
+                this.volume = 0;
+                this.fadeOutTime = fadeOutTime;
+
+            }
+
+            public void Play(int fadeInTime = 0, int duration = 0, int fadeOutTime = 0, float volume = 1.0f)
+            {
+                fadeIn(fadeInTime);
+                fadeOut(fadeOutTime);
+                this.fadeInTime = fadeInTime;
+                this.fadeOutTime = fadeOutTime;
+
+                device.Volume = volume;
+                device.Play();
+            }
+            public void Play(int fadeIn) { }
+            public void End()
+            {
+                reader.Dispose();
+            }
+            public void Pause()
+            {
+                device.Pause();
+            }
+            public void Pause(int fadeOutTime) { }
+            public void Close() { }
+            public void Close(int fadeOutTime) { }
+
+        }
+    }
+  
 
 }
 

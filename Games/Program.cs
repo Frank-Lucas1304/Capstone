@@ -12,7 +12,7 @@ namespace ConsoleApp1
     internal class Program
     {
         static A3ttrGame a3ttrGame = new A3ttrGame();
-        static void lol(string[] args)
+        static void Main(string[] args)
         {
 
             
@@ -27,7 +27,7 @@ namespace ConsoleApp1
 
             }
         }
-
+        
         private static void A3ttrGame_a3ttr_ConnectChangedEvent(bool connected)
         {
             Console.WriteLine("连接状态:"+ connected);
@@ -35,7 +35,7 @@ namespace ConsoleApp1
             {
 
                 //进入DemoMod
-                a3ttrGame.changeGameModel(new PianoPlay());
+                a3ttrGame.changeGameModel(new Fluidity());
                 
 
                 //a3ttrGame.changeGameModel(new DemoMod(Color.Aqua));

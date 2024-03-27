@@ -25,10 +25,11 @@ namespace PianoTiles.mod
         long times = 0;
             //Music Synchronisation Variables
         int offset = 0;
-        static int bpm = 278;
+        static int bpm = 278; //originally 278
+        //static int bpm = 320;
         int targetSpeed = bpm;
             //Animation
-        int keeptime = bpm;
+        int keeptime = bpm + 10;
         int fadetime = bpm;
 
         /*GAME PARAMETERS*/
@@ -65,9 +66,10 @@ namespace PianoTiles.mod
         {
             base.Name = "PianoTiles";
             List<string> songList = new List<string>();
-            songList.Add("BGM");
-            songList.Add("PianoSong");
-            songList.Add("Pickles");
+            songList.Add("BGM"); // bpm 107-108
+            songList.Add("PianoSong");  //bpm 140
+            songList.Add("Pickles"); //bpm 82
+            songList.Add("EDance"); //bpm 123
             int songToPlay = 1;
             string song = songList[songToPlay];
 
@@ -75,6 +77,7 @@ namespace PianoTiles.mod
             a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
             a3ttrSoundlist.Add("PianoSong", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoSong.wav"));
             a3ttrSoundlist.Add("Pickles", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\Pickles.wav"));
+            a3ttrSoundlist.Add("EDance", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\EDance.wav"));
             a3ttrSoundlist.Add("levelUp", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\levelUp.wav"));
             a3ttrSoundlist.Add("feedback", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\feedback.wav"));
             a3ttrSoundlist[song].Play();

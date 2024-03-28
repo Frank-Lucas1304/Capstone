@@ -22,8 +22,9 @@ namespace A3ttrEngine.mod
 
         static string[] auClairDeLaLune = new string[] { };
         static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3" };
+        static Partition happySong = new Partition(new string[]{"HC3", "HF3", "HF3", "HF3", "HC3", "HC3", "HF3", "HC3", "HF3"},156);
 
-        string[] noteList = happy;
+        static Note[] noteList = happySong.noteList;
 
         int note_pos = 0;
 
@@ -158,7 +159,7 @@ namespace A3ttrEngine.mod
                 {   // Display Sequence
                     if (times++ >= betweenLevelDelay)
                     {
-                        (int x, int y) = KeyMapping(noteList[note_pos]);
+                        (int x, int y) = KeyMapping(noteList[note_pos].name);
                         buttonGrid[x, y].Display(time, ref note_pos);
                         betweenLevelDelay = 0;
                         times = 0;
@@ -256,7 +257,7 @@ namespace A3ttrEngine.mod
                 (int x, int y) pos;
                 if (note_pos >= level && note_pos < 2 * level)
                 {
-                    pos = KeyMapping(noteList[note_pos - level]);
+                    pos = KeyMapping(noteList[note_pos - level].name);
                     bool isTargetHit = buttonGrid[pos.x, pos.y].hit(x, y);
                     if (isTargetHit)
                     {
@@ -752,13 +753,46 @@ namespace A3ttrEngine.mod
     }
     class Partition
     {
-        public int bpm = 0;
-        public Partition(Note[] noteList,int bpm) {
-            foreach (Note note in noteList)
+        public int bpm { get; set; }
+        List<Note> noteList { get; set; }   
+        public Partition(string[] partition,int bpm) {
+
+            foreach (string note in partition)
             {
-                note.tune(bpm);
+                string key = note.Substring(1, note.Length - 1);
+
+                char type = note[0];
+                Note val = null;
+                switch (type)
+                {
+                    
+                    case 'H': // Half Note
+                        val = new H(key);
+                        val.tune(bpm);
+                        noteList.Append(val);
+
+                        break;
+
+                    case 'Q': // Quarter Note
+                        val = new Q(key);
+                        val.tune(bpm);
+                        noteList.Append(val);
+
+                        break;
+
+                    case 'E': // 1/8th Note
+                        val = new E(key);
+                        val.tune(bpm);
+                        noteList.Append(val);
+                        Console.WriteLine(note[0]);
+
+                        break;
+
+                }
+          
             }
-        
+
+
         }
     }
 

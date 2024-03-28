@@ -12,7 +12,10 @@ namespace A3ttrEngine.mod
     public class MusicMelody : A3GameModel
     {
 
-        Target[,] buttonGrid = new Target[8,8];
+        public Dictionary<string, A3ttrSound> a3ttrSoundlist = new Dictionary<string, A3ttrSound>();
+        // public Dictionary<string, A3ttrSound> a3ttrSoundlist = new Dictionary<string, A3ttrSound>();
+
+        Target[,] buttonGrid = new Target[8, 8];
         Queue<Target> animatedButtons = new Queue<Target>();
         Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
         static string[] happyBirthday = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
@@ -20,7 +23,7 @@ namespace A3ttrEngine.mod
         static string[] happy = new string[] { "C3", "F3", "F3", "F3", "C3", "C3", "F3", "C3", "F3" };
 
         static string[] auClairDeLaLune = new string[] { };
-        static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3"};
+        static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3" };
 
         string[] noteList = happy;
 
@@ -38,17 +41,17 @@ namespace A3ttrEngine.mod
         (int R, int G, int B) mid = (120, 50, 120);
         (int R, int G, int B) neutral = (10, 10, 10);
         (int R, int G, int B) white = (10, 10, 10);
-     
+
         long betweenLevelDelay;
         long quitDelay = 1200;
-        bool quitGame = false; 
+        bool quitGame = false;
 
         long times = 0;
         bool launchpadSetUp = true;
 
-   
-        public MusicMelody( )
-        {  }
+
+        public MusicMelody()
+        { }
 
         /// <summary>
         /// 初始化（提前加载资源）
@@ -114,11 +117,12 @@ namespace A3ttrEngine.mod
             base.Name = "MusicMelody";
 
             a3ttrSoundlist.Add("GameOver", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\GameOver.wav"));
-            
+
             for (int x = 0; x < 8; x++)
             {
-                for (int y = 0; y < 8; y++) {
-                    buttonGrid[x,y] = new Target((x, y));
+                for (int y = 0; y < 8; y++)
+                {
+                    buttonGrid[x, y] = new Target((x, y));
                 }
             }
             loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
@@ -133,7 +137,15 @@ namespace A3ttrEngine.mod
         /// </summary>
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
-        {   
+        {
+            foreach (string key in a3ttrSoundlist.Keys)
+            {
+                // For now
+                if (a3ttrSoundlist[key].Sample.Volume > 0)
+                {
+                    a3ttrSoundlist[key].Sample.Volume -= 0.1f;
+                }
+            }
             if (launchpadSetUp)
             {
                 Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
@@ -236,7 +248,7 @@ namespace A3ttrEngine.mod
                     // Reduces Size of Queue as Animations are completed
                 }
             }
-            
+
             base.update(time);
         }
         /// <summary>
@@ -252,14 +264,14 @@ namespace A3ttrEngine.mod
             if (action == 1 && type == 1)
             {
                 (int x, int y) pos;
-                if (note_pos>= level && note_pos < 2*level)
-                {   
-                    pos = KeyMapping(noteList[note_pos-level]);
+                if (note_pos >= level && note_pos < 2 * level)
+                {
+                    pos = KeyMapping(noteList[note_pos - level]);
                     bool isTargetHit = buttonGrid[pos.x, pos.y].hit(x, y);
                     if (isTargetHit)
-                    {   
+                    {
                         note_pos += 1;
-                        if (note_pos == 2*level) 
+                        if (note_pos == 2 * level)
                             positiveFeedbackEffects.Enqueue(new Circle(pos));
                         else
                         {
@@ -270,7 +282,7 @@ namespace A3ttrEngine.mod
                             if (!animatedButtons.Contains(buttonGrid[x, y]))
                                 animatedButtons.Enqueue(buttonGrid[x, y]);
                         }
-                        
+
                     }
                     else
                     {
@@ -290,9 +302,13 @@ namespace A3ttrEngine.mod
                         }
                     }
                     // Not all notes are there
-                    try {
+                    try
+                    {
                         a3ttrSoundlist[$"{x}-{y}"].Play(); // to play correct and wrong note
-                    }catch(Exception e)
+
+                    }
+                    catch (Exception e)
+
                     {
                         Console.WriteLine(e.Message);
                         Console.WriteLine("Check Keys, not all of them have sounds linked to them");
@@ -315,10 +331,11 @@ namespace A3ttrEngine.mod
             quitGame = true;
             StartAnimation("gameover", 1, 1);
             Console.WriteLine("Animation Length");
-            Console.WriteLine("Sequence length: " + (level-1));
+            Console.WriteLine("Sequence length: " + (level - 1));
             Console.WriteLine("Game Over");
         }
-        public void ClearBoard() { 
+        public void ClearBoard()
+        {
             //Play an empty animation
         }
 
@@ -389,8 +406,9 @@ namespace A3ttrEngine.mod
         }
 
     }
-    class Target {
-        public static int[] duration = new int[3] { 100, 200, 200};
+    class Target
+    {
+        public static int[] duration = new int[3] { 100, 200, 200 };
         public static A3ttrPadCell[,] launchpad;
         public static Dictionary<string, A3ttrSound> a3ttrSoundlist;
 
@@ -402,10 +420,10 @@ namespace A3ttrEngine.mod
 
         // Performing Shallow Copy
         int[] timing = (int[])duration.Clone();
-  
+
         (int R, int G, int B) black = (0, 0, 0);
         (int R, int G, int B) purple = (50, 0, 50);
-        (int R, int G, int B) white = (255,255,255);
+        (int R, int G, int B) white = (255, 255, 255);
 
         public long times { get; set; }
         public int display_status { get; set; }
@@ -413,14 +431,14 @@ namespace A3ttrEngine.mod
         public int length { get; set; }
         public (int x, int y) pos { get; set; }
         public string key { get; set; }
-        public (int R,int G, int B) currColor { get; set; }
-        public (int R,int G, int B) gradColor { get; set; }
+        public (int R, int G, int B) currColor { get; set; }
+        public (int R, int G, int B) gradColor { get; set; }
 
         public Queue<Effect> animation_sequence = new Queue<Effect>();
 
         public Target((int, int) pos, string key = null)
-        {   
-            this.key = key; 
+        {
+            this.key = key;
             this.times = 0;
             this.pos = pos;
             //this.animation_status = 0;
@@ -433,13 +451,14 @@ namespace A3ttrEngine.mod
         {
             this.currColor = (0, 0, 0);
             this.gradColor = purple;
-            
+
 
             this.display_status = 0;
             this.gradient(timing[display_status]);
         }
 
-        public void Display(long time,ref int note_pos) { //did you mean times
+        public void Display(long time, ref int note_pos)
+        { //did you mean times
             if (display_status <= 2)
             {
                 gradient(timing[display_status] - times);
@@ -447,17 +466,20 @@ namespace A3ttrEngine.mod
 
             }
 
-            if (times>= timing[display_status])
+            if (times >= timing[display_status])
             {
                 ++display_status;
                 switch (display_status)
                 {
                     case 1:
                         gradColor = white;
-                        try{
+                        try
+                        {
                             // In case not located in list
                             a3ttrSoundlist[$"{pos.x}-{pos.y}"].Play();
-                        }catch (Exception e) {
+                        }
+                        catch (Exception e)
+                        {
                             Console.WriteLine(e.Message);
                         }
                         break;
@@ -465,7 +487,7 @@ namespace A3ttrEngine.mod
                         gradColor = black;
                         break;
                     case 3:
-                        
+
                         Console.WriteLine("In");
                         note_pos += 1;
                         reset();
@@ -475,10 +497,12 @@ namespace A3ttrEngine.mod
             }
             times += time;
         }
-        
-        public void AnimateTarget(long time) {
+
+        public void AnimateTarget(long time)
+        {
             int size = animation_sequence.Count();
-            if (size > 0) {
+            if (size > 0)
+            {
 
                 (int R, int G, int B) temp = (0, 0, 0);
 
@@ -495,10 +519,10 @@ namespace A3ttrEngine.mod
                 if (animation_sequence.Peek().color_sequence.Length == 0)
                 {
                     animation_sequence.Dequeue();
-          
+
                 }
                 currColor = (temp.R / size, temp.G / size, temp.B / size);
-                
+
                 setLed(Color.FromArgb(currColor.R, currColor.G, currColor.B));
             }
         }
@@ -509,7 +533,8 @@ namespace A3ttrEngine.mod
 
 
         public void gradient(long timeleft)
-        {   if (timeleft <= 0)
+        {
+            if (timeleft <= 0)
             {
                 timeleft = 1;
             }
@@ -523,7 +548,8 @@ namespace A3ttrEngine.mod
             //Console.WriteLine(currColor.ToString() + " " + gradColor.ToString() + " " + timeleft.ToString());
             currColor = c;
         }
-        public bool hit(int x, int y) {
+        public bool hit(int x, int y)
+        {
             return ((pos.y == y) & (pos.x == x));
         }
 
@@ -536,7 +562,7 @@ namespace A3ttrEngine.mod
         public long speed { get; set; }
         public int radius { get; set; }
 
-        int max_radius {  get; set; }
+        int max_radius { get; set; }
         public int status { get; set; }
 
         public (int x, int y) origin;
@@ -545,14 +571,16 @@ namespace A3ttrEngine.mod
         {
             radius = 0;
             status = 0;
-            max_radius = random_radii.Next(3,4);
+            max_radius = random_radii.Next(3, 4);
             this.origin = origin;
         }
-        public void Animate(Queue<Target> animatedButtons,long time, int speed, Target[,] Grid, (int,int,int)[] color_list,int[] timing) {
+        public void Animate(Queue<Target> animatedButtons, long time, int speed, Target[,] Grid, (int, int, int)[] color_list, int[] timing)
+        {
             //Make this two for loops, implement it so that you store 
             if ((status != 1) && ((speed - times) >= 0))
-            {   
-                if (radius != 0) { 
+            {
+                if (radius != 0)
+                {
                     int iterations = 360 / (45 / radius);
                     for (int i = 0; i < iterations + 1; i++)
                     {   //Angle tolerance was determined through testing 
@@ -573,20 +601,20 @@ namespace A3ttrEngine.mod
                             /*The bound condition was discovered through robust testing dont ask why it is like that it just works*/
                             if ((-bound - 1 < err) & (err <= bound) & 0 <= y & y < 8 & 0 <= x & x < 8)
                             {
-                             
-                                    Grid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
-                                    //To avoid animating same item multiple times
-                                    if (!animatedButtons.Contains(Grid[x, y]))
-                                        animatedButtons.Enqueue(Grid[x, y]);
-                                    
-                                
+
+                                Grid[x, y].animation_sequence.Enqueue(new Effect(color_list, timing));
+                                //To avoid animating same item multiple times
+                                if (!animatedButtons.Contains(Grid[x, y]))
+                                    animatedButtons.Enqueue(Grid[x, y]);
+
+
                             }
                         }
                     }
                 }
                 else
                 {
-                  //Animation for pressed button
+                    //Animation for pressed button
                     Grid[origin.x, origin.y].animation_sequence.Enqueue(new Effect(color_list, timing));
                     //To avoid animating same item multiple times
                     if (!animatedButtons.Contains(Grid[origin.x, origin.y]))
@@ -620,13 +648,15 @@ namespace A3ttrEngine.mod
         public (int R, int G, int B)[] color_sequence { get; set; }
         public (int R, int G, int B) currColor { get; set; }
         public (int R, int G, int B) gradColor { get; set; }
-        public Effect((int R, int G, int B)[] color_list, int[] timing_list) {
+        public Effect((int R, int G, int B)[] color_list, int[] timing_list)
+        {
             color_sequence = color_list;
             timing_sequence = timing_list;
             status = 0;
             times = 0;
         }
-        public bool ChangeCurrColor(long time) {
+        public bool ChangeCurrColor(long time)
+        {
 
             if (status >= 0 & color_sequence.Length != 0)
             {
@@ -674,12 +704,44 @@ namespace A3ttrEngine.mod
             c.R = Math.Sign(gradColor.R - currColor.R) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.R - currColor.R) / timeleft) + currColor.R;
             c.G = Math.Sign(gradColor.G - currColor.G) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.G - currColor.G) / timeleft) + currColor.G;
             c.B = Math.Sign(gradColor.B - currColor.B) * (int)Math.Ceiling((decimal)Math.Abs(gradColor.B - currColor.B) / timeleft) + currColor.B;
-            
+
             currColor = c;
 
         }
+
     }
-        
+    /*
+    class Note
+    {
+        public int duration { get; }
+        public string name { get; }
+        public Note(string name, int duration)
+        {
+            this.name = name;
+            this.duration = duration;
+
+        }
+
+
+    }
+    class Black : Note
+    {
+
+        public Black(string name, int duration)
+        {
+            this.name = name;
+            this.duration = duration;
+
+        }
+    }
+    class Partition
+    {
+        public int bpm { get; }
+        public Partition(Note[] list)
+        {
+
+        }
+    }*/
 }
-    
+
 

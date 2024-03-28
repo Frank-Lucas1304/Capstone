@@ -2,6 +2,7 @@
 using NAudio.Wave;
 using System.Drawing;
 using NAudio.Wave.SampleProviders;
+using System.Runtime.CompilerServices;
 
 
 namespace A3ttrEngine.mod
@@ -700,22 +701,67 @@ namespace A3ttrEngine.mod
 
     class Note
     {
-        public int duration { get; }
+        
+        public float duration { get; set; }
         public string name { get; }
-        public Note (string name, int duration)
+        public Note (string name)
         {
             this.name = name;
-            this.duration = duration;
+            
 
+        }
+        public void tune(int bpm)
+        {
+            // abstract
         }
 
 
     }
-    /*
-    class Black : Note
+
+    class H : Note
     {
-        Note
-    }*/
+        public H(string name) : base(name) {
+
+            
+        }
+        public void tune (int bpm)
+        {
+            duration = 60 / bpm * 2;
+        }
+    }
+
+    class Q : Note
+    {
+        public Q(string name) : base(name)
+        {
+        }
+        public void tune(int bpm)
+        {
+            duration = 60 / bpm * 1;
+        }
+    }
+    class E : Note
+    {
+        public E(string name) : base(name)
+        {
+        }
+        public void tune(int bpm)
+        {
+            duration = 60 / bpm * 1/5;
+        }
+    }
+    class Partition
+    {
+        public int bpm = 0;
+        public Partition(Note[] noteList,int bpm) {
+            foreach (Note note in noteList)
+            {
+                note.tune(bpm);
+            }
+        
+        }
+    }
+
     /* class Quarter : Note
      {
          public Quarter() { };

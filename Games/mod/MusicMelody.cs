@@ -29,7 +29,7 @@ namespace A3ttrEngine.mod
         bool isInvalidInput = false;
         (int x, int y) invalidPos;
         int lives = 3;
-        int level = 9;
+        int level = 5;
 
         (int R, int G, int B) red = (255, 0, 0);
         (int R, int G, int B) purple = (255, 0, 255);
@@ -698,11 +698,11 @@ namespace A3ttrEngine.mod
     }
 
 
-    class Black
+    class Note
     {
         public int duration { get; }
         public string name { get; }
-        public Black(string name, int duration)
+        public Note (string name, int duration)
         {
             this.name = name;
             this.duration = duration;
@@ -711,6 +711,11 @@ namespace A3ttrEngine.mod
 
 
     }
+    /*
+    class Black : Note
+    {
+        Note
+    }*/
     /* class Quarter : Note
      {
          public Quarter() { };

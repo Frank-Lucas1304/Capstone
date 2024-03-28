@@ -11,7 +11,7 @@ namespace A3ttrEngine.mod
     /// </summary>
     public class MusicMelody : A3GameModel
     {
-
+        Dictionary<string, Sound> Soundlist = new Dictionary<string, Sound>();
         Target[,] buttonGrid = new Target[8,8];
         Queue<Target> animatedButtons = new Queue<Target>();
         Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
@@ -57,63 +57,63 @@ namespace A3ttrEngine.mod
         public void loadPianoWaveFiles()
         {
 
-            a3ttrSoundlist.Add("5-7", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - A.wav"));
-            a3ttrSoundlist.Add("6-6", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - A#.wav"));
-            a3ttrSoundlist.Add("6-7", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - B.wav"));
-            a3ttrSoundlist.Add("0-7", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - C.wav"));
-            a3ttrSoundlist.Add("1-6", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - C#.wav"));
-            a3ttrSoundlist.Add("1-7", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - D.wav"));
-            a3ttrSoundlist.Add("2-6", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - D#.wav"));
-            a3ttrSoundlist.Add("2-7", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - E.wav"));
-            a3ttrSoundlist.Add("3-7", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - F.wav"));
-            a3ttrSoundlist.Add("4-6", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - F#.wav"));
-            a3ttrSoundlist.Add("4-7", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - G.wav"));
-            a3ttrSoundlist.Add("5-6", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - G#.wav"));
+            Soundlist.Add("5-7", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - A.wav"));
+            Soundlist.Add("6-6", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - A#.wav"));
+            Soundlist.Add("6-7", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - B.wav"));
+            Soundlist.Add("0-7", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - C.wav"));
+            Soundlist.Add("1-6", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - C#.wav"));
+            Soundlist.Add("1-7", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - D.wav"));
+            Soundlist.Add("2-6", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - D#.wav"));
+            Soundlist.Add("2-7", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - E.wav"));
+            Soundlist.Add("3-7", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - F.wav"));
+            Soundlist.Add("4-6", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - F#.wav"));
+            Soundlist.Add("4-7", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - G.wav"));
+            Soundlist.Add("5-6", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - G#.wav"));
             //2nd Octave
-            a3ttrSoundlist.Add("5-5", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - A.wav"));
-            a3ttrSoundlist.Add("6-4", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - A#.wav"));
-            a3ttrSoundlist.Add("6-5", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - B.wav"));
-            a3ttrSoundlist.Add("0-5", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - C.wav"));
-            a3ttrSoundlist.Add("1-4", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - C#.wav"));
-            a3ttrSoundlist.Add("1-5", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - D.wav"));
-            a3ttrSoundlist.Add("2-4", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - D#.wav"));
-            a3ttrSoundlist.Add("2-5", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - E.wav"));
-            a3ttrSoundlist.Add("3-5", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - F.wav"));
-            a3ttrSoundlist.Add("4-4", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - F#.wav"));
-            a3ttrSoundlist.Add("4-5", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - G.wav"));
-            a3ttrSoundlist.Add("5-4", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - G#.wav"));
+            Soundlist.Add("5-5", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - A.wav"));
+            Soundlist.Add("6-4", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - A#.wav"));
+            Soundlist.Add("6-5", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - B.wav"));
+            Soundlist.Add("0-5", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - C.wav"));
+            Soundlist.Add("1-4", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - C#.wav"));
+            Soundlist.Add("1-5", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - D.wav"));
+            Soundlist.Add("2-4", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - D#.wav"));
+            Soundlist.Add("2-5", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - E.wav"));
+            Soundlist.Add("3-5", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - F.wav"));
+            Soundlist.Add("4-4", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - F#.wav"));
+            Soundlist.Add("4-5", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - G.wav"));
+            Soundlist.Add("5-4", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\1 - G#.wav"));
             //3rd octave
-            a3ttrSoundlist.Add("5-3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - A.wav"));
-            a3ttrSoundlist.Add("6-2", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - A#.wav"));
-            a3ttrSoundlist.Add("6-3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - B.wav"));
-            a3ttrSoundlist.Add("0-3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - C.wav"));
-            a3ttrSoundlist.Add("1-2", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - C#.wav"));
-            a3ttrSoundlist.Add("1-3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - D.wav"));
-            a3ttrSoundlist.Add("2-2", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - D#.wav"));
-            a3ttrSoundlist.Add("2-3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - E.wav"));
-            a3ttrSoundlist.Add("3-3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - F.wav"));
-            a3ttrSoundlist.Add("4-2", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - F#.wav"));
-            a3ttrSoundlist.Add("4-3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - G.wav"));
-            a3ttrSoundlist.Add("5-2", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - G#.wav"));
+            Soundlist.Add("5-3", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - A.wav"));
+            Soundlist.Add("6-2", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - A#.wav"));
+            Soundlist.Add("6-3", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - B.wav"));
+            Soundlist.Add("0-3", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - C.wav"));
+            Soundlist.Add("1-2", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - C#.wav"));
+            Soundlist.Add("1-3", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - D.wav"));
+            Soundlist.Add("2-2", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - D#.wav"));
+            Soundlist.Add("2-3", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - E.wav"));
+            Soundlist.Add("3-3", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - F.wav"));
+            Soundlist.Add("4-2", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - F#.wav"));
+            Soundlist.Add("4-3", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - G.wav"));
+            Soundlist.Add("5-2", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\2 - G#.wav"));
             //4th octave
-            a3ttrSoundlist.Add("5-1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - A.wav"));
-            a3ttrSoundlist.Add("6-0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - A#.wav"));
-            a3ttrSoundlist.Add("6-1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - B.wav"));
-            a3ttrSoundlist.Add("0-1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - C.wav"));
-            a3ttrSoundlist.Add("1-0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - C#.wav"));
-            a3ttrSoundlist.Add("1-1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - D.wav"));
-            a3ttrSoundlist.Add("2-0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - D#.wav"));
-            a3ttrSoundlist.Add("2-1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - E.wav"));
-            a3ttrSoundlist.Add("3-1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - F.wav"));
-            a3ttrSoundlist.Add("4-0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - F#.wav"));
-            a3ttrSoundlist.Add("4-1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - G.wav"));
-            a3ttrSoundlist.Add("5-0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - G#.wav"));
+            Soundlist.Add("5-1", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - A.wav"));
+            Soundlist.Add("6-0", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - A#.wav"));
+            Soundlist.Add("6-1", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - B.wav"));
+            Soundlist.Add("0-1", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - C.wav"));
+            Soundlist.Add("1-0", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - C#.wav"));
+            Soundlist.Add("1-1", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - D.wav"));
+            Soundlist.Add("2-0", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - D#.wav"));
+            Soundlist.Add("2-1", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - E.wav"));
+            Soundlist.Add("3-1", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - F.wav"));
+            Soundlist.Add("4-0", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - F#.wav"));
+            Soundlist.Add("4-1", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - G.wav"));
+            Soundlist.Add("5-0", new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\3 - G#.wav"));
         }
         public override void init()
         {
             base.Name = "MusicMelody";
 
-            a3ttrSoundlist.Add("GameOver", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\GameOver.wav"));
+            Soundlist.Add("GameOver", new Sound(System.Environment.CurrentDirectory + "\\sound\\GameOver.wav"));
             
             for (int x = 0; x < 8; x++)
             {
@@ -137,7 +137,7 @@ namespace A3ttrEngine.mod
             if (launchpadSetUp)
             {
                 Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
-                Target.a3ttrSoundlist = a3ttrSoundlist;
+                Target.Soundlist = Soundlist;
                 launchpadSetUp = false;
             }
 
@@ -291,7 +291,7 @@ namespace A3ttrEngine.mod
                     }
                     // Not all notes are there
                     try {
-                        a3ttrSoundlist[$"{x}-{y}"].Play(); // to play correct and wrong note
+                        Soundlist[$"{x}-{y}"].Play(); // to play correct and wrong note
                     }catch(Exception e)
                     {
                         Console.WriteLine(e.Message);
@@ -392,7 +392,7 @@ namespace A3ttrEngine.mod
     class Target {
         public static int[] duration = new int[3] { 100, 200, 200};
         public static A3ttrPadCell[,] launchpad;
-        public static Dictionary<string, A3ttrSound> a3ttrSoundlist;
+        public static Dictionary<string, Sound> Soundlist;
 
         /*Sequence Display
          pos 1 is gradient1 duration
@@ -456,7 +456,7 @@ namespace A3ttrEngine.mod
                         gradColor = white;
                         try{
                             // In case not located in list
-                            a3ttrSoundlist[$"{pos.x}-{pos.y}"].Play();
+                            Soundlist[$"{pos.x}-{pos.y}"].Play();
                         }catch (Exception e) {
                             Console.WriteLine(e.Message);
                         }

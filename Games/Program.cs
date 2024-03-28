@@ -1,4 +1,4 @@
-﻿using A3TTRControl;
+using A3TTRControl;
 using A3TTRControl2;
 using A3TTRControl2.mod;
 using A3ttrEngine.mod;

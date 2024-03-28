@@ -12,9 +12,6 @@ namespace A3ttrEngine.mod
     public class MusicMelody : A3GameModel
     {
 
-        public Dictionary<string, A3ttrSound> a3ttrSoundlist = new Dictionary<string, A3ttrSound>();
-        // public Dictionary<string, A3ttrSound> a3ttrSoundlist = new Dictionary<string, A3ttrSound>();
-
         Target[,] buttonGrid = new Target[8, 8];
         Queue<Target> animatedButtons = new Queue<Target>();
         Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
@@ -138,14 +135,6 @@ namespace A3ttrEngine.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
-            foreach (string key in a3ttrSoundlist.Keys)
-            {
-                // For now
-                if (a3ttrSoundlist[key].Sample.Volume > 0)
-                {
-                    a3ttrSoundlist[key].Sample.Volume -= 0.1f;
-                }
-            }
             if (launchpadSetUp)
             {
                 Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
@@ -305,10 +294,8 @@ namespace A3ttrEngine.mod
                     try
                     {
                         a3ttrSoundlist[$"{x}-{y}"].Play(); // to play correct and wrong note
-
                     }
                     catch (Exception e)
-
                     {
                         Console.WriteLine(e.Message);
                         Console.WriteLine("Check Keys, not all of them have sounds linked to them");
@@ -708,40 +695,28 @@ namespace A3ttrEngine.mod
             currColor = c;
 
         }
-
     }
-    /*
-    class Note
+
+
+    class Black
     {
         public int duration { get; }
         public string name { get; }
-        public Note(string name, int duration)
-        {
-            this.name = name;
-            this.duration = duration;
-
-        }
-
-
-    }
-    class Black : Note
-    {
-
         public Black(string name, int duration)
         {
             this.name = name;
             this.duration = duration;
 
         }
-    }
-    class Partition
-    {
-        public int bpm { get; }
-        public Partition(Note[] list)
-        {
 
-        }
-    }*/
+
+    }
+    /* class Quarter : Note
+     {
+         public Quarter() { };
+     }*/
+
+
 }
 
 

@@ -25,8 +25,7 @@ namespace PianoTiles.mod
         long times = 0;
             //Music Synchronisation Variables
         int offset = 0;
-        static int bpm = 278; //originally 278
-        //static int bpm = 320;
+        static int bpm = 321; //originally 278
         int targetSpeed = bpm;
             //Animation
         int keeptime = bpm + 10;
@@ -38,7 +37,7 @@ namespace PianoTiles.mod
 
         int targetNum = 4;
         int level = 1;
-        double speed_incr = 0.06;
+        double speed_incr = 0.06; //originally 0.06
         //int speed_incr = 8;
         const int maxTargetsAtTheTime = 1; //This variable sends x at the exact same time, not staggered
         Random random = new Random();
@@ -53,12 +52,12 @@ namespace PianoTiles.mod
         int levelUpTimer = 0;
 
         //Nice gradient purple colours
-        //System.Drawing.Color color1 = System.Drawing.Color.FromArgb(20, 0, 50);
-        //System.Drawing.Color color2 = System.Drawing.Color.FromArgb(40, 0, 70);
-        //System.Drawing.Color color3 = System.Drawing.Color.FromArgb(80, 0, 100);
         System.Drawing.Color color2 = System.Drawing.Color.FromArgb(200, 0, 200); //1
         System.Drawing.Color color1 = System.Drawing.Color.FromArgb(150, 0, 255); //2
         System.Drawing.Color color3 = System.Drawing.Color.FromArgb(50, 0, 255); //3
+
+        int counter_target_press = 0;
+        List<int> inactive_list = new List<int>(); // JUST FOR ME TO KEEP TRACK OF WHERE THINGS ARE GOING WRONG
         public Game1()
         {
 
@@ -75,7 +74,7 @@ namespace PianoTiles.mod
             songList.Add("PianoSong");  //bpm 140
             songList.Add("Pickles"); //bpm 82
             songList.Add("EDance"); //bpm 123
-            int songToPlay = 1;
+            int songToPlay = 0;
             string song = songList[songToPlay];
 
             animationDisplay.on(false);// what is this??
@@ -170,7 +169,8 @@ namespace PianoTiles.mod
                 if (times >= offset)
                 {
                     if (levelUp)
-                    {   //CLEAR ANIMATION
+                    {
+                        //CLEAR ANIMATION
                         for (int x = 0; x < 8; x++)
                         {
                             for (int y = 0; y < 8; y++)
@@ -192,7 +192,7 @@ namespace PianoTiles.mod
                         }
                         levelUp = false;
 
-                        a3ttrSoundlist["BGM"].Play();
+                        //a3ttrSoundlist["BGM"].Play();
                     }
                     if (gameOver)
                     {
@@ -201,6 +201,7 @@ namespace PianoTiles.mod
                         //NoteOnOffMessage(IDeviceBase device, Channel channel, Pitch pitch, int velocity, float time, Clock clock, float duration);
                         Console.WriteLine("GAME OVER :(");
                         Console.WriteLine("Your score is " + points);
+                        Console.WriteLine(string.Join(", ", inactive_list));
                         Environment.Exit(0);
 
                     }
@@ -214,13 +215,15 @@ namespace PianoTiles.mod
                         if (target.status == "missed" | target.status == "hit")
                         {
                             Random random = new Random(Guid.NewGuid().GetHashCode());
-                            if (random.Next(0, 2) == 1 && Target.inactiveTargets < maxTargetsAtTheTime)
-                                
+                            if (random.Next(0, 2) == 1 && Target.inactiveTargets < maxTargetsAtTheTime) //&& Target.inactiveTargets < maxTargetsAtTheTime
+
                             {   if (!(target.startPos == prevTargetStart && target.endPos == prevTargetEnd)) 
                                 {
                                     // if the new generated target is not the previous target
                                     // to avoid repition of the same target in a row
+
                                     target.on();
+                                    inactive_list.Add(Target.inactiveTargets); // JUST FOR ME TO KEEP TRACK OF WHERE THINGS ARE GOING WRONG
                                     // updates previous target
                                     prevTargetStart = target.startPos;
                                     prevTargetEnd = target.endPos;
@@ -267,6 +270,8 @@ namespace PianoTiles.mod
                     {
                         target.status = "hit";
                         --Target.inactiveTargets;
+                        //Target.inactiveTargets = 0;
+                        inactive_list.Add(Target.inactiveTargets); // JUST FOR ME TO KEEP TRACK OF WHERE THINGS ARE GOING WRONG
                         clearFadeLed(x, y);
                         clearLed(x, y);
                         setFadeLed(Color.Green, x, y, keeptime, fadetime);
@@ -298,11 +303,13 @@ namespace PianoTiles.mod
                             offset += 10 * bpm; // little break
                             speed_incr = 0.20;
                             a3ttrSoundlist["BGM"].Pause();
+                            //a3ttrSoundlist[song].Pause();
                             a3ttrSoundlist["levelUp"].Play();
                             //StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
                             Console.WriteLine("BREAK");
                             //StartAnimation("levelUp", 1, 1);
                             HappyFace(Color.Black, Color.Magenta);
+                            a3ttrSoundlist["BGM"].Play();
 
                             levelUp = true;
 
@@ -313,7 +320,7 @@ namespace PianoTiles.mod
 
                 }
 
-                // ADDING EXTRA DIRECTIONS AS THE GAME GOES ON
+                // PLAYING FEEDBACK
                 if (points != 0 & points % feedback == 0)
                 {
                     feedback = random.Next(0, 2)==1 ? 7 : 9;
@@ -374,15 +381,28 @@ namespace PianoTiles.mod
                     break;
 
                 case "active":
-                    /* MISSED TARGET
-                    When the target enters here it is because the user did not hit the target in time. Therefore the target status is set to "missed" and a visual feedback is ouputed*/
-                    --Target.inactiveTargets;
-                    a3ttrSoundlist["Buzzer"].Play();
-                    target.status = "missed";
-                    clearLed(target.endPos.x, target.endPos.y);
-                    setFadeLed(Color.Red, target.endPos.x, target.endPos.y, keeptime, fadetime);
-                    lives--;
-                    Console.WriteLine("You now have " + lives + " lives!");
+                    if (counter_target_press > 0)
+                    {
+                        // THIS COUNTER GIVES USER EXTRA TIME TO PRESS BUTTON
+                        /* MISSED TARGET
+                        When the target enters here it is because the user did not hit the target in time. Therefore the target status is set to "missed" and a visual feedback is ouputed*/
+                        --Target.inactiveTargets;
+                        inactive_list.Add(Target.inactiveTargets); // JUST FOR ME TO KEEP TRACK OF WHERE THINGS ARE GOING WRONG
+                        //Target.inactiveTargets = 0;
+                        //Target.inactiveTarget = false;
+                        a3ttrSoundlist["Buzzer"].Play();
+                        target.status = "missed";
+                        clearLed(target.endPos.x, target.endPos.y);
+                        setFadeLed(Color.Red, target.endPos.x, target.endPos.y, keeptime, fadetime);
+                        lives--;
+                        Console.WriteLine("You now have " + lives + " lives!");
+                        counter_target_press = 0;
+                    }
+                    else { 
+                        counter_target_press += 1;
+                    }
+                    
+                    
                     
                     if (lives < 1)
                     {
@@ -416,6 +436,7 @@ namespace PianoTiles.mod
             public static int colorSpeed = 0;
 
             public static int inactiveTargets = 0;
+            public static bool inactiveTarget = false;
             public long ctime { get; set; }
             public long speed { get; set; } // speed and time window are the same
             public string status { get; set; }
@@ -444,8 +465,10 @@ namespace PianoTiles.mod
             {   
                 status = "inactive";
                 currPos = startPos;
+                inactiveTarget = true;
                 if (state)
                     ++inactiveTargets;
+                    //inactiveTargets = 1;
             }
             public Target((int,int) startPos,(int, int) endPos, (int, int) direction, int length)
             {

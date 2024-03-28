@@ -4,174 +4,140 @@ class Sound
 {
     public WaveOutEvent device { get; set; }
     public MediaFoundationReader reader { get; set; }
+
     public string path { get; }
     private long times { get; set; }
     private float volume { get; set; }
     private float currVolume { get; set; }
-    private float volumeGradient { get; set; }
-    private int keepTime { get; set; }
-    private int fadeInTime { get; set; }
-    private int fadeOutTime { get; set; }
-    private int status { get; set; }
+    public int audioLength { get; set; }
 
+    bool isStopped = false;
+
+    int[] timing = new int[3];
+
+    int status = 0;
     public Sound(string path)
     {
-        device = new WaveOutEvent();
-        this.path = path;
+
         reader = new MediaFoundationReader(path);
+        device = new WaveOutEvent();
         device.Init(reader.ToSampleProvider());
 
-        fadeInTime = 0;
-        fadeOutTime = 0;
-        keepTime = 0;
         times = 0;
 
-        // If no fadeIn
-        status = 1;
-        currVolume = 1.0f;
-
+        //default value
+        audioLength = (int)(reader.TotalTime.TotalMilliseconds);
+        device.Volume = 0.0f;
     }
 
     public void update(long time)
     {
         if (device.PlaybackState == PlaybackState.Playing)
         {
-
-            times += time;
-            switch (status)
+            if (status <= 2)
             {
-
-                case 0:
-                    if (times <= fadeInTime)
-                    {
-                        volumeGradient = gradient(fadeInTime - times);
-                        currVolume += volumeGradient;
-                        if (currVolume >= volume)
-                        {
-                            currVolume = volume;
-                        }
-                        device.Volume = currVolume;
+                gradient(timing[status] - times);
+                device.Volume = currVolume;
+                Console.WriteLine(device.Volume);
 
 
-                    }
-                    if (Math.Round(currVolume, 1) == volume)
-                    {
-                        times = 0;
-                        status++;
-                    }
-                    break;
-                case 1:
-                    Console.WriteLine(times);
-                    if (times >= keepTime)
-                    {
+            }
 
-                        times = 0;
-                        status++;
+            if (times >= timing[status])
+            {
+                ++status;
+                switch (status)
+                {
+                    case 2:// Setting Parameters for FadeOut
                         volume = 0.0f;
-                        if (fadeOutTime == 0)
+                        break;
+                    case 3: // Audio is done, Restarting
+                        status = 0;
+                        Console.WriteLine(reader.CurrentTime);
+                        if (isStopped)
                         {
-                            status = 0;
-                            device.Stop();
-                            device.Dispose();
-                        }
-                    }
-                    break;
-                case 2:
-                    if (times <= fadeOutTime)
-                    {
-                        volumeGradient = gradient(fadeOutTime - times);
-                        Console.WriteLine(currVolume);
-
-                        currVolume += volumeGradient;
-                        if (currVolume <= 0.0f)
-                        {
-                            currVolume = 0.0f;
-                        }
-                        device.Volume = currVolume;
-
-                        if (Math.Round(currVolume, 1) == volume)
-                        {
-                            times = 0;
-                            status = 1;
-
                             device.Stop();
 
-                            device.Dispose();
-                        }
-                    }
 
-                    break;
-                default:
-                    times = 0;
-                    break;
+                        }
+                        else
+                        {
+                            device.Pause();
+
+                        }
+                        break;
+                }
+                times = 0;
+            }
+            times += time;
+        }
+
+
+    }
+    public void Offset(int offset)
+    {
+        reader.CurrentTime = TimeSpan.FromSeconds(offset);
+    }
+    public void Pause(int fadeTime = 0)
+    {
+        times = 0;
+        timing[2] = fadeTime;
+        status = 2;
+        volume = 0.0f;
+
+    }
+    public void Stop(int fadeTime = 0)
+    {
+        isStopped = true;
+        Pause(fadeTime);
+
+    }
+    public void Play(int fadeInTime = 10, int keepTime = -1, int fadeOutTime = 10, float volume = 1.0f)
+    {
+
+        // Error Checking --> audioLength is in milliseconds
+        if ((fadeInTime + keepTime + fadeOutTime) > audioLength)
+        {
+            throw new Exception("Expected fadeInTime + keepTime + fadeOutTime <= audioLength got the opposite.");
+        }
+
+        // Setting up parameters
+        if (keepTime == -1)
+        {
+            timing[1] = audioLength - fadeInTime - fadeOutTime;
+            Console.WriteLine(timing[1]);
+
+            if (timing[1] < 0)
+            {
+                throw new Exception("keepTime value is smaller than 0, adjust fadeOutTime and fadeInTime settings");
             }
         }
-    }
-    public float gradient(long timeLeft)
-    {
-        if ((timeLeft) <= 0)
-        {
-            return (float)(Math.Sign(volume - currVolume) * (Math.Abs(volume - currVolume)));
-        }
         else
         {
-            return (float)(Math.Sign(volume - currVolume) * (Math.Abs(volume - currVolume) / (timeLeft)));
+            timing[1] = keepTime;
         }
+        timing[0] = fadeInTime;
+        timing[2] = fadeOutTime;
 
-    }
-    public void fadeIn(int fadeInTime)
-    {
-        if (fadeInTime != 0)
-        {
-            currVolume = 0.0f;
-        }
-        else
-        {
-            status = 1;
-        }
-
-        this.fadeInTime = fadeInTime;
-    }
-    public void fadeOut(int fadeOutTime)
-    {
-        this.fadeOutTime = fadeOutTime;
-    }
-
-    public void Play(int fadeInTime = 0, int keepTime = 0, int fadeOutTime = 0, float volume = 1.0f)
-    {
-
-        fadeIn(fadeInTime);
-        fadeOut(fadeOutTime);
-        this.keepTime = keepTime;
         this.volume = volume;
-        this.times = 0;
-        device.Volume = currVolume;
-        try
+        if (device.PlaybackState == PlaybackState.Stopped)
         {
-            device.Play();
+            reader.CurrentTime = TimeSpan.Zero;
         }
-        catch
+        status = 0;
+        device.Volume = 0.0f;
+        // If we are resuming --> want to restart from the current time not 0
+        device.Play();
+    }
+    public void gradient(long timeLeft)
+    {
+        if (timeLeft <= 0)
         {
-            //How to play back audio??
-            reader = new MediaFoundationReader(path);
-            device.Init(reader.ToSampleProvider());
-            device.Play();
+            currVolume += (float)(Math.Sign(volume - currVolume) * (Math.Abs(volume - currVolume)));
+        }
+        else
+        {
+            currVolume += (float)(Math.Sign(volume - currVolume) * (Math.Abs(volume - currVolume) / (timeLeft)));
         }
     }
-    public void End()
-    {
-        reader.Dispose();
-    }
-    public void Pause()
-    {
-        device.Pause();
-    }
-    public void Pause(int fadeOutTime) { }
-    public void Close() { }
-    public void Close(int fadeOutTime)
-    {
-
-        status = 2;
-    }
-
 }

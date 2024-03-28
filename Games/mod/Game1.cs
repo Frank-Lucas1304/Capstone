@@ -25,7 +25,8 @@ namespace PianoTiles.mod
         long times = 0;
             //Music Synchronisation Variables
         int offset = 0;
-        static int bpm = 321; //originally 278
+        static int bpm0 = 321;
+        static int bpm = bpm0; //originally 278
         int targetSpeed = bpm;
             //Animation
         int keeptime = bpm + 10;
@@ -57,6 +58,7 @@ namespace PianoTiles.mod
         System.Drawing.Color color3 = System.Drawing.Color.FromArgb(50, 0, 255); //3
 
         int counter_target_press = 0;
+
         List<int> inactive_list = new List<int>(); // JUST FOR ME TO KEEP TRACK OF WHERE THINGS ARE GOING WRONG
         public Game1()
         {
@@ -70,15 +72,26 @@ namespace PianoTiles.mod
         {
             base.Name = "PianoTiles";
             List<string> songList = new List<string>();
-            songList.Add("BGM"); // bpm 107-108
+            songList.Add("BGM"); // bpm 108
+            songList.Add("BGM1"); // bpm 119
+            songList.Add("BGM2"); // bpm 129
+            songList.Add("BGM3"); // bpm 140
+            songList.Add("BGM4"); // bpm 151
+            songList.Add("BGM5"); // bpm 162
             songList.Add("PianoSong");  //bpm 140
-            songList.Add("Pickles"); //bpm 82
+            songList.Add("Pickles"); //bpm 150
             songList.Add("EDance"); //bpm 123
+            
             int songToPlay = 0;
             string song = songList[songToPlay];
 
             animationDisplay.on(false);// what is this??
             a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
+            a3ttrSoundlist.Add("BGM1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_1.wav"));
+            a3ttrSoundlist.Add("BGM2", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_2.wav"));
+            a3ttrSoundlist.Add("BGM3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_3.wav"));
+            a3ttrSoundlist.Add("BGM4", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_4.wav"));
+            a3ttrSoundlist.Add("BGM5", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_5.wav"));
             a3ttrSoundlist.Add("PianoSong", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoSong.wav"));
             a3ttrSoundlist.Add("Pickles", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\Pickles.wav"));
             a3ttrSoundlist.Add("EDance", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\EDance.wav"));
@@ -296,20 +309,39 @@ namespace PianoTiles.mod
                         {
                             if (points < gameTargets.Count())
                                 targetNum += 2;
+                            
                             level += 1;
+                            // PLAY SPED UP VERSION OF SONG
+                            int oldlevel = level - 2;
+                            string oldsong = "BGM" + oldlevel.ToString();
+                            if (level == 2)
+                            {
+                                oldsong = "BGM";
+                            }
+                            int newlevel = level - 1;
+                            string newsong = "BGM" + newlevel.ToString();
+                            if (level > 6) {
+                                oldsong = "BGM5";
+                                newsong = "BGM5";
+                            }
+
+                            //display points
                             Console.WriteLine("level up " + level);
                             Console.WriteLine($"{points} POINTS!");
                             
                             offset += 10 * bpm; // little break
                             speed_incr = 0.20;
-                            a3ttrSoundlist["BGM"].Pause();
+                            a3ttrSoundlist[oldsong].Pause();
                             //a3ttrSoundlist[song].Pause();
                             a3ttrSoundlist["levelUp"].Play();
                             //StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
                             Console.WriteLine("BREAK");
                             //StartAnimation("levelUp", 1, 1);
                             HappyFace(Color.Black, Color.Magenta);
-                            a3ttrSoundlist["BGM"].Play();
+                            a3ttrSoundlist[newsong].Play();
+                            bpm = bpm0 * (1 + (level - 1) / 10); //adjust bpm
+                            targetSpeed = bpm;
+                            speed_incr += 0.01;
 
                             levelUp = true;
 

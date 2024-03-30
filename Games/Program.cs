@@ -24,7 +24,6 @@ namespace ConsoleApp1
             if (true)
             {
              
-
             }
         }
         

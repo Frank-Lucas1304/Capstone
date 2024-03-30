@@ -24,15 +24,15 @@ namespace A3ttrEngine.mod
         static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3" };
         static Partition happySong = new Partition(new string[]{"HC3", "HF3", "HF3", "HF3", "HC3", "HC3", "HF3", "HC3", "HF3"},156);
 
-        static Note[] noteList = happySong.noteList;
-
+        //static List<Note> noteList = happySong.noteList;
+        string[] noteList = happy;
         int note_pos = 0;
 
         bool isInvalidInput = false;
         (int x, int y) invalidPos;
         int lives = 3;
         int level = 5;
-
+        
         (int R, int G, int B) red = (255, 0, 0);
         (int R, int G, int B) purple = (255, 0, 255);
         (int R, int G, int B) black = (0, 0, 0);
@@ -159,7 +159,7 @@ namespace A3ttrEngine.mod
                 {   // Display Sequence
                     if (times++ >= betweenLevelDelay)
                     {
-                        (int x, int y) = KeyMapping(noteList[note_pos].name);
+                        (int x, int y) = KeyMapping(noteList[note_pos]);
                         buttonGrid[x, y].Display(time, ref note_pos);
                         betweenLevelDelay = 0;
                         times = 0;
@@ -257,7 +257,7 @@ namespace A3ttrEngine.mod
                 (int x, int y) pos;
                 if (note_pos >= level && note_pos < 2 * level)
                 {
-                    pos = KeyMapping(noteList[note_pos - level].name);
+                    pos = KeyMapping(noteList[note_pos - level]);
                     bool isTargetHit = buttonGrid[pos.x, pos.y].hit(x, y);
                     if (isTargetHit)
                     {
@@ -754,7 +754,7 @@ namespace A3ttrEngine.mod
     class Partition
     {
         public int bpm { get; set; }
-        List<Note> noteList { get; set; }   
+        public List<Note> noteList { get; set; }   
         public Partition(string[] partition,int bpm) {
 
             foreach (string note in partition)

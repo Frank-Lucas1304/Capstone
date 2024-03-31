@@ -22,14 +22,13 @@ namespace A3ttrEngine.mod
         Target[,] buttonGrid = new Target[8, 8];
         Queue<Target> animatedButtons = new Queue<Target>();
         Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
-        static string[] happyBirthday = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
 
         static string[] happy = new string[] { "C3", "F3", "F3", "F3", "C3", "C3", "F3", "C3", "F3" };
 
         //static string[] auClairDeLaLune = new string[] { };
         //static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3" };
-        static Partition happySong = new Partition(new string[] { "HC3", "HF3", "HF3", "HF3", "HC3", "HC3", "HF3", "HC3", "HF3" }, 156);
-
+        static Partition happySong = new Partition(new string[] { "HC3", "HF3", "HF3", "QF3", "HC3", "QC3", "HF3", "HC3", "HF3" }, 156);
+        static Partition happyBirthday = new Partition(new string[] { "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", }, 156);
         //static List<Note> noteList = happySong.noteList;
 
         int note_pos = 0;
@@ -37,7 +36,7 @@ namespace A3ttrEngine.mod
         bool isInvalidInput = false;
         (int x, int y) invalidPos;
         int lives = 3;
-        int level = 5;
+        int level = 6;
 
         (int R, int G, int B) red = (255, 0, 0);
         (int R, int G, int B) purple = (255, 0, 255);
@@ -145,7 +144,10 @@ namespace A3ttrEngine.mod
         {
             if (launchpadSetUp)
             {
-                noteList = happySong.noteList;
+                //Setting up Sequence
+                noteList = happyBirthday.noteList;
+
+
                 Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
                 Target.a3ttrSoundlist = a3ttrSoundlist;
                 launchpadSetUp = false;
@@ -168,7 +170,7 @@ namespace A3ttrEngine.mod
                     if (times++ >= betweenLevelDelay)
                     {
                         (int x, int y) = KeyMapping(noteList[note_pos].key);
-                        buttonGrid[x, y].Display(time, ref note_pos);
+                        buttonGrid[x, y].Display(time, ref note_pos, noteList[note_pos].duration);
                         betweenLevelDelay = 0;
                         times = 0;
                     }
@@ -454,8 +456,10 @@ namespace A3ttrEngine.mod
             this.gradient(timing[display_status]);
         }
 
-        public void Display(long time, ref int note_pos)
+        public void Display(long time, ref int note_pos,int duration)
         { //did you mean times
+            if (timing[1]!=duration)
+                { timing[1] = duration; }
             if (display_status <= 2)
             {
                 gradient(timing[display_status] - times);
@@ -729,7 +733,7 @@ namespace A3ttrEngine.mod
     class Note
     {
 
-        public float duration { get; set; }
+        public int duration { get; set; }
         public string key { get; }
         public char type { get; }
         public Note(char type, string key, int bpm)
@@ -740,24 +744,23 @@ namespace A3ttrEngine.mod
             switch (type)
             {
                 case 'H': // Half Note
-                    duration  = beatPerSecond * 2 * 1000;
+                    duration  = (int)(beatPerSecond * 2 * 1000);
 
 
                     break;
 
                 case 'Q': // Quarter Note
-                    duration  = beatPerSecond * 1000;
+                    duration  = (int)(beatPerSecond * 1000);
 
 
                     break;
 
                 case 'E': // 1/8th Note
-                    duration = (beatPerSecond * 1 / 2)*1000;
+                    duration = (int)(beatPerSecond * 0.5f*1000);
                     break;
 
 
             }
-            duration = (int)duration;
            
         }
     }

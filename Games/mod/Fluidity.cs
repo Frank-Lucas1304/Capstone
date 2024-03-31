@@ -38,8 +38,8 @@ namespace PianoTiles.mod
         int blue = 0x0;
         int green = 0x0;
         Sound lol = new Sound(System.Environment.CurrentDirectory + "\\sound\\PianoTileSounds\\0 - B.wav");
-
-        public Fluidity()
+        A3ttrGame game;
+        public Fluidity(A3ttrGame gameModel)
         {
 
            
@@ -74,11 +74,10 @@ namespace PianoTiles.mod
         bool launchpadSetUp = true;
         public override void update(long time)
         {
- 
 
-            
- 
-            
+
+
+
                 //Console.WriteLine(time);
             lol.update(time);
             

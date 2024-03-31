@@ -3,6 +3,7 @@ using A3TTRControl2;
 using A3TTRControl2.mod;
 using A3ttrEngine.mod;
 using Cgen.Audio;
+using Games.mod;
 using PianoTiles.mod;
 using System.Drawing;
 using System.Runtime.CompilerServices;
@@ -12,6 +13,7 @@ namespace ConsoleApp1
     internal class Program
     {
         static A3ttrGame a3ttrGame = new A3ttrGame();
+        A3ttrGame Get3TtrGame;
         static void Main(string[] args)
         {
 
@@ -35,7 +37,6 @@ namespace ConsoleApp1
 
                 //进入DemoMod
                 a3ttrGame.changeGameModel(new Game1());
-                a3ttrGame.changeGameModel(new MusicMelody());
 
                 //a3ttrGame.changeGameModel(new DemoMod(Color.Aqua));
             }

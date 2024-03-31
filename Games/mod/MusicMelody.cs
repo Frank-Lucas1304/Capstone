@@ -2,6 +2,8 @@
 using NAudio.Wave;
 using System.Drawing;
 using NAudio.Wave.SampleProviders;
+using Games.mod;
+using A3TTRControl;
 
 
 namespace A3ttrEngine.mod
@@ -15,6 +17,7 @@ namespace A3ttrEngine.mod
         Target[,] buttonGrid = new Target[8, 8];
         Queue<Target> animatedButtons = new Queue<Target>();
         Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
+        A3ttrGame controlPanelGame;
         static string[] happyBirthday = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
 
         static string[] happy = new string[] { "C3", "F3", "F3", "F3", "C3", "C3", "F3", "C3", "F3" };
@@ -47,8 +50,10 @@ namespace A3ttrEngine.mod
         bool launchpadSetUp = true;
 
 
-        public MusicMelody()
-        { }
+        public MusicMelody(A3ttrGame controlPanel)
+        {
+            controlPanelGame = controlPanel;
+        }
 
         /// <summary>
         /// 初始化（提前加载资源）
@@ -147,7 +152,7 @@ namespace A3ttrEngine.mod
                 if (times++ >= quitDelay) // Force quit delay as well as time increment
                 {
                     Console.WriteLine("Exit", times);
-                    Environment.Exit(0);
+                    controlPanelGame.changeGameModel(new Test(controlPanelGame));
                 }
             }
             else

@@ -3,6 +3,12 @@ using NAudio.Wave;
 using System.Drawing;
 using NAudio.Wave.SampleProviders;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using Midi.Instruments;
+using OpenTK.Audio.OpenAL;
+using OpenTK.Input;
+using OpenTK.Graphics.ES10;
+using System.Xml.Linq;
 
 
 namespace A3ttrEngine.mod
@@ -20,19 +26,19 @@ namespace A3ttrEngine.mod
 
         static string[] happy = new string[] { "C3", "F3", "F3", "F3", "C3", "C3", "F3", "C3", "F3" };
 
-        static string[] auClairDeLaLune = new string[] { };
-        static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3" };
-        static Partition happySong = new Partition(new string[]{"HC3", "HF3", "HF3", "HF3", "HC3", "HC3", "HF3", "HC3", "HF3"},156);
+        //static string[] auClairDeLaLune = new string[] { };
+        //static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3" };
+        static Partition happySong = new Partition(new string[] { "HC3", "HF3", "HF3", "HF3", "HC3", "HC3", "HF3", "HC3", "HF3" }, 156);
 
         //static List<Note> noteList = happySong.noteList;
-        string[] noteList = happy;
+
         int note_pos = 0;
 
         bool isInvalidInput = false;
         (int x, int y) invalidPos;
         int lives = 3;
         int level = 5;
-        
+
         (int R, int G, int B) red = (255, 0, 0);
         (int R, int G, int B) purple = (255, 0, 255);
         (int R, int G, int B) black = (0, 0, 0);
@@ -47,7 +53,7 @@ namespace A3ttrEngine.mod
 
         long times = 0;
         bool launchpadSetUp = true;
-
+        List<Note> noteList;
 
         public MusicMelody()
         { }
@@ -139,9 +145,11 @@ namespace A3ttrEngine.mod
         {
             if (launchpadSetUp)
             {
+                noteList = happySong.noteList;
                 Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
                 Target.a3ttrSoundlist = a3ttrSoundlist;
                 launchpadSetUp = false;
+
             }
 
             if (quitGame)
@@ -155,11 +163,11 @@ namespace A3ttrEngine.mod
             else
             {
 
-                if (note_pos < level & note_pos < noteList.Length)
+                if (note_pos < level & note_pos < noteList.Count)
                 {   // Display Sequence
                     if (times++ >= betweenLevelDelay)
                     {
-                        (int x, int y) = KeyMapping(noteList[note_pos]);
+                        (int x, int y) = KeyMapping(noteList[note_pos].key);
                         buttonGrid[x, y].Display(time, ref note_pos);
                         betweenLevelDelay = 0;
                         times = 0;
@@ -191,7 +199,7 @@ namespace A3ttrEngine.mod
                         {
                             if (note_pos == 2 * level)
                             {
-                                int size = noteList.Length;
+                                int size = noteList.Count;
                                 if (size == level)
                                 {
                                     GameCompleted();
@@ -257,7 +265,7 @@ namespace A3ttrEngine.mod
                 (int x, int y) pos;
                 if (note_pos >= level && note_pos < 2 * level)
                 {
-                    pos = KeyMapping(noteList[note_pos - level]);
+                    pos = KeyMapping(noteList[note_pos - level].key);
                     bool isTargetHit = buttonGrid[pos.x, pos.y].hit(x, y);
                     if (isTargetHit)
                     {
@@ -699,109 +707,60 @@ namespace A3ttrEngine.mod
         }
     }
 
-
-    class Note
-    {
-        
-        public float duration { get; set; }
-        public string name { get; }
-        public Note (string name)
-        {
-            this.name = name;
-            
-
-        }
-        public void tune(int bpm)
-        {
-            // abstract
-        }
-
-
-    }
-
-    class H : Note
-    {
-        public H(string name) : base(name) {
-
-            
-        }
-        public void tune (int bpm)
-        {
-            duration = 60 / bpm * 2;
-        }
-    }
-
-    class Q : Note
-    {
-        public Q(string name) : base(name)
-        {
-        }
-        public void tune(int bpm)
-        {
-            duration = 60 / bpm * 1;
-        }
-    }
-    class E : Note
-    {
-        public E(string name) : base(name)
-        {
-        }
-        public void tune(int bpm)
-        {
-            duration = 60 / bpm * 1/5;
-        }
-    }
     class Partition
     {
         public int bpm { get; set; }
-        public List<Note> noteList { get; set; }   
-        public Partition(string[] partition,int bpm) {
-
-            foreach (string note in partition)
+        public List<Note> noteList { get; set; }
+        public Partition(string[] partition, int bpm)
+        {
+            noteList = new List<Note>();
+            this.bpm = bpm;
+            foreach (string name in partition)
             {
-                string key = note.Substring(1, note.Length - 1);
+                char type = name[0];
+                string key = name.Substring(1, name.Length - 1);
+                noteList.Add(new Note(type,key,bpm));
 
-                char type = note[0];
-                Note val = null;
-                switch (type)
-                {
-                    
-                    case 'H': // Half Note
-                        val = new H(key);
-                        val.tune(bpm);
-                        noteList.Append(val);
-
-                        break;
-
-                    case 'Q': // Quarter Note
-                        val = new Q(key);
-                        val.tune(bpm);
-                        noteList.Append(val);
-
-                        break;
-
-                    case 'E': // 1/8th Note
-                        val = new E(key);
-                        val.tune(bpm);
-                        noteList.Append(val);
-                        Console.WriteLine(note[0]);
-
-                        break;
-
-                }
-          
             }
 
 
         }
     }
+    class Note
+    {
 
-    /* class Quarter : Note
-     {
-         public Quarter() { };
-     }*/
+        public float duration { get; set; }
+        public string key { get; }
+        public char type { get; }
+        public Note(char type, string key, int bpm)
+        {   
+            this.type = type;
+            this.key = key;
+            float beatPerSecond = 60.0f / bpm;
+            switch (type)
+            {
+                case 'H': // Half Note
+                    duration  = beatPerSecond * 2 * 1000;
 
 
+                    break;
+
+                case 'Q': // Quarter Note
+                    duration  = beatPerSecond * 1000;
+
+
+                    break;
+
+                case 'E': // 1/8th Note
+                    duration = (beatPerSecond * 1 / 2)*1000;
+                    break;
+
+
+            }
+            duration = (int)duration;
+           
+        }
+    }
 }
 
 

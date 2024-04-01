@@ -9,6 +9,7 @@ using PianoTiles.mod;
 using A3TTRControl;
 using System.ComponentModel;
 using OpenTK.Input;
+using System.ComponentModel.Design;
 
 
 namespace A3ttrEngine.mod
@@ -49,8 +50,11 @@ namespace A3ttrEngine.mod
 
         long betweenLevelDelay;
         long quitDelay = 1200;
+        long countDownDelay = 4000;
+        long pauseAnimationDelay = 3000;
         bool quitGame = false;
         bool pauseGame = false;
+        bool countDownActivated = false;
 
         long times = 0;
         bool launchpadSetUp = true;
@@ -137,7 +141,7 @@ namespace A3ttrEngine.mod
         {
             base.Name = "MusicMelody";
             
-            //loadAnimation("pause", System.Environment.CurrentDirectory + "\\animation\\pause.ttr");
+            loadAnimation("pause", System.Environment.CurrentDirectory + "\\animation\\pause.ttr");
             
             loadAnimation("countDown", System.Environment.CurrentDirectory + "\\animation\\countDown.ttr");
 
@@ -174,6 +178,7 @@ namespace A3ttrEngine.mod
             {
                 if (quitGame)
                 {
+                    times += time;
                     if (times++ >= quitDelay) // Force quit delay as well as time increment
                     {
                         Console.WriteLine("Exit", times);
@@ -182,11 +187,12 @@ namespace A3ttrEngine.mod
                 }
                 else
                 {
-                    if (!pauseGame)
+                    if (!pauseGame && !countDownActivated)
                     {
                         if (note_pos < level & note_pos < noteList.Count)
                         {   // Display Sequence
-                            if (times++ >= betweenLevelDelay)
+                            times += time;
+                            if (times >= betweenLevelDelay)
                             {
                                 (int x, int y) = KeyMapping(noteList[note_pos].key);
                                 buttonGrid[x, y].Display(time, ref note_pos, noteList[note_pos].duration);
@@ -270,7 +276,27 @@ namespace A3ttrEngine.mod
                     }
                     else
                     {
-                        //StartAnimation("pause", 1,0);
+                        if (countDownActivated)
+                        {
+                            times += time;
+                            if (times >= countDownDelay)
+                            {
+                                countDownActivated = false;
+                                times = 0;
+                            }
+                        }
+                        else
+                        {
+                            times += time;
+                            if (times >= pauseAnimationDelay)
+                            {
+                                a3ttranimationlist.Remove("pause");
+                                loadAnimation("pause", System.Environment.CurrentDirectory + "\\animation\\pause.ttr");
+                                Console.WriteLine("Loop");
+                                StartAnimation("pause", 1, 1);
+                                times = 0;
+                            }
+                        }
                     }
                 }
             }
@@ -394,11 +420,22 @@ namespace A3ttrEngine.mod
                         }
                         break;
                     case 4: { //Select
-
                             // No purpose
                         } 
                         break;
-                    case 5: { 
+                    case 5: { // Pause or Play
+                            pauseGame = !pauseGame;
+                            if (pauseGame){
+                                StartAnimation("pause",1,1);
+                                times = 0;
+
+                            }
+                            else {
+                                StartAnimation("countDown", 1, 1);
+                                countDownActivated = true;
+                                times = 0;
+
+                            }
                         } 
                         break;
                     case 6: { 

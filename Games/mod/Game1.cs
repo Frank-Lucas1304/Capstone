@@ -13,6 +13,9 @@ namespace PianoTiles.mod
 {
     public class Game1 : A3GameModel
     {
+        string songSelect = "BGM"; // THE ONLY VARIABLE TO CHANGE TO SELECT A SONG
+        string currentSong = "";
+
         List<Target> gameTargets = new List<Target>();
         Target animationDisplay = new Target((0, 0), (7, 0), (1, 0), 7);
         // we are going to have to manage memory better, we can't just have ever growing list --> later
@@ -25,7 +28,8 @@ namespace PianoTiles.mod
         long times = 0;
             //Music Synchronisation Variables
         int offset = 0;
-        static int bpm = 321; //originally 278
+        static int bpm0 = 321;
+        static int bpm = bpm0; //originally 278
         int targetSpeed = bpm;
             //Animation
         int keeptime = bpm + 10;
@@ -57,6 +61,7 @@ namespace PianoTiles.mod
         System.Drawing.Color color3 = System.Drawing.Color.FromArgb(50, 0, 255); //3
 
         int counter_target_press = 0;
+
         List<int> inactive_list = new List<int>(); // JUST FOR ME TO KEEP TRACK OF WHERE THINGS ARE GOING WRONG
         public Game1()
         {
@@ -70,18 +75,58 @@ namespace PianoTiles.mod
         {
             base.Name = "PianoTiles";
             List<string> songList = new List<string>();
-            songList.Add("BGM"); // bpm 107-108
-            songList.Add("PianoSong");  //bpm 140
-            songList.Add("Pickles"); //bpm 82
-            songList.Add("EDance"); //bpm 123
+            songList.Add("BGM0"); // bpm 108
+            songList.Add("BGM1"); // bpm 119
+            songList.Add("BGM2"); // bpm 129
+            songList.Add("BGM3"); // bpm 140
+            songList.Add("BGM4"); // bpm 151
+            songList.Add("BGM5"); // bpm 162
+            //songList.Add("PianoSong");  //bpm 140
+            //songList.Add("Pickles"); //bpm 150
+            songList.Add("EDance0"); //bpm 123
+            songList.Add("EDance1");
+            songList.Add("EDance2");
+            songList.Add("EDance3");
+            songList.Add("EDance4");
+            songList.Add("EDance5");
+
+            songList.Add("StayinAlive0");
+            songList.Add("StayinAlive1");
+            songList.Add("StayinAlive2");
+            songList.Add("StayinAlive3");
+            songList.Add("StayinAlive4");
+            songList.Add("StayinAlive5");
+
             int songToPlay = 0;
             string song = songList[songToPlay];
+            song = songSelect + "0";
+            if (songSelect == "StayinAlive") {
+                bpm0 = 327;
+                bpm = 327;
+            }
 
             animationDisplay.on(false);// what is this??
-            a3ttrSoundlist.Add("BGM", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
-            a3ttrSoundlist.Add("PianoSong", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoSong.wav"));
-            a3ttrSoundlist.Add("Pickles", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\Pickles.wav"));
-            a3ttrSoundlist.Add("EDance", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\EDance.wav"));
+            a3ttrSoundlist.Add("BGM0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
+            a3ttrSoundlist.Add("BGM1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_1.wav"));
+            a3ttrSoundlist.Add("BGM2", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_2.wav"));
+            a3ttrSoundlist.Add("BGM3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_3.wav"));
+            a3ttrSoundlist.Add("BGM4", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_4.wav"));
+            a3ttrSoundlist.Add("BGM5", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_5.wav"));
+            //a3ttrSoundlist.Add("PianoSong", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\PianoSong.wav"));
+            a3ttrSoundlist.Add("EDance0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\edance1_0.wav"));
+            a3ttrSoundlist.Add("EDance1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\edance1_1.wav"));
+            a3ttrSoundlist.Add("EDance2", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\edance1_2.wav"));
+            a3ttrSoundlist.Add("EDance3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\edance1_3.wav"));
+            a3ttrSoundlist.Add("EDance4", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\edance1_4.wav"));
+            a3ttrSoundlist.Add("EDance5", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\edance1_5.wav"));
+
+            a3ttrSoundlist.Add("StayinAlive0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\stayinalive1_0.wav"));
+            a3ttrSoundlist.Add("StayinAlive1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\stayinalive1_1.wav"));
+            a3ttrSoundlist.Add("StayinAlive2", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\stayinalive1_2.wav"));
+            a3ttrSoundlist.Add("StayinAlive3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\stayinalive1_3.wav"));
+            a3ttrSoundlist.Add("StayinAlive4", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\stayinalive1_4.wav"));
+            a3ttrSoundlist.Add("StayinAlive5", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\stayinalive1_5.wav"));
+
             a3ttrSoundlist.Add("levelUp", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\levelUp.wav"));
             a3ttrSoundlist.Add("feedback", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\feedback.wav"));
             a3ttrSoundlist[song].Play();
@@ -296,20 +341,43 @@ namespace PianoTiles.mod
                         {
                             if (points < gameTargets.Count())
                                 targetNum += 2;
+                            
                             level += 1;
+                            // PLAY SPED UP VERSION OF SONG
+                            int oldlevel = level - 2;
+                            string oldsong = songSelect + oldlevel.ToString();
+                            /**
+                            if (level == 2)
+                            {
+                                oldsong = "BGM";
+                            }**/
+                            int newlevel = level - 1;
+                            string newsong = songSelect + newlevel.ToString();
+                            
+                            if (level > 6) {
+                                oldsong = songSelect+"5";
+                                newsong = songSelect + "5";
+                                
+                            }
+                            currentSong = newsong;
+
+                            //display points
                             Console.WriteLine("level up " + level);
                             Console.WriteLine($"{points} POINTS!");
                             
                             offset += 10 * bpm; // little break
                             speed_incr = 0.20;
-                            a3ttrSoundlist["BGM"].Pause();
+                            a3ttrSoundlist[oldsong].Pause();
                             //a3ttrSoundlist[song].Pause();
                             a3ttrSoundlist["levelUp"].Play();
                             //StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
                             Console.WriteLine("BREAK");
                             //StartAnimation("levelUp", 1, 1);
                             HappyFace(Color.Black, Color.Magenta);
-                            a3ttrSoundlist["BGM"].Play();
+                            a3ttrSoundlist[currentSong].Play();
+                            bpm = bpm0 * (1 + (level - 1) / 10); //adjust bpm
+                            targetSpeed = bpm;
+                            speed_incr += 0.01;
 
                             levelUp = true;
 
@@ -409,7 +477,7 @@ namespace PianoTiles.mod
                         //ONCE THE USER GETS TO ZERO LIVES, THE GAME IS OVER
                         Console.WriteLine("GAME OVER :(");
                         Console.WriteLine("Your score is " + points);
-                        a3ttrSoundlist["BGM"].Stop();
+                        a3ttrSoundlist[currentSong].Stop();
                         offset = 20 * bpm;
                         gameOver = true;
                         StartAnimation("gameover", 0.5, 1);

@@ -290,9 +290,7 @@ namespace A3ttrEngine.mod
                             times += time;
                             if (times >= pauseAnimationDelay)
                             {
-                                a3ttranimationlist.Remove("pause");
-                                loadAnimation("pause", System.Environment.CurrentDirectory + "\\animation\\pause.ttr");
-                                Console.WriteLine("Loop");
+
                                 StartAnimation("pause", 1, 1);
                                 times = 0;
                             }
@@ -377,6 +375,7 @@ namespace A3ttrEngine.mod
                     (int x, int y) displayTarget = KeyMapping(noteList[note_pos].key); // last button in display sequence
                     buttonGrid[displayTarget.x, displayTarget.y].reset(); // resets last button into initial state
                     setLed(Color.Black, displayTarget.x, displayTarget.y); // reseting color of button 
+                    note_pos = 0;
 
                 }
                 switch (ControlButtonID(x)) {
@@ -431,7 +430,7 @@ namespace A3ttrEngine.mod
 
                             }
                             else {
-                                note_pos = 
+                                // reseting sequence
                                 StartAnimation("countDown", 1, 1);
                                 countDownActivated = true;
                                 times = 0;

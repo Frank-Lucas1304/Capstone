@@ -1,44 +1,38 @@
-﻿using System;
+﻿using A3TTRControl;
+using A3TTRControl2;
+using A3ttrEngine.mod;
+using PianoTiles.mod;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 public class ControlPanel
 {
+    public const int TotalNumberOfGame = 4;
     public static int ControlButtonID(int x)
     {
         return x - 49;
     }
-    public static bool isScrollUp(int x, int y) {
-        return (x == 49 && y == 57);
+    /* Method Does not work
+    public static A3GameModel GameID(A3ttrGame consoleObj,int currGameID,int songID = 0)
+    {
+        switch(currGameID)
+        {
+            case 0:
+                return new Game1();
+            case 1:
+                return new MusicMelody(consoleObj, songID);
+            case 2:
+                return new Drawing();
+            case 3:
+                return new PianoPlay();
+            default:
+                return null;
         }
-    public static bool iScrollDownPressed(int x, int y) {
-        return (x == 50 && y == 57);
-    }
-    public static bool PreviousPressed(int x, int y) {
-        return (x == 51 && y == 57);
-    }
-    public static bool NextPressed(int x, int y) {
-        return (x == 52 && y == 57);
-    }
-    public static bool SelectPressed(int x, int y) {
-        return (x == 53 && y == 57);
-
-    }
-    public static bool PlayPausePressed(int x, int y) {
-
-        return (x == 54 && y == 57);
-    }
-    public static bool HomePressed(int x, int y) {
-        return (x == 55 && y == 57);
-
-    }
-
-    public static bool ReturnPressed(int x, int y) {
-
-        return (x == 55 && y == 57);
-    }
+    }*/
 
 
 }

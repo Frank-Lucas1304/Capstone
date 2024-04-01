@@ -5,6 +5,9 @@ using NAudio.Wave.SampleProviders;
 
 using static ControlPanel;
 using System.Linq.Expressions;
+using PianoTiles.mod;
+using A3TTRControl;
+using System.ComponentModel;
 
 
 namespace A3ttrEngine.mod
@@ -25,8 +28,10 @@ namespace A3ttrEngine.mod
         static Partition happySong = new Partition(new string[] { "HC3", "HF3", "HF3", "QF3", "HC3", "QC3", "HF3", "HC3", "HF3" }, 156,6);
         static Partition happyBirthday = new Partition(new string[] { "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", }, 156,6);
         //static List<Note> noteList = happySong.noteList;
+
+        A3ttrGame consoleObj;
+
         int songID = 0;
-        bool switchSong = false;
         static List<Partition> songOptions = new List<Partition>() {happyBirthday,happySong};
        
         static List<Note> noteList = null;
@@ -50,13 +55,18 @@ namespace A3ttrEngine.mod
 
         long times = 0;
         bool launchpadSetUp = true;
-        
-    
 
 
-        public MusicMelody(int songID)
+
+
+        public MusicMelody(A3ttrGame consoleObj, int songID)
         {
+            this.consoleObj = consoleObj;
+
+            // default Settings
             this.songID = songID;
+            noteList = songOptions[songID].noteList;
+            level = songOptions[songID].initLevel;
                  
         }
 
@@ -201,20 +211,9 @@ namespace A3ttrEngine.mod
                             }
                             else
                             {
-                                // Making sure all animation is done before moving on
+                                // Making sure all animation are done before moving on
                                 if (animatedButtons.Count == 0)
-                                {
-                                    if (!switchSong)
-                                    {
-                                        note_pos = 0; // Telling game to display new song's sequence
-                                        times = 0;
-
-                                        positiveFeedbackEffects.Clear();
-
-                                        animatedButtons.Clear();
-                                        switchSong = true;
-
-                                    }
+                                { 
                                     if (note_pos == 2 * level)
                                     {
                                         int size = noteList.Count;
@@ -347,22 +346,21 @@ namespace A3ttrEngine.mod
                             if (songID < songOptions.Count-1)
                             {
                                 Console.WriteLine("Switch song +=1");
-                                if (note_pos == level) // display sequence was already completed before user tried to switch song
+                                if (!(note_pos >= level)) // display sequence was already completed before user tried to switch song
                                 {
-                                    note_pos = 0;
-                                    times = 0;
-                                }
-                                else
-                                {
-                                    switchSong = true;
+                                    Console.WriteLine("Switch activate");
 
+                                    // This code removes previous state of the last target activatio in the display sequence
+                                    (int x, int y) displayTarget = KeyMapping(noteList[note_pos].key); // last button in display sequence
+                                    buttonGrid[displayTarget.x, displayTarget.y].reset(); // resets last button into initial state
                                 }
+
+                                // Reseting Game Settings
                                 songID += 1;
-                                noteList = songOptions[songID].noteList;
+                                note_pos = 0;
+                                times = 0;
                                 level = songOptions[songID].initLevel;
-
-
-
+                                noteList = songOptions[songID].noteList;
                             }
 
                         }
@@ -372,26 +370,27 @@ namespace A3ttrEngine.mod
                             if (0 < songID)
                             {
                                 Console.WriteLine("Switch song -=1");
-                                if (note_pos >= level) // display sequence was already completed before user tried to switch song
+                                if (!(note_pos >= level)) // display sequence was already completed before user tried to switch song
                                 {
-                                    note_pos = 0;
-                                    times = 0;
-                                }
-                                else
-                                {
-                                    switchSong = true;
+                                    Console.WriteLine("Switch activate");
 
+                                    // This code removes previous state of the last target activatio in the display sequence
+                                    (int x, int y) displayTarget = KeyMapping(noteList[note_pos].key); // last button in display sequence
+                                    buttonGrid[displayTarget.x, displayTarget.y].reset(); // resets last button into initial state
                                 }
+
+                                // Reseting Game Settings
                                 songID -= 1;
-                                noteList = songOptions[songID].noteList;
+                                note_pos = 0;
+                                times = 0;
                                 level = songOptions[songID].initLevel;
-
+                                noteList = songOptions[songID].noteList;
                             }
 
                         }
                         break; 
-                    case 2: { 
-                            a3ttr
+                    case 2: {
+                            consoleObj.changeGameModel(new Game1());
                         }
                         break;
                     case 3: { 
@@ -547,6 +546,7 @@ namespace A3ttrEngine.mod
 
             this.display_status = 0;
             this.gradient(timing[display_status]);
+            this.setLed(Color.Black);
         }
 
         public void Display(long time, ref int note_pos,int duration)

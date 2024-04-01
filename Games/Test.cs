@@ -74,7 +74,7 @@ namespace Games.mod
                 if (x == 0 && y == 0)
                 {
                     state = 1;
-                    currentGame.changeGameModel(new MusicMelody(currentGame));
+                    currentGame.changeGameModel(new MusicMelody(currentGame,0));
                 }
                 else
                 {

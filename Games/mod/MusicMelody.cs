@@ -412,7 +412,7 @@ namespace A3ttrEngine.mod
                         break; 
                     case 2: { // Previous Game
 
-                            consoleObj.changeGameModel(new Drawing(consoleObj));
+                                consoleObj.changeGameModel(new Drawing(consoleObj));
                         }
                         break;
                     case 3: { // Next

@@ -7,6 +7,11 @@ using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
+using A3TTRControl;
+using A3ttrEngine.mod;
+using System.Net.NetworkInformation;
+using static ControlPanel;
+
 
 
 namespace PianoTiles.mod
@@ -63,10 +68,31 @@ namespace PianoTiles.mod
         int counter_target_press = 0;
 
         List<int> inactive_list = new List<int>(); // JUST FOR ME TO KEEP TRACK OF WHERE THINGS ARE GOING WRONG
-        public Game1()
+
+        // Control Panel Variables
+        A3ttrGame consoleObj;
+        int songID;
+        public Game1(A3ttrGame consoleObj, int songID)
         {
+            this.consoleObj = consoleObj;
+            this.songID = songID;
+            songSelect = selectSong(songID);
+        }
+        public string selectSong(int songID)
+        {
+            switch (state)
+            {
+                case 0:
+                    return "BGM";
+                case 1:
+                    return "EDance";
+                case 2:
+                    return "StayinAlive";
+                default:
+                    return null;
+                    
 
-
+            }
         }
         /// <summary>
         /// 初始化（提前加载资源）
@@ -162,11 +188,6 @@ namespace PianoTiles.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
-            Note a = new Note("A");
-            a.PitchInOctave(1);
-
-
-
 
             times += time;
             if (isAnimationOn & times >= bpm)//switch constraint to times%(speed*0.5)<(speed*0.5 -1)
@@ -397,11 +418,79 @@ namespace PianoTiles.mod
                 }
 
             }
-            else if (action == 2 && type == 1)
+            else if (action == 1 && type == 2)
             {
-                // WHEN USER LIFTS OFF BUTTON, BUTTON GOES BACK TO ORIGINAL COLOUR
 
-                //清除按钮led灯光
+                switch (ControlButtonID(x))
+                {
+                    case 0: //Scroll Up
+                        {
+                            if (songID < 2)
+                            {
+                                consoleObj.changeGameModel(new Game1(consoleObj, songID + 1));
+
+                            }
+
+
+
+                        }
+                        break;
+                    case 1:
+                        { //Scroll Down
+
+                            if (0 < songID)
+                            {
+                                consoleObj.changeGameModel(new Game1(consoleObj, songID - 1));
+
+                            }
+                        }
+                        break;
+                    case 2:
+                        { // Previous Game
+
+                            consoleObj.changeGameModel(new Drawing(consoleObj));
+                        }
+                        break;
+                    case 3:
+                        { // Next
+                            consoleObj.changeGameModel(new PianoPlay());
+                        }
+                        break;
+                    case 4:
+                        { //Select
+                            // No purpose
+                        }
+                        break;
+                    case 5:
+                        { // Pause or Play
+                            /*
+                            pauseGame = !pauseGame;
+                            if (pauseGame)
+                            {
+                                StartAnimation("pause", 1, 1);
+                                times = 0;
+
+                            }
+                            else
+                            {
+                                // reseting sequence
+                                StartAnimation("countDown", 1, 1);
+                                countDownActivated = true;
+                                times = 0;
+
+                            }*/
+                        }
+                        break;
+                    case 6:
+                        {
+                        }
+                        break;
+                    case 7:
+                        {
+                        }
+                        break;
+
+                }
             }
 
         }

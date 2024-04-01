@@ -14,6 +14,7 @@ using static Cgen.Logger;
 using System.Net.NetworkInformation;
 using A3TTRControl;
 using static ControlPanel;
+using PianoTiles.mod;
 
 
 namespace A3ttrEngine.mod
@@ -130,7 +131,7 @@ namespace A3ttrEngine.mod
                         break;
                     case 2:
                         { // Previous Game
-                            // No Purpose Here
+                            consoleObj.changeGameModel(new Game1(consoleObj,0));
                         }
                         break;
                     case 3:

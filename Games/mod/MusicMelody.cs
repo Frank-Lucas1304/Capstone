@@ -205,7 +205,8 @@ namespace A3ttrEngine.mod
                             //Optimisation: using Animation Curve/ function or different colors
                             (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral, mid, light, black };
                             int[] timing = new int[5] { 0, 100, 100, 100, 100 };
-
+                            //Trying To fix bug
+                            Thread.Sleep(100);
                             // Displays all circle animations
                             foreach (Circle circle in positiveFeedbackEffects)
                             {

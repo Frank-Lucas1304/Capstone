@@ -13,7 +13,7 @@ namespace PianoTiles.mod
 {
     public class Game1 : A3GameModel
     {
-        string songSelect = "BGM"; // THE ONLY VARIABLE TO CHANGE TO SELECT A SONG
+        string songSelect = "StayinAlive"; // THE ONLY VARIABLE TO CHANGE TO SELECT A SONG
         string currentSong = "";
 
         List<Target> gameTargets = new List<Target>();

@@ -18,7 +18,7 @@ namespace PianoTiles.mod
 {
     public class Game1 : A3GameModel
     {
-        string songSelect = "StayinAlive"; // THE ONLY VARIABLE TO CHANGE TO SELECT A SONG
+        string songSelect;
         string currentSong = "";
 
         List<Target> gameTargets = new List<Target>();
@@ -80,7 +80,7 @@ namespace PianoTiles.mod
         }
         public string selectSong(int songID)
         {
-            switch (state)
+            switch (songID)
             {
                 case 0:
                     return "BGM";
@@ -130,6 +130,7 @@ namespace PianoTiles.mod
                 bpm0 = 327;
                 bpm = 327;
             }
+            Console.WriteLine(songSelect);
 
             animationDisplay.on(false);// what is this??
             a3ttrSoundlist.Add("BGM0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
@@ -192,43 +193,7 @@ namespace PianoTiles.mod
             times += time;
             if (isAnimationOn & times >= bpm)//switch constraint to times%(speed*0.5)<(speed*0.5 -1)
             {
-                (int x, int y) = animationDisplay.currPos;
-                (int x, int y) endPos = animationDisplay.endPos;
-                setFadeLed(Color.White, x, y, keeptime * 3, fadetime*2);// Overides all colors from the target functions
-                if (x == endPos.x & y == endPos.y)
-                {   switch(animationState) {
-                        case 0:
-                            setFadeLed(Color.White,4,3,keeptime * 3, fadetime*2);   
-                            ++animationState;
-                            animationDisplay.direction = (0, 1);
-                            animationDisplay.startPos = endPos;
-                            animationDisplay.endPos = (7, 7);
-                            break;
-                        case 1:
-                            setFadeLed(Color.White, 4, 4, keeptime * 3, fadetime*2 );
-                            ++animationState;
-                            animationDisplay.direction = (-1, 0);
-                            animationDisplay.startPos = endPos;
-                            animationDisplay.endPos = (0, 7);
-                            break;
-                        case 2:
-                            setFadeLed(Color.White, 3, 4, keeptime * 3, fadetime*2) ;
-                            ++animationState;
-                            animationDisplay.direction = (0, -1);
-                            animationDisplay.startPos = endPos;
-                            animationDisplay.endPos = (0, 0);
-                            break;
-                        case 3:
-                            setFadeLed(Color.White, 3, 3, keeptime * 3, fadetime*2);
-                            animationState = 0;
-                            animationDisplay.direction = (1,0);
-                            animationDisplay.startPos = endPos;
-                            animationDisplay.endPos = (7, 0);
-                            break;
-                    }
-                }
-                NextPos(animationDisplay);
-                times = 0;
+                isAnimationOn = false;
             }
             else
             {              

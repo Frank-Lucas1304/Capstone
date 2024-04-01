@@ -78,7 +78,7 @@ namespace Games.mod
                 }
                 else
                 {
-                    currentGame.changeGameModel(new Game1());
+                    currentGame.changeGameModel(new Game1(currentGame, 0));
                 }
 
             }

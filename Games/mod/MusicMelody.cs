@@ -27,9 +27,11 @@ namespace A3ttrEngine.mod
 
         //static string[] auClairDeLaLune = new string[] { };
         //static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3" };
-        static Partition happySong = new Partition(new string[] { "HC3", "HF3", "HF3", "QF3", "HC3", "QC3", "HF3", "HC3", "HF3" }, 156);
-        static Partition happyBirthday = new Partition(new string[] { "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", }, 156);
+        static Partition happySong = new Partition(new string[] { "HC3", "HF3", "HF3", "QF3", "HC3", "QC3", "HF3", "HC3", "HF3" }, 156,6);
+        static Partition happyBirthday = new Partition(new string[] { "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", }, 156,6);
         //static List<Note> noteList = happySong.noteList;
+        static List<Partition> songOptions = new List<Partition>() {happyBirthday,happySong};
+        static List<Note> noteList = null;
 
         int note_pos = 0;
 
@@ -38,21 +40,21 @@ namespace A3ttrEngine.mod
         int lives = 3;
         int level = 6;
 
-        (int R, int G, int B) red = (255, 0, 0);
-        (int R, int G, int B) purple = (255, 0, 255);
         (int R, int G, int B) black = (0, 0, 0);
         (int R, int G, int B) light = (255, 0, 255);
         (int R, int G, int B) mid = (120, 50, 120);
         (int R, int G, int B) neutral = (10, 10, 10);
-        (int R, int G, int B) white = (10, 10, 10);
 
         long betweenLevelDelay;
         long quitDelay = 1200;
         bool quitGame = false;
+        bool pauseGame = false;
 
         long times = 0;
         bool launchpadSetUp = true;
-        List<Note> noteList;
+        
+    
+
 
         public MusicMelody()
         { }
@@ -144,109 +146,109 @@ namespace A3ttrEngine.mod
         {
             if (launchpadSetUp)
             {
-                //Setting up Sequence
-                noteList = happyBirthday.noteList;
-
-
                 Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
                 Target.a3ttrSoundlist = a3ttrSoundlist;
                 launchpadSetUp = false;
 
             }
-
-            if (quitGame)
+            if (noteList != null)
             {
-                if (times++ >= quitDelay) // Force quit delay as well as time increment
+                if (quitGame)
                 {
-                    Console.WriteLine("Exit", times);
-                    Environment.Exit(0);
-                }
-            }
-            else
-            {
-
-                if (note_pos < level & note_pos < noteList.Count)
-                {   // Display Sequence
-                    if (times++ >= betweenLevelDelay)
+                    if (times++ >= quitDelay) // Force quit delay as well as time increment
                     {
-                        (int x, int y) = KeyMapping(noteList[note_pos].key);
-                        buttonGrid[x, y].Display(time, ref note_pos, noteList[note_pos].duration);
-                        betweenLevelDelay = 0;
-                        times = 0;
+                        Console.WriteLine("Exit", times);
+                        Environment.Exit(0);
                     }
                 }
                 else
                 {
-                    //Optimisation: using Animation Curve/ function or different colors
-                    (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral, mid, light, black };
-                    int[] timing = new int[5] { 0, 100, 100, 100, 100 };
-
-                    // Displays all circle animations
-                    foreach (Circle circle in positiveFeedbackEffects)
+                    if (!pauseGame)
                     {
-                        circle.Animate(animatedButtons, time, 60, buttonGrid, color_list, timing);
-                    }
-                    //Reducing size of queue if needed
-                    if (positiveFeedbackEffects.Count > 0)
-                    {
-                        if (positiveFeedbackEffects.Peek().status == 1)
-                        {
-                            positiveFeedbackEffects.Dequeue();
-                        }
-                    }
-                    else
-                    {
-                        // Making sure all animation is done before moving on
-                        if (animatedButtons.Count == 0)
-                        {
-                            if (note_pos == 2 * level)
+                        if (note_pos < level & note_pos < noteList.Count)
+                        {   // Display Sequence
+                            if (times++ >= betweenLevelDelay)
                             {
-                                int size = noteList.Count;
-                                if (size == level)
+                                (int x, int y) = KeyMapping(noteList[note_pos].key);
+                                buttonGrid[x, y].Display(time, ref note_pos, noteList[note_pos].duration);
+                                betweenLevelDelay = 0;
+                                times = 0;
+                            }
+                        }
+                        else
+                        {
+                            //Optimisation: using Animation Curve/ function or different colors
+                            (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral, mid, light, black };
+                            int[] timing = new int[5] { 0, 100, 100, 100, 100 };
+
+                            // Displays all circle animations
+                            foreach (Circle circle in positiveFeedbackEffects)
+                            {
+                                circle.Animate(animatedButtons, time, 60, buttonGrid, color_list, timing);
+                            }
+                            //Reducing size of queue if needed
+                            if (positiveFeedbackEffects.Count > 0)
+                            {
+                                if (positiveFeedbackEffects.Peek().status == 1)
                                 {
-                                    GameCompleted();
-                                }
-                                else
-                                {
-                                    // Increasing level and displaying longer sequence
-                                    level += level + 2 < size ? 2 : 1;
-                                    note_pos = 0;
-                                    times = 0;
+                                    positiveFeedbackEffects.Dequeue();
                                 }
                             }
                             else
                             {
-                                // Checking if invalid input
-                                if (isInvalidInput)
+                                // Making sure all animation is done before moving on
+                                if (animatedButtons.Count == 0)
                                 {
-                                    isInvalidInput = !isInvalidInput;
-                                    if (lives == 0)
+                                    if (note_pos == 2 * level)
                                     {
-                                        GameOver();
+                                        int size = noteList.Count;
+                                        if (size == level)
+                                        {
+                                            GameCompleted();
+                                        }
+                                        else
+                                        {
+                                            // Increasing level and displaying longer sequence
+                                            level += level + 2 < size ? 2 : 1;
+                                            note_pos = 0;
+                                            times = 0;
+                                        }
                                     }
-                                    note_pos = 0;
-                                    times = 0;
+                                    else
+                                    {
+                                        // Checking if invalid input
+                                        if (isInvalidInput)
+                                        {
+                                            isInvalidInput = !isInvalidInput;
+                                            if (lives == 0)
+                                            {
+                                                GameOver();
+                                            }
+                                            note_pos = 0;
+                                            times = 0;
+                                        }
+                                    }
+
                                 }
                             }
 
+                            // Reducing Queue Size when required
+                            if (animatedButtons.Count > 0)
+                            {
+                                if (animatedButtons.Peek().animation_sequence.Count == 0)
+                                {
+                                    animatedButtons.Dequeue();
+                                }
+                            }
+
+                            foreach (Target button in animatedButtons)
+                            {
+                                button.AnimateTarget(time);
+                            }
+
+                            // Reduces Size of Queue as Animations are completed
                         }
                     }
-
-                    // Reducing Queue Size when required
-                    if (animatedButtons.Count > 0)
-                    {
-                        if (animatedButtons.Peek().animation_sequence.Count == 0)
-                        {
-                            animatedButtons.Dequeue();
-                        }
-                    }
-
-                    foreach (Target button in animatedButtons)
-                    {
-                        button.AnimateTarget(time);
-                    }
-
-                    // Reduces Size of Queue as Animations are completed
                 }
             }
 
@@ -715,19 +717,27 @@ namespace A3ttrEngine.mod
     {
         public int bpm { get; set; }
         public List<Note> noteList { get; set; }
-        public Partition(string[] partition, int bpm)
+
+        public int initLevel { get; set; }
+        public Partition(string[] partition, int bpm, int initLevel)
         {
-            noteList = new List<Note>();
+            // Initialising bpm for song --> this will determine display pace
             this.bpm = bpm;
+            // This parameter will be used to implement starting difficulty
+            this.initLevel = initLevel;
+
+            noteList = new List<Note>();
+
             foreach (string name in partition)
             {
+                // The type is to know the length of each note
                 char type = name[0];
                 string key = name.Substring(1, name.Length - 1);
-                noteList.Add(new Note(type,key,bpm));
+                noteList.Add(new Note(type, key, bpm));
 
             }
 
-
+            this.initLevel = initLevel;
         }
     }
     class Note

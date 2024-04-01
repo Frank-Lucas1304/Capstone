@@ -2,13 +2,9 @@
 using NAudio.Wave;
 using System.Drawing;
 using NAudio.Wave.SampleProviders;
-using System.Runtime.CompilerServices;
-using System.Collections.Generic;
-using Midi.Instruments;
-using OpenTK.Audio.OpenAL;
-using OpenTK.Input;
-using OpenTK.Graphics.ES10;
-using System.Xml.Linq;
+
+using static ControlPanel;
+using System.Linq.Expressions;
 
 
 namespace A3ttrEngine.mod
@@ -22,7 +18,6 @@ namespace A3ttrEngine.mod
         Target[,] buttonGrid = new Target[8, 8];
         Queue<Target> animatedButtons = new Queue<Target>();
         Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
-
         static string[] happy = new string[] { "C3", "F3", "F3", "F3", "C3", "C3", "F3", "C3", "F3" };
 
         //static string[] auClairDeLaLune = new string[] { };
@@ -30,7 +25,10 @@ namespace A3ttrEngine.mod
         static Partition happySong = new Partition(new string[] { "HC3", "HF3", "HF3", "QF3", "HC3", "QC3", "HF3", "HC3", "HF3" }, 156,6);
         static Partition happyBirthday = new Partition(new string[] { "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", }, 156,6);
         //static List<Note> noteList = happySong.noteList;
+        int songID = 0;
+        bool switchSong = false;
         static List<Partition> songOptions = new List<Partition>() {happyBirthday,happySong};
+       
         static List<Note> noteList = null;
 
         int note_pos = 0;
@@ -56,8 +54,11 @@ namespace A3ttrEngine.mod
     
 
 
-        public MusicMelody()
-        { }
+        public MusicMelody(int songID)
+        {
+            this.songID = songID;
+                 
+        }
 
         /// <summary>
         /// 初始化（提前加载资源）
@@ -121,6 +122,10 @@ namespace A3ttrEngine.mod
         public override void init()
         {
             base.Name = "MusicMelody";
+            
+            //loadAnimation("pause", System.Environment.CurrentDirectory + "\\animation\\pause.ttr");
+            
+            loadAnimation("countDown", System.Environment.CurrentDirectory + "\\animation\\countDown.ttr");
 
             a3ttrSoundlist.Add("GameOver", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\GameOver.wav"));
 
@@ -199,6 +204,17 @@ namespace A3ttrEngine.mod
                                 // Making sure all animation is done before moving on
                                 if (animatedButtons.Count == 0)
                                 {
+                                    if (!switchSong)
+                                    {
+                                        note_pos = 0; // Telling game to display new song's sequence
+                                        times = 0;
+
+                                        positiveFeedbackEffects.Clear();
+
+                                        animatedButtons.Clear();
+                                        switchSong = true;
+
+                                    }
                                     if (note_pos == 2 * level)
                                     {
                                         int size = noteList.Count;
@@ -249,6 +265,10 @@ namespace A3ttrEngine.mod
                             // Reduces Size of Queue as Animations are completed
                         }
                     }
+                    else
+                    {
+                        //StartAnimation("pause", 1,0);
+                    }
                 }
             }
 
@@ -263,8 +283,8 @@ namespace A3ttrEngine.mod
         /// <param name="y">按键Y坐标</param>
         public override void input(int action, int type, int x, int y)
         {
-
-            if (action == 1 && type == 1)
+            //if game is paused we dont want to be able to register input
+            if (action == 1 && type == 1 && !pauseGame)
             {
                 (int x, int y) pos;
                 if (note_pos >= level && note_pos < 2 * level)
@@ -275,7 +295,9 @@ namespace A3ttrEngine.mod
                     {
                         note_pos += 1;
                         if (note_pos == 2 * level)
+                        {
                             positiveFeedbackEffects.Enqueue(new Circle(pos));
+                        }
                         else
                         {
                             (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral, mid, light, black };
@@ -316,9 +338,78 @@ namespace A3ttrEngine.mod
                     }
                 }
             }
-            else if (action == 2 && type == 1)
+            else if (action == 1 && type == 2)
             {
 
+                switch (ControlButtonID(x)) {
+                    case 0: //Scroll Up
+                        {
+                            if (songID < songOptions.Count-1)
+                            {
+                                Console.WriteLine("Switch song +=1");
+                                if (note_pos == level) // display sequence was already completed before user tried to switch song
+                                {
+                                    note_pos = 0;
+                                    times = 0;
+                                }
+                                else
+                                {
+                                    switchSong = true;
+
+                                }
+                                songID += 1;
+                                noteList = songOptions[songID].noteList;
+                                level = songOptions[songID].initLevel;
+
+
+
+                            }
+
+                        }
+                        break;
+                    case 1: { //Scroll Down
+
+                            if (0 < songID)
+                            {
+                                Console.WriteLine("Switch song -=1");
+                                if (note_pos >= level) // display sequence was already completed before user tried to switch song
+                                {
+                                    note_pos = 0;
+                                    times = 0;
+                                }
+                                else
+                                {
+                                    switchSong = true;
+
+                                }
+                                songID -= 1;
+                                noteList = songOptions[songID].noteList;
+                                level = songOptions[songID].initLevel;
+
+                            }
+
+                        }
+                        break; 
+                    case 2: { 
+                            a3ttr
+                        }
+                        break;
+                    case 3: { 
+                        }
+                        break;
+                    case 4: { 
+                        } 
+                        break;
+                    case 5: { 
+                        } 
+                        break;
+                    case 6: { 
+                        } 
+                        break;
+                    case 7: { 
+                        } break;
+                
+                }
             }
             base.input(action, type, x, y);
         }

@@ -130,13 +130,13 @@ namespace A3ttrEngine.mod
                         break;
                     case 2:
                         { // Previous Game
-                            consoleObj.changeGameModel(new MusicMelody(consoleObj, 0)); // Default Song settings
+                            // No Purpose Here
                         }
                         break;
                     case 3:
                         { // Next
-
-                            // No Purpose Here
+                            consoleObj.changeGameModel(new MusicMelody(consoleObj, 0)); // Default Song settings
+                            
                         }
                         break;
                 }

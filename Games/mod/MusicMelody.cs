@@ -313,7 +313,7 @@ namespace A3ttrEngine.mod
         public override void input(int action, int type, int x, int y)
         {
             //if game is paused we dont want to be able to register input
-            if (action == 1 && type == 1 && !pauseGame)
+            if (action == 1 && type == 1 && !pauseGame && !countDownActivated)
             {
                 (int x, int y) pos;
                 if (note_pos >= level && note_pos < 2 * level)
@@ -431,6 +431,7 @@ namespace A3ttrEngine.mod
 
                             }
                             else {
+                                note_pos = 
                                 StartAnimation("countDown", 1, 1);
                                 countDownActivated = true;
                                 times = 0;

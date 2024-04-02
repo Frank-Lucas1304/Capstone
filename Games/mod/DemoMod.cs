@@ -53,6 +53,7 @@ namespace A3ttrEngine.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
+            //input(0, 1, 0, 0);
             base.update(time);
         }
         /// <summary>
@@ -67,9 +68,17 @@ namespace A3ttrEngine.mod
             if (action==1&&type==1)
             {
                 //设置按钮led灯光
-                Console.WriteLine("Lmao");
+                //Console.WriteLine("press");
+                //Console.WriteLine("Lmao");
                 base.setLed(ledColor, x, y);
                
+            }else if (action == 2 && type == 1)
+            {
+                base.setLed(System.Drawing.Color.RosyBrown, x, y);
+                //Console.WriteLine("inside");
+
+
+                //Console.WriteLine("release");
             }
             else if (action == 2 && type == 2)
             {
@@ -77,6 +86,7 @@ namespace A3ttrEngine.mod
 
                 //清除按钮led灯光
             }
+            Console.WriteLine($"{action}{type}{x}{y}");
             base.input(action, type, x, y);
         }
     }

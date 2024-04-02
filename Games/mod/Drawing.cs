@@ -15,6 +15,7 @@ using System.Net.NetworkInformation;
 using A3TTRControl;
 using static ControlPanel;
 using PianoTiles.mod;
+using Games.mod;
 
 
 namespace A3ttrEngine.mod
@@ -138,6 +139,27 @@ namespace A3ttrEngine.mod
                         { // Next
                             consoleObj.changeGameModel(new MusicMelody(consoleObj, 0)); // Default Song settings
                             
+                        }
+                        break;
+                    case 4:
+                        { //Select
+                          // No purpose
+                        }
+                        break;
+                    case 5:
+                        { // Pause or Play
+                          // No purpose
+                        }
+                    break;
+                    case 6:
+                        {
+                            consoleObj.changeGameModel(new Menu(consoleObj));
+
+                        }
+                        break;
+                    case 7:
+                        {
+                            consoleObj.changeGameModel(new Menu(consoleObj));
                         }
                         break;
                 }

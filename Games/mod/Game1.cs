@@ -11,6 +11,7 @@ using A3TTRControl;
 using A3ttrEngine.mod;
 using System.Net.NetworkInformation;
 using static ControlPanel;
+using Games.mod;
 
 
 
@@ -418,7 +419,7 @@ namespace PianoTiles.mod
                         break;
                     case 3:
                         { // Next
-                            consoleObj.changeGameModel(new PianoPlay());
+                            consoleObj.changeGameModel(new PianoPlay(consoleObj));
                         }
                         break;
                     case 4:
@@ -448,10 +449,12 @@ namespace PianoTiles.mod
                         break;
                     case 6:
                         {
+                            consoleObj.changeGameModel(new Menu(consoleObj));
                         }
                         break;
                     case 7:
                         {
+                            consoleObj.changeGameModel(new Menu(consoleObj));
                         }
                         break;
 

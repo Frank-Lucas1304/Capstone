@@ -65,6 +65,7 @@ namespace A3ttrEngine.mod
         {
             if (action==1 && type==1)
             {
+                
                 if (molelist.Count(c => c.cleartime >= times && c.x == x && c.y == y) > 0) // checks if taget was hit
                 {
                     // Positive Feedback Effects

@@ -20,11 +20,11 @@ namespace Games.mod
     /// <summary>
     /// 这是一个演示
     /// </summary>
-    public class Test : A3GameModel
+    public class Menu : A3GameModel
     {
         A3ttrGame currentGame;
         public int state = 0;
-        public Test(A3ttrGame consoleGame)
+        public Menu(A3ttrGame consoleGame)
         {
             currentGame = consoleGame;
 

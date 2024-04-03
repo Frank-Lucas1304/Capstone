@@ -11,6 +11,7 @@ using System.ComponentModel;
 using OpenTK.Input;
 using System.ComponentModel.Design;
 using Games.mod;
+using System.IO.Ports;
 
 
 namespace A3ttrEngine.mod
@@ -24,15 +25,15 @@ namespace A3ttrEngine.mod
         Target[,] buttonGrid = new Target[8, 8];
         Queue<Target> animatedButtons = new Queue<Target>();
         Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
-        static string[] happy = new string[] { "C3", "F3", "F3", "F3", "C3", "C3", "F3", "C3", "F3" };
 
         //static string[] auClairDeLaLune = new string[] { };
         //static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3" };
-        static Partition happySong = new Partition(new string[] { "HC3", "HF3", "HF3", "QF3", "HC3", "QC3", "HF3", "HC3", "HF3" }, 156,6);
-        static Partition happyBirthday = new Partition(new string[] { "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", }, 156,6);
+        static Partition pirate = new Partition(new string[] { "EA2", "EC3", "QD3", "QD3", "ED3", "EE3", "QF3", "QF3", "EF3", "EG3", "QE3", "QE3", "ED3", "EC3", "EC3", "ED3" }, 106, 6);
+        static Partition furElise = new Partition(new string[] { "EE3", "E#D3", "EE3", "E#D3", "EE3", "EB2", "ED3", "EE3", "EA2", "EC2", "EE2", "EA2", "EB2", "EE2", "E#G2", "EB2", "EC3" }, 136,6);
+        static Partition happyBirthday = new Partition(new string[] { "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "EC3", "EC3", "EC2", "EA3", "QF3", "QE3", "QD3", "EB3", "EB3", "QA3", "EF3", "EG3", "EF3", }, 156,6);
         //static List<Note> noteList = happySong.noteList;
 
-        static List<Partition> songOptions = new List<Partition>() { happyBirthday, happySong };
+        static List<Partition> songOptions = new List<Partition>() { happyBirthday, furElise, pirate };
         static List<Note> noteList = null;
 
 
@@ -66,9 +67,9 @@ namespace A3ttrEngine.mod
 
         int songID = 0;
 
+        SerialPort _serialport;
 
-
-        public MusicMelody(A3ttrGame consoleObj, int songID)
+        public MusicMelody(A3ttrGame consoleObj, int songID, SerialPort _serialport)
         {
             this.consoleObj = consoleObj;
 
@@ -76,7 +77,9 @@ namespace A3ttrEngine.mod
             this.songID = songID;
             noteList = songOptions[songID].noteList;
             level = songOptions[songID].initLevel;
-                 
+            this._serialport = _serialport;
+
+
         }
 
         /// <summary>
@@ -180,10 +183,11 @@ namespace A3ttrEngine.mod
                 if (quitGame)
                 {
                     times += time;
-                    if (times++ >= quitDelay) // Force quit delay as well as time increment
+                    if (times >= (quitDelay+1000)) // Force quit delay as well as time increment
                     {
                         Console.WriteLine("Exit", times);
-                        Environment.Exit(0);
+                        _serialport.Write("4");
+                        consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
                     }
                 }
                 else
@@ -196,6 +200,8 @@ namespace A3ttrEngine.mod
                             if (times >= betweenLevelDelay)
                             {
                                 (int x, int y) = KeyMapping(noteList[note_pos].key);
+                                Console.WriteLine(noteList[note_pos].key);
+                                Console.WriteLine($"{x} {y}");
                                 buttonGrid[x, y].Display(time, ref note_pos, noteList[note_pos].duration);
                                 betweenLevelDelay = 0;
                                 times = 0;
@@ -245,6 +251,8 @@ namespace A3ttrEngine.mod
                                         // Checking if invalid input
                                         if (isInvalidInput)
                                         {
+                                            _serialport.Write("6");
+
                                             isInvalidInput = !isInvalidInput;
                                             if (lives == 0)
                                             {
@@ -411,16 +419,17 @@ namespace A3ttrEngine.mod
                         }
                         break; 
                     case 2: { // Previous Game
-
+                            _serialport.Write("B");
                             a3ttranimationlist.Clear();
                             a3ttrSoundlist.Clear();
-                            consoleObj.changeGameModel(new Drawing(consoleObj));
+                            consoleObj.changeGameModel(new Drawing(consoleObj, _serialport));
                         }
                         break;
                     case 3: { // Next
+                            _serialport.Write("D");
                             a3ttranimationlist.Clear();
                             a3ttrSoundlist.Clear();
-                            consoleObj.changeGameModel(new PianoPlay(consoleObj));
+                            consoleObj.changeGameModel(new PianoPlay(consoleObj, _serialport));
                         }
                         break;
                     case 4: { //Select
@@ -444,12 +453,18 @@ namespace A3ttrEngine.mod
                         } 
                         break;
                     case 6: {
-
-                            consoleObj.changeGameModel(new Menu(consoleObj));
+                            _serialport.Write("4");
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
                         } 
                         break;
-                    case 7: {
-                            consoleObj.changeGameModel(new Menu(consoleObj));
+                    case 7:
+                        {
+                            _serialport.Write("4");
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
                         } break;
                 
                 }
@@ -516,7 +531,7 @@ namespace A3ttrEngine.mod
             else
             { // Sharp notes
                 octave = key[2] - 48;
-
+                letter = key[1];
                 y = 6 - octave * 2;
                 switch (letter)
                 {

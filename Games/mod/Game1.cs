@@ -12,6 +12,8 @@ using A3ttrEngine.mod;
 using System.Net.NetworkInformation;
 using static ControlPanel;
 using Games.mod;
+using OpenTK.Graphics.OpenGL;
+using System.IO.Ports;
 
 
 
@@ -29,6 +31,8 @@ namespace PianoTiles.mod
         int animationState = 0;
         bool levelUp = false;
         bool gameOver = false;
+        bool pauseGame = false;
+        bool once = true;
         int feedback = 7;
         /*TIME VARIABLES*/
         long times = 0;
@@ -73,11 +77,16 @@ namespace PianoTiles.mod
         // Control Panel Variables
         A3ttrGame consoleObj;
         int songID;
-        public Game1(A3ttrGame consoleObj, int songID)
+        string song;
+        SerialPort _serialport;
+        public Game1(A3ttrGame consoleObj, int songID,SerialPort _serialport)
         {
             this.consoleObj = consoleObj;
             this.songID = songID;
             songSelect = selectSong(songID);
+            song = songSelect + "0";
+            currentSong = song;
+            this._serialport = _serialport;
         }
         public string selectSong(int songID)
         {
@@ -124,17 +133,13 @@ namespace PianoTiles.mod
             songList.Add("StayinAlive4");
             songList.Add("StayinAlive5");
 
-            int songToPlay = 0;
-            string song = songList[songToPlay];
-            song = songSelect + "0";
             if (songSelect == "StayinAlive") {
                 bpm0 = 327;
                 bpm = 327;
             }
             Console.WriteLine(songSelect);
 
-            animationDisplay.on(false);// what is this??
-            a3ttrSoundlist.Add("BGM0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong.wav"));
+            a3ttrSoundlist.Add("BGM0", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_0.wav"));
             a3ttrSoundlist.Add("BGM1", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_1.wav"));
             a3ttrSoundlist.Add("BGM2", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_2.wav"));
             a3ttrSoundlist.Add("BGM3", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\demosong1_3.wav"));
@@ -157,13 +162,12 @@ namespace PianoTiles.mod
 
             a3ttrSoundlist.Add("levelUp", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\levelUp.wav"));
             a3ttrSoundlist.Add("feedback", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\feedback.wav"));
-            a3ttrSoundlist[song].Play();
             a3ttrSoundlist.Add("gameover", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\gameover.wav"));
             a3ttrSoundlist.Add("Buzzer", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\WrongBuzzer.wav"));
-            loadAnimation("levelUp", System.Environment.CurrentDirectory + "\\animation\\gradient2.ttr");
-
+            loadAnimation("levelUp", System.Environment.CurrentDirectory + "\\animation\\happy.ttr");
+            loadAnimation("countDown", System.Environment.CurrentDirectory + "\\animation\\countDown.ttr");
             loadAnimation("gameover", System.Environment.CurrentDirectory + "\\animation\\gameover.ttr");
-
+            loadAnimation("pause", System.Environment.CurrentDirectory + "\\animation\\pause.ttr");
             Target.launchpad = a3ttrPadCell;
 
             gameTargets.Add(new Target((3, 3), (0, 0), (-1, -1), 3)); //A
@@ -190,87 +194,99 @@ namespace PianoTiles.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
-
-            times += time;
-            if (isAnimationOn & times >= bpm)//switch constraint to times%(speed*0.5)<(speed*0.5 -1)
+            if (gameOver&& times>2000)
             {
-                isAnimationOn = false;
+
+                //NoteOnOffMessage(IDeviceBase device, Channel channel, Pitch pitch, int velocity, float time, Clock clock, float duration);
+                Console.WriteLine("GAME OVER :(");
+                Console.WriteLine("Your score is " + points);
+                Console.WriteLine(string.Join(", ", inactive_list));
+                _serialport.Write("4");
+                a3ttranimationlist.Clear();
+                a3ttrSoundlist.Clear();
+                consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
+
             }
-            else
-            {              
-                if (times >= offset)
+            if (!pauseGame && !gameOver)
+            {
+                times += time;
+                if (isAnimationOn && once)
                 {
-                    if (levelUp)
-                    {
-                        //CLEAR ANIMATION
-                        for (int x = 0; x < 8; x++)
-                        {
-                            for (int y = 0; y < 8; y++)
-                            {
-                                base.clearLed(x, y);
-                                base.clearFadeLed(x, y);
-                            }
-                        }
+                    StartAnimation("countDown", 1, 1);
+                    once = false;
+                }
+                if (isAnimationOn && times >= 3000)//switch constraint to times%(speed*0.5)<(speed*0.5 -1)
+                {
+                    a3ttrSoundlist[song].Play();
 
-
-                        /*RANDOMIZING TARGETS*/
-                        for (int i = gameTargets.Count - 1; i >= 0; i--)
-                        {
-                            Random random = new Random(Guid.NewGuid().GetHashCode());
-                            var k = random.Next(i + 1);
-                            var value = gameTargets[k];
-                            gameTargets[k] = gameTargets[i];
-                            gameTargets[i] = value;
-                        }
-                        levelUp = false;
-
-                        //a3ttrSoundlist["BGM"].Play();
-                    }
-                    if (gameOver)
-                    {
-
-                        //Chord("G");
-                        //NoteOnOffMessage(IDeviceBase device, Channel channel, Pitch pitch, int velocity, float time, Clock clock, float duration);
-                        Console.WriteLine("GAME OVER :(");
-                        Console.WriteLine("Your score is " + points);
-                        Console.WriteLine(string.Join(", ", inactive_list));
-                        Environment.Exit(0);
-
-                    }
-                    offset = targetSpeed; // updating time condition so that target movement will hit their end position on beat
-                    // SENDING A NEW TARGET IN A RANDOM 
-                    // MOVE EACH TARGET TO THE NEXT POSITION
-                    for (int i = 0; i < targetNum; i++)
-                    {
-                        Target target = gameTargets.ElementAt(i);
-
-                        if (target.status == "missed" | target.status == "hit")
-                        {
-                            Random random = new Random(Guid.NewGuid().GetHashCode());
-                            if (random.Next(0, 2) == 1 && Target.inactiveTargets < maxTargetsAtTheTime) //&& Target.inactiveTargets < maxTargetsAtTheTime
-
-                            {   if (!(target.startPos == prevTargetStart && target.endPos == prevTargetEnd)) 
-                                {
-                                    // if the new generated target is not the previous target
-                                    // to avoid repition of the same target in a row
-
-                                    target.on();
-                                    inactive_list.Add(Target.inactiveTargets); // JUST FOR ME TO KEEP TRACK OF WHERE THINGS ARE GOING WRONG
-                                    // updates previous target
-                                    prevTargetStart = target.startPos;
-                                    prevTargetEnd = target.endPos;
-                                }
-                                
-
-                            }
-                        }
-                        NextPos(target); // need to figure out when to add targets
-                   
-                    }
+                    isAnimationOn = false;
                     times = 0;
                 }
+                else
+                {
+                    if (!isAnimationOn && times >= offset)
+                    {
+                        if (levelUp)
+                        {
+                            //CLEAR ANIMATION
+                            for (int x = 0; x < 8; x++)
+                            {
+                                for (int y = 0; y < 8; y++)
+                                {
+                                    base.clearLed(x, y);
+                                    base.clearFadeLed(x, y);
+                                }
+                            }
+
+
+                            /*RANDOMIZING TARGETS*/
+                            for (int i = gameTargets.Count - 1; i >= 0; i--)
+                            {
+                                Random random = new Random(Guid.NewGuid().GetHashCode());
+                                var k = random.Next(i + 1);
+                                var value = gameTargets[k];
+                                gameTargets[k] = gameTargets[i];
+                                gameTargets[i] = value;
+                            }
+                            levelUp = false;
+
+                        }
+
+                        offset = targetSpeed; // updating time condition so that target movement will hit their end position on beat
+                                              // SENDING A NEW TARGET IN A RANDOM 
+                                              // MOVE EACH TARGET TO THE NEXT POSITION
+                        for (int i = 0; i < targetNum; i++)
+                        {
+                            Target target = gameTargets.ElementAt(i);
+
+                            if (target.status == "missed" | target.status == "hit")
+                            {
+                                Random random = new Random(Guid.NewGuid().GetHashCode());
+                                if (random.Next(0, 2) == 1 && Target.inactiveTargets < maxTargetsAtTheTime) //&& Target.inactiveTargets < maxTargetsAtTheTime
+
+                                {
+                                    if (!(target.startPos == prevTargetStart && target.endPos == prevTargetEnd))
+                                    {
+                                        // if the new generated target is not the previous target
+                                        // to avoid repition of the same target in a row
+
+                                        target.on();
+                                        inactive_list.Add(Target.inactiveTargets); // JUST FOR ME TO KEEP TRACK OF WHERE THINGS ARE GOING WRONG
+                                                                                   // updates previous target
+                                        prevTargetStart = target.startPos;
+                                        prevTargetEnd = target.endPos;
+                                    }
+
+
+                                }
+                            }
+                            NextPos(target); // need to figure out when to add targets
+
+                        }
+                        times = 0;
+                    }
+                }
             }
-            
             base.update(time);// instead of time  put 2
         }
 
@@ -288,11 +304,7 @@ namespace PianoTiles.mod
         {
             if (action == 1 && type == 1)
             {
-                if (isAnimationOn)
-                {
-                    isAnimationOn = false;
-                    times = 0;
-                }
+               
 
 
                 // CHECK IF BUTTON PRESSED IS A TARGET BUTTON
@@ -354,13 +366,11 @@ namespace PianoTiles.mod
                             
                             offset += 10 * bpm; // little break
                             speed_incr = 0.20;
-                            a3ttrSoundlist[oldsong].Pause();
-                            //a3ttrSoundlist[song].Pause();
+                            a3ttrSoundlist[oldsong].Stop();
                             a3ttrSoundlist["levelUp"].Play();
-                            //StartAnimation("green", 1.5, 0.03); // Visual Feedback --> whole board pulsates
                             Console.WriteLine("BREAK");
-                            //StartAnimation("levelUp", 1, 1);
-                            HappyFace(Color.Black, Color.Magenta);
+                            StartAnimation("levelUp", 1, 1);
+                            //HappyFace(Color.Black, Color.Magenta);
                             a3ttrSoundlist[currentSong].Play();
                             bpm = bpm0 * (1 + (level - 1) / 10); //adjust bpm
                             targetSpeed = bpm;
@@ -386,83 +396,95 @@ namespace PianoTiles.mod
             }
             else if (action == 1 && type == 2)
             {
-
-                switch (ControlButtonID(x))
-                {
-                    case 0: //Scroll Up
-                        {
-                            if (songID < 2)
+                if (!isAnimationOn) {
+                    switch (ControlButtonID(x))
+                    {
+                        case 0: //Scroll Up
                             {
-                                consoleObj.changeGameModel(new Game1(consoleObj, songID + 1));
+                                if (songID < 2)
+                                {
+                                    a3ttranimationlist.Clear();
+                                    a3ttrSoundlist.Clear();
+                                    consoleObj.changeGameModel(new Game1(consoleObj, songID + 1, _serialport));
+
+                                }
+
+
 
                             }
+                            break;
+                        case 1:
+                            { //Scroll Down
 
+                                if (0 < songID)
+                                {
+                
+                                    a3ttranimationlist.Clear();
+                                    a3ttrSoundlist.Clear();
+                                    consoleObj.changeGameModel(new Game1(consoleObj, songID - 1, _serialport));
 
+                                }
+                            }
+                            break;
+                        case 2:
+                            { // Previous Game
 
-                        }
-                        break;
-                    case 1:
-                        { //Scroll Down
-
-                            if (0 < songID)
-                            {
-                                consoleObj.changeGameModel(new Game1(consoleObj, songID - 1));
 
                             }
-                        }
-                        break;
-                    case 2:
-                        { // Previous Game
-
-                           
-                        }
-                        break;
-                    case 3:
-                        { // Next
-                            a3ttranimationlist.Clear();
-                            a3ttrSoundlist.Clear();
-                            consoleObj.changeGameModel(new Drawing(consoleObj));
-                        }
-                        break;
-                    case 4:
-                        { //Select
-                            // No purpose
-                        }
-                        break;
-                    case 5:
-                        { // Pause or Play
-                            /*
-                            pauseGame = !pauseGame;
-                            if (pauseGame)
-                            {
-                                StartAnimation("pause", 1, 1);
-                                times = 0;
-
+                            break;
+                        case 3:
+                            { // Next
+                                _serialport.Write("B");
+                                a3ttranimationlist.Clear();
+                                a3ttrSoundlist.Clear();
+                                consoleObj.changeGameModel(new Drawing(consoleObj, _serialport));
                             }
-                            else
-                            {
-                                // reseting sequence
-                                StartAnimation("countDown", 1, 1);
-                                countDownActivated = true;
-                                times = 0;
+                            break;
+                        case 4:
+                            { //Select
+                              // No purpose
+                            }
+                            break;
+                        case 5:
+                            { // Pause or Play
 
-                            }*/
-                        }
-                        break;
-                    case 6:
-                        {
-                            a3ttranimationlist.Clear();
-                            a3ttrSoundlist.Clear();
-                            consoleObj.changeGameModel(new Menu(consoleObj));
-                        }
-                        break;
-                    case 7:
-                        {
-                            a3ttranimationlist.Clear();
-                            a3ttrSoundlist.Clear();
-                            consoleObj.changeGameModel(new Menu(consoleObj));
-                        }
-                        break;
+
+                                if (!pauseGame)
+                                {
+                                    pauseGame = true;
+
+                                    a3ttrSoundlist[currentSong].Stop();
+                                    StartAnimation("pause", 1, 1);
+                                    times = 0;
+
+                                }
+                                else
+                                {
+                                    pauseGame = false;
+                                    isAnimationOn = true;
+                                    once = true;
+                                    times = 0;
+
+                                }
+                            }
+                            break;
+                        case 6:
+                            {
+                                _serialport.Write("4");
+                                a3ttranimationlist.Clear();
+                                a3ttrSoundlist.Clear();
+                                consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
+                            }
+                            break;
+                        case 7:
+                            {
+                                _serialport.Write("4");
+                                a3ttranimationlist.Clear();
+                                a3ttrSoundlist.Clear();
+                                consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
+                            }
+                            break;
+                    }
 
                 }
             }
@@ -492,8 +514,6 @@ namespace PianoTiles.mod
                         Color color = (distance == 1) ? color3 : color2;
                         if (distance == 2) {
                             color = color1;
-                            //setFadeLed(Color.FromArgb(10, 10, 10), target.startPos.x, target.startPos.y, keeptime, fadetime * 2);
-                            //setFadeLed(Color.FromArgb(10, 10, 10), target.startPos.x + 2*target.direction.x, 2*target.startPos.y + target.direction.y, keeptime, fadetime * 2);
                             
                         }
                         setFadeLed(color, currPos.x, currPos.y, keeptime, fadetime*2);
@@ -505,7 +525,6 @@ namespace PianoTiles.mod
                         //I CHANGED THIS SO IT FADES BECAUSE OTHERWISE THE 4 BUTTONS ARE LIT UP WHITE THE WHOLE TIME
 
                         setLed(Color.White, target.currPos.x, target.currPos.y);
-                        //base.setFadeLed(Color.White, target.currPos.x, target.currPos.y, keeptime, fadetime);
                         target.status = "active"; // Activate it
 
                     }
@@ -519,8 +538,6 @@ namespace PianoTiles.mod
                         When the target enters here it is because the user did not hit the target in time. Therefore the target status is set to "missed" and a visual feedback is ouputed*/
                         --Target.inactiveTargets;
                         inactive_list.Add(Target.inactiveTargets); // JUST FOR ME TO KEEP TRACK OF WHERE THINGS ARE GOING WRONG
-                        //Target.inactiveTargets = 0;
-                        //Target.inactiveTarget = false;
                         a3ttrSoundlist["Buzzer"].Play();
                         target.status = "missed";
                         clearLed(target.endPos.x, target.endPos.y);
@@ -540,11 +557,16 @@ namespace PianoTiles.mod
                         //ONCE THE USER GETS TO ZERO LIVES, THE GAME IS OVER
                         Console.WriteLine("GAME OVER :(");
                         Console.WriteLine("Your score is " + points);
+                        Console.WriteLine(currentSong);
+
                         a3ttrSoundlist[currentSong].Stop();
                         offset = 20 * bpm;
                         gameOver = true;
+                        _serialport.Write("6");
+
                         StartAnimation("gameover", 0.5, 1);
                         a3ttrSoundlist["gameover"].Play();
+                       
 
                     }
 
@@ -577,15 +599,7 @@ namespace PianoTiles.mod
             public (int x, int y) currPos { get; set; }
             public (int x, int y) direction { get; set; }
             public Color color { get; set; }
-            public void update(int times)
-            {   
-                // This method will be responsible for updating the color of the led
-                if (times % colorSpeed < colorSpeed - 1)
-                {   
-                    
-                }
-                
-            }
+
             public int distance()
             {
                 int xDiff = Math.Abs(currPos.x - endPos.x);

@@ -9,10 +9,11 @@ using PianoTiles.mod;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using static ControlPanel;
 
 
 namespace Games.mod
@@ -24,10 +25,16 @@ namespace Games.mod
     {
         A3ttrGame currentGame;
         public int state = 0;
-        public Menu(A3ttrGame consoleGame)
+        int consoleState = 0;
+        int menuItem = 0;
+        int menuID = 0;
+        int gameID = 0;
+        int songID = 0;
+        SerialPort _serialport;
+        public Menu(A3ttrGame consoleGame, SerialPort _serialport)
         {
             currentGame = consoleGame;
-
+            this._serialport = _serialport;
 
 
 
@@ -46,17 +53,7 @@ namespace Games.mod
         /// <param name="time">距离上次更新的时间(毫秒)</param>
         public override void update(long time)
         {
-            if (state == 1)
-            {
-                Console.WriteLine("IN");
-            }
-            else
-            {
-                if (state == 2)
-                {
-                    Console.WriteLine("OUT");
-                }
-            }
+
             base.update(time);
         }
         /// <summary>
@@ -70,21 +67,76 @@ namespace Games.mod
         {
             if (action == 1 && type == 1)
             {
-                Console.WriteLine(x + " " + y);
-                if (x == 0 && y == 0)
-                {
-                    state = 1;
-                    currentGame.changeGameModel(new MusicMelody(currentGame,0));
-                }
-                else
-                {
-                    currentGame.changeGameModel(new Game1(currentGame, 0));
-                }
 
             }
-            else if (action == 2 && type == 2)
+            else if (action == 1 && type == 2)
             {
+                switch (ControlButtonID(x))
+                {
+                    case 0:
+                        _serialport.Write("1");
+                        if (menuItem > 0)
+                        {
+                            menuItem -= 1;
+                        }
+                        break;
+                    case 1:
+                        _serialport.Write("2");
+                        if (menuItem < 3)
+                        {
+                            
+                            menuItem += 1;
+                            
+                        }
+                        break;
+                    case 4:
+                        _serialport.Write("3");
+                        if (menuID == 0)
+                        {
+                            gameID = menuItem;
+                            if (menuItem != 0 || menuItem != 2)
+                            {
+                                Console.WriteLine(gameID);
+                                if (gameID == 1)
+                                {
+                                    currentGame.changeGameModel(new Drawing(currentGame, _serialport));
 
+                                }
+                                if (gameID == 3)
+                                {
+                                    currentGame.changeGameModel(new PianoPlay(currentGame, _serialport));
+
+                                }
+                            }
+                            menuID = 1;
+                            menuItem = 0;
+                        }
+                        else
+                        {
+                            songID=menuItem;
+                            if (gameID == 0)
+                            {
+                                currentGame.changeGameModel(new Game1(currentGame,songID, _serialport));
+
+                            }
+                            else
+                            {
+                                currentGame.changeGameModel(new MusicMelody(currentGame,songID, _serialport));
+
+                            }
+                        }
+                        break;
+                    case 6:
+                        _serialport.Write("4");
+
+                        break;
+                    case 7:
+                        _serialport.Write("4");
+
+                        break;
+
+
+                }
 
                 //清除按钮led灯光
             }
@@ -92,3 +144,4 @@ namespace Games.mod
         }
     }
 }
+

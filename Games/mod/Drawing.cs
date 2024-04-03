@@ -16,6 +16,7 @@ using A3TTRControl;
 using static ControlPanel;
 using PianoTiles.mod;
 using Games.mod;
+using System.IO.Ports;
 
 
 namespace A3ttrEngine.mod
@@ -29,11 +30,11 @@ namespace A3ttrEngine.mod
 
         // Control Panel Variables
         A3ttrGame consoleObj;
-
-        public Drawing(A3ttrGame consoleObj)
+        SerialPort _serialport;
+        public Drawing(A3ttrGame consoleObj,SerialPort _serialport)
         {
             this.consoleObj = consoleObj;
-
+            this._serialport = _serialport;
         }
         public override void init()
         {
@@ -132,12 +133,14 @@ namespace A3ttrEngine.mod
                         break;
                     case 2:
                         { // Previous Game
-                            consoleObj.changeGameModel(new Game1(consoleObj,0));
+                            Console.WriteLine("Previous");
+                            consoleObj.changeGameModel(new Game1(consoleObj,0, _serialport));
                         }
                         break;
                     case 3:
                         { // Next
-                            consoleObj.changeGameModel(new MusicMelody(consoleObj, 0)); // Default Song settings
+                            Console.WriteLine("Next");
+                            consoleObj.changeGameModel(new MusicMelody(consoleObj, 0, _serialport)); // Default Song settings
                             
                         }
                         break;
@@ -153,13 +156,13 @@ namespace A3ttrEngine.mod
                     break;
                     case 6:
                         {
-                            consoleObj.changeGameModel(new Menu(consoleObj));
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
 
                         }
                         break;
                     case 7:
                         {
-                            consoleObj.changeGameModel(new Menu(consoleObj));
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
                         }
                         break;
                 }

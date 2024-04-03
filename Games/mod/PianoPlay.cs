@@ -2,6 +2,7 @@
 using A3TTRControl2;
 using Games.mod;
 using System.Drawing;
+using System.IO.Ports;
 using static ControlPanel;
 
 
@@ -19,9 +20,11 @@ namespace A3ttrEngine.mod
         int maxPointer = 4;
         A3ttrGame consoleObj;
         bool setup = true;
-        public PianoPlay(A3ttrGame consoleObj)
+        SerialPort _serialport;
+        public PianoPlay(A3ttrGame consoleObj, SerialPort _serialport)
         {
             this.consoleObj = consoleObj;
+            this._serialport = _serialport;
         }
         public void loadPianoWaveFiles()
         {
@@ -189,9 +192,10 @@ namespace A3ttrEngine.mod
                         break;
                     case 2:
                         { // Previous Game
+                            _serialport.Write("C");
                             a3ttranimationlist.Clear();
                             a3ttrSoundlist.Clear();
-                            consoleObj.changeGameModel(new MusicMelody(consoleObj, 0));
+                            consoleObj.changeGameModel(new MusicMelody(consoleObj, 0, _serialport));
                         }
                         break;
                     case 3:
@@ -211,12 +215,18 @@ namespace A3ttrEngine.mod
                         break;
                     case 6:
                         {
-                            consoleObj.changeGameModel(new Menu(consoleObj));
+                            _serialport.Write("4");
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
                         }
                         break;
                     case 7:
                         {
-                            consoleObj.changeGameModel(new Menu(consoleObj));
+                            _serialport.Write("4");
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
                         }
                         break;
 

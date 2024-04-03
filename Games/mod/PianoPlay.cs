@@ -162,7 +162,15 @@ namespace A3ttrEngine.mod
         {
             if (action == 1 && type == 1)
             {
-                a3ttrSoundlist[$"{x}-{y}"].Play();
+                try
+                {
+                    a3ttrSoundlist[$"{x}-{y}"].Play();
+                    
+                }
+                catch
+                {
+
+                }
             }
             else if (action == 1 && type == 2)
             {
@@ -181,7 +189,8 @@ namespace A3ttrEngine.mod
                         break;
                     case 2:
                         { // Previous Game
-
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
                             consoleObj.changeGameModel(new MusicMelody(consoleObj, 0));
                         }
                         break;

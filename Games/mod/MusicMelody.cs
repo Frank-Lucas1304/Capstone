@@ -412,11 +412,15 @@ namespace A3ttrEngine.mod
                         break; 
                     case 2: { // Previous Game
 
-                                consoleObj.changeGameModel(new Drawing(consoleObj));
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new Drawing(consoleObj));
                         }
                         break;
                     case 3: { // Next
-                                consoleObj.changeGameModel(new PianoPlay(consoleObj));
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new PianoPlay(consoleObj));
                         }
                         break;
                     case 4: { //Select

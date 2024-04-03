@@ -414,12 +414,14 @@ namespace PianoTiles.mod
                     case 2:
                         { // Previous Game
 
-                            consoleObj.changeGameModel(new Drawing(consoleObj));
+                           
                         }
                         break;
                     case 3:
                         { // Next
-                            consoleObj.changeGameModel(new PianoPlay(consoleObj));
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new Drawing(consoleObj));
                         }
                         break;
                     case 4:
@@ -449,11 +451,15 @@ namespace PianoTiles.mod
                         break;
                     case 6:
                         {
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
                             consoleObj.changeGameModel(new Menu(consoleObj));
                         }
                         break;
                     case 7:
                         {
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
                             consoleObj.changeGameModel(new Menu(consoleObj));
                         }
                         break;

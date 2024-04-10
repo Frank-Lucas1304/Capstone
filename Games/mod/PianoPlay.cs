@@ -1,20 +1,10 @@
 ﻿using A3TTRControl;
 using A3TTRControl2;
-using Midi.Instruments;
-using OpenTK.Graphics.OpenGL;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Data;
-using System.Diagnostics.CodeAnalysis;
+using Games.mod;
 using System.Drawing;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using static Cgen.Logger;
-using static CXO2.Charting.Event;
+using System.IO.Ports;
+using static ControlPanel;
+
 
 namespace A3ttrEngine.mod
 {
@@ -28,8 +18,13 @@ namespace A3ttrEngine.mod
         List<Color> colors = new List<Color> { Color.Red, Color.White, Color.Violet, Color.Green, Color.Lavender };
         int pointer = 0;
         int maxPointer = 4;
-        public PianoPlay()
+        A3ttrGame consoleObj;
+        bool setup = true;
+        SerialPort _serialport;
+        public PianoPlay(A3ttrGame consoleObj, SerialPort _serialport)
         {
+            this.consoleObj = consoleObj;
+            this._serialport = _serialport;
         }
         public void loadPianoWaveFiles()
         {
@@ -158,32 +153,88 @@ namespace A3ttrEngine.mod
         }
         public override void update(long time)
         {
-            colorLaunchpad();
+            if (setup)
+            {
+                Console.WriteLine("In");
+                setup = false;
+                colorLaunchpad();
+            }
+
         }
         public override void input(int action, int type, int x, int y)
         {
             if (action == 1 && type == 1)
             {
-                (int x, int y) pos;
-
-                //light up the key that you just pressed 
                 try
                 {
-                    a3ttrSoundlist[$"{x}-{y}"].Play(); // to play correct and wrong note
-                    setFadeLed(Color.Green, x, y, keeptime, fadetime);
+                    a3ttrSoundlist[$"{x}-{y}"].Play();
+                    
                 }
-                catch (Exception e)
+                catch
                 {
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine("Check Keys, not all of them have sounds linked to them");
+
                 }
             }
-            else if (action == 2 && type == 1)
+            else if (action == 1 && type == 2)
             {
 
-            }
-            base.input(action, type, x, y);
+                switch (ControlButtonID(x))
+                {
+                    case 0: //Scroll Up
+                        {
+                            // No purpose 
+                        }
+                        break;
+                    case 1:
+                        { // Scroll Down
+                          // No purpose
+                        }
+                        break;
+                    case 2:
+                        { // Previous Game
+                            _serialport.Write("C");
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new MusicMelody(consoleObj, 0, _serialport));
+                        }
+                        break;
+                    case 3:
+                        { // Next
+                          // No purpose
+                        }
+                        break;
+                    case 4:
+                        { //Select
+                          // No purpose
+                        }
+                        break;
+                    case 5:
+                        { // Pause or Play
+                          // No purpose
+                        }
+                        break;
+                    case 6:
+                        {
+                            _serialport.Write("4");
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
+                        }
+                        break;
+                    case 7:
+                        {
+                            _serialport.Write("4");
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
+                        }
+                        break;
 
+                }
+
+            }
+
+            base.input(action, type, x, y);
         }
     }
 }

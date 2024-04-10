@@ -10,6 +10,14 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using static Cgen.Logger;
+using System.Net.NetworkInformation;
+using A3TTRControl;
+using static ControlPanel;
+using PianoTiles.mod;
+using Games.mod;
+using System.IO.Ports;
+
 
 namespace A3ttrEngine.mod
 {
@@ -19,12 +27,21 @@ namespace A3ttrEngine.mod
         List<(int x, int y)> LitUpTiles = new List<(int x, int y)>();
         Color col = Color.Black;
         Boolean erase = false;
+
+        // Control Panel Variables
+        A3ttrGame consoleObj;
+        SerialPort _serialport;
+        public Drawing(A3ttrGame consoleObj,SerialPort _serialport)
+        {
+            this.consoleObj = consoleObj;
+            this._serialport = _serialport;
+        }
         public override void init()
         {
-            
+
             base.Name = "Drawing";
             base.init();
-          
+
             base.setLed(Color.FromArgb(255, 0, 0), 0, 0);
             base.setLed(Color.FromArgb(255, 135, 0), 0, 1);
             base.setLed(Color.FromArgb(255, 255, 0), 0, 2);
@@ -68,12 +85,14 @@ namespace A3ttrEngine.mod
                     }
                 }
             }
-            
-            if (action == 1 && type == 1 && x !=0)
-            { 
+
+            if (action == 1 && type == 1 && x != 0)
+            {
                 //IF TILE ALREADY LIT UP, ERASE COLOUR
-                foreach ((int x, int y) j in LitUpTiles) {
-                    if (j.x == x && j.y == y) {
+                foreach ((int x, int y) j in LitUpTiles)
+                {
+                    if (j.x == x && j.y == y)
+                    {
                         erase = true;
                         base.clearLed(x, y);
                         LitUpTiles.Remove(j);
@@ -96,12 +115,62 @@ namespace A3ttrEngine.mod
                 **/
 
             }
-            else if (action == 2 && type == 1)
+            else if (action == 1 && type == 2)
             {
-                //清除按钮led灯光
-                //base.clearLed(x, y);
+                switch (ControlButtonID(x))
+                {
+                    case 0: //Scroll Up
+                        {
+                            // No Purpose Here
+                        }
+                        break;
+                    case 1:
+                        { //Scroll Down
+
+                            // No Purpose Here
+
+                        }
+                        break;
+                    case 2:
+                        { // Previous Game
+                            _serialport.Write("A");
+
+                            Console.WriteLine("Previous");
+                            consoleObj.changeGameModel(new Game1(consoleObj,0, _serialport));
+                        }
+                        break;
+                    case 3:
+                        { // Next
+                            _serialport.Write("C");
+                            Console.WriteLine("Next");
+                            consoleObj.changeGameModel(new MusicMelody(consoleObj, 0, _serialport)); // Default Song settings
+                            
+                        }
+                        break;
+                    case 4:
+                        { //Select
+                          // No purpose
+                        }
+                        break;
+                    case 5:
+                        { // Pause or Play
+                          // No purpose
+                        }
+                    break;
+                    case 6:
+                        {
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
+
+                        }
+                        break;
+                    case 7:
+                        {
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
+                        }
+                        break;
+                }
+                base.input(action, type, x, y);
             }
-            base.input(action, type, x, y);
         }
     }
 }

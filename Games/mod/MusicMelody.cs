@@ -2,8 +2,16 @@
 using NAudio.Wave;
 using System.Drawing;
 using NAudio.Wave.SampleProviders;
-using Games.mod;
+
+using static ControlPanel;
+using System.Linq.Expressions;
+using PianoTiles.mod;
 using A3TTRControl;
+using System.ComponentModel;
+using OpenTK.Input;
+using System.ComponentModel.Design;
+using Games.mod;
+using System.IO.Ports;
 
 
 namespace A3ttrEngine.mod
@@ -17,42 +25,64 @@ namespace A3ttrEngine.mod
         Target[,] buttonGrid = new Target[8, 8];
         Queue<Target> animatedButtons = new Queue<Target>();
         Queue<Circle> positiveFeedbackEffects = new Queue<Circle>();
-        A3ttrGame controlPanelGame;
-        static string[] happyBirthday = new string[] { "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "D3", "C3", "F3", "E3", "C3", "C3", "C2", "A3", "F3", "E3", "D3", "B3", "B3", "A3", "F3", "G3", "F3", };
 
-        static string[] happy = new string[] { "C3", "F3", "F3", "F3", "C3", "C3", "F3", "C3", "F3" };
+        //static string[] auClairDeLaLune = new string[] { };
+        //static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3" };
+        static Partition pirate = new Partition(new string[] { "EA2", "EC3", "QD3", "QD3", "ED3", "EE3", "QF3", "QF3", "EF3", "EG3", "QE3", "QE3", "ED3", "EC3", "EC3", "ED3" }, 106, 6);
+        static Partition furElise = new Partition(new string[] { "EE3", "E#D3", "EE3", "E#D3", "EE3", "EB2", "ED3", "EE3", "EA2", "EC2", "EE2", "EA2", "EB2", "EE2", "E#G2", "EB2", "EC3" }, 136,6);
+        static Partition happyBirthday = new Partition(new string[] { "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "EC3", "EC3", "QD3", "QC3", "QF3", "HE3", "EC3", "EC3", "EC2", "EA3", "QF3", "QE3", "QD3", "EB3", "EB3", "QA3", "EF3", "EG3", "EF3", }, 156,6);
+        //static List<Note> noteList = happySong.noteList;
 
-        static string[] auClairDeLaLune = new string[] { };
-        static string[] baaBaaBlackSheep = new string[] { "C3", "C3", "G3", "G3", "A3", "A3", "A3", "A3", "G3" };
+        static List<Partition> songOptions = new List<Partition>() { happyBirthday, furElise, pirate };
+        static List<Note> noteList = null;
 
-        string[] noteList = happy;
+
 
         int note_pos = 0;
 
         bool isInvalidInput = false;
         (int x, int y) invalidPos;
         int lives = 3;
-        int level = 5;
+        int level = 6;
 
-        (int R, int G, int B) red = (255, 0, 0);
-        (int R, int G, int B) purple = (255, 0, 255);
         (int R, int G, int B) black = (0, 0, 0);
         (int R, int G, int B) light = (255, 0, 255);
         (int R, int G, int B) mid = (120, 50, 120);
         (int R, int G, int B) neutral = (10, 10, 10);
-        (int R, int G, int B) white = (10, 10, 10);
 
         long betweenLevelDelay;
         long quitDelay = 1200;
+        long countDownDelay = 4000;
+        long pauseAnimationDelay = 3000;
         bool quitGame = false;
+        bool pauseGame = false;
+        bool countDownActivated = false;
 
         long times = 0;
         bool launchpadSetUp = true;
 
 
-        public MusicMelody(A3ttrGame controlPanel)
+        // Control Panel Variables
+        A3ttrGame consoleObj;
+
+        int songID = 0;
+
+        SerialPort _serialport;
+
+        public MusicMelody(A3ttrGame consoleObj, int songID, SerialPort _serialport)
         {
-            controlPanelGame = controlPanel;
+            this.consoleObj = consoleObj;
+
+            // default Settings
+            this.songID = songID;
+            if (songID > 2) {
+                songID = 2;
+            }
+            noteList = songOptions[songID].noteList;
+            level = songOptions[songID].initLevel;
+            this._serialport = _serialport;
+
+
         }
 
         /// <summary>
@@ -117,6 +147,10 @@ namespace A3ttrEngine.mod
         public override void init()
         {
             base.Name = "MusicMelody";
+            
+            loadAnimation("pause", System.Environment.CurrentDirectory + "\\animation\\pause.ttr");
+            
+            loadAnimation("countDown", System.Environment.CurrentDirectory + "\\animation\\countDown.ttr");
 
             a3ttrSoundlist.Add("GameOver", new A3ttrSound(System.Environment.CurrentDirectory + "\\sound\\GameOver.wav"));
 
@@ -145,101 +179,135 @@ namespace A3ttrEngine.mod
                 Target.launchpad = a3ttrPadCell; // to be able to update the board from the target instances
                 Target.a3ttrSoundlist = a3ttrSoundlist;
                 launchpadSetUp = false;
-            }
 
-            if (quitGame)
+            }
+            if (noteList != null)
             {
-                if (times++ >= quitDelay) // Force quit delay as well as time increment
+                if (quitGame)
                 {
-                    Console.WriteLine("Exit", times);
-                    controlPanelGame.changeGameModel(new Test(controlPanelGame));
-                }
-            }
-            else
-            {
-
-                if (note_pos < level & note_pos < noteList.Length)
-                {   // Display Sequence
-                    if (times++ >= betweenLevelDelay)
+                    times += time;
+                    if (times >= (quitDelay+1000)) // Force quit delay as well as time increment
                     {
-                        (int x, int y) = KeyMapping(noteList[note_pos]);
-                        buttonGrid[x, y].Display(time, ref note_pos);
-                        betweenLevelDelay = 0;
-                        times = 0;
+                        Console.WriteLine("Exit", times);
+                        _serialport.Write("4");
+                        consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
                     }
                 }
                 else
                 {
-                    //Optimisation: using Animation Curve/ function or different colors
-                    (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral, mid, light, black };
-                    int[] timing = new int[5] { 0, 100, 100, 100, 100 };
-
-                    // Displays all circle animations
-                    foreach (Circle circle in positiveFeedbackEffects)
+                    if (!pauseGame && !countDownActivated)
                     {
-                        circle.Animate(animatedButtons, time, 60, buttonGrid, color_list, timing);
-                    }
-                    //Reducing size of queue if needed
-                    if (positiveFeedbackEffects.Count > 0)
-                    {
-                        if (positiveFeedbackEffects.Peek().status == 1)
-                        {
-                            positiveFeedbackEffects.Dequeue();
-                        }
-                    }
-                    else
-                    {
-                        // Making sure all animation is done before moving on
-                        if (animatedButtons.Count == 0)
-                        {
-                            if (note_pos == 2 * level)
+                        if (note_pos < level & note_pos < noteList.Count)
+                        {   // Display Sequence
+                            times += time;
+                            if (times >= betweenLevelDelay)
                             {
-                                int size = noteList.Length;
-                                if (size == level)
+                                (int x, int y) = KeyMapping(noteList[note_pos].key);
+                                Console.WriteLine(noteList[note_pos].key);
+                                Console.WriteLine($"{x} {y}");
+                                buttonGrid[x, y].Display(time, ref note_pos, noteList[note_pos].duration);
+                                betweenLevelDelay = 0;
+                                times = 0;
+                            }
+                        }
+                        else
+                        {
+                            //Optimisation: using Animation Curve/ function or different colors
+                            (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral, mid, light, black };
+                            int[] timing = new int[5] { 0, 100, 100, 100, 100 };
+        
+                            // Displays all circle animations
+                            foreach (Circle circle in positiveFeedbackEffects)
+                            {
+                                circle.Animate(animatedButtons, time, 60, buttonGrid, color_list, timing);
+                            }
+                            //Reducing size of queue if needed
+                            if (positiveFeedbackEffects.Count > 0)
+                            {
+                                if (positiveFeedbackEffects.Peek().status == 1)
                                 {
-                                    GameCompleted();
-                                }
-                                else
-                                {
-                                    // Increasing level and displaying longer sequence
-                                    level += level + 2 < size ? 2 : 1;
-                                    note_pos = 0;
-                                    times = 0;
+                                    positiveFeedbackEffects.Dequeue();
                                 }
                             }
                             else
                             {
-                                // Checking if invalid input
-                                if (isInvalidInput)
-                                {
-                                    isInvalidInput = !isInvalidInput;
-                                    if (lives == 0)
+                                // Making sure all animation are done before moving on
+                                if (animatedButtons.Count == 0)
+                                { 
+                                    if (note_pos == 2 * level)
                                     {
-                                        GameOver();
+                                        int size = noteList.Count;
+                                        if (size == level)
+                                        {
+                                            GameCompleted();
+                                        }
+                                        else
+                                        {
+                                            // Increasing level and displaying longer sequence
+                                            level += level + 2 < size ? 2 : 1;
+                                            note_pos = 0;
+                                            times = 0;
+                                        }
                                     }
-                                    note_pos = 0;
-                                    times = 0;
+                                    else
+                                    {
+                                        // Checking if invalid input
+                                        if (isInvalidInput)
+                                        {
+                                            _serialport.Write("6");
+
+                                            isInvalidInput = !isInvalidInput;
+                                            if (lives == 0)
+                                            {
+                                                GameOver();
+                                            }
+                                            note_pos = 0;
+                                            times = 0;
+                                        }
+                                    }
+
                                 }
                             }
 
+                            // Reducing Queue Size when required
+                            if (animatedButtons.Count > 0)
+                            {
+                                if (animatedButtons.Peek().animation_sequence.Count == 0)
+                                {
+                                    animatedButtons.Dequeue();
+                                }
+                            }
+
+                            foreach (Target button in animatedButtons)
+                            {
+                                button.AnimateTarget(time);
+                            }
+
+                            // Reduces Size of Queue as Animations are completed
                         }
                     }
-
-                    // Reducing Queue Size when required
-                    if (animatedButtons.Count > 0)
+                    else
                     {
-                        if (animatedButtons.Peek().animation_sequence.Count == 0)
+                        if (countDownActivated)
                         {
-                            animatedButtons.Dequeue();
+                            times += time;
+                            if (times >= countDownDelay)
+                            {
+                                countDownActivated = false;
+                                times = 0;
+                            }
+                        }
+                        else
+                        {
+                            times += time;
+                            if (times >= pauseAnimationDelay)
+                            {
+
+                                StartAnimation("pause", 1, 1);
+                                times = 0;
+                            }
                         }
                     }
-
-                    foreach (Target button in animatedButtons)
-                    {
-                        button.AnimateTarget(time);
-                    }
-
-                    // Reduces Size of Queue as Animations are completed
                 }
             }
 
@@ -254,19 +322,21 @@ namespace A3ttrEngine.mod
         /// <param name="y">按键Y坐标</param>
         public override void input(int action, int type, int x, int y)
         {
-
-            if (action == 1 && type == 1)
+            //if game is paused we dont want to be able to register input
+            if (action == 1 && type == 1 && !pauseGame && !countDownActivated)
             {
                 (int x, int y) pos;
                 if (note_pos >= level && note_pos < 2 * level)
                 {
-                    pos = KeyMapping(noteList[note_pos - level]);
+                    pos = KeyMapping(noteList[note_pos - level].key);
                     bool isTargetHit = buttonGrid[pos.x, pos.y].hit(x, y);
                     if (isTargetHit)
                     {
                         note_pos += 1;
                         if (note_pos == 2 * level)
+                        {
                             positiveFeedbackEffects.Enqueue(new Circle(pos));
+                        }
                         else
                         {
                             (int R, int G, int B)[] color_list = new (int R, int G, int B)[5] { black, neutral, mid, light, black };
@@ -307,9 +377,100 @@ namespace A3ttrEngine.mod
                     }
                 }
             }
-            else if (action == 2 && type == 1)
+            else if (action == 1 && type == 2)
             {
+                if (!(note_pos >= level)) // display sequence was already completed before user tried to switch song
+                {
+                    Console.WriteLine("Switch activate");
 
+                    // This code removes previous state of the last target activatio in the display sequence
+                    (int x, int y) displayTarget = KeyMapping(noteList[note_pos].key); // last button in display sequence
+                    buttonGrid[displayTarget.x, displayTarget.y].reset(); // resets last button into initial state
+                    setLed(Color.Black, displayTarget.x, displayTarget.y); // reseting color of button 
+                    note_pos = 0;
+
+                }
+                switch (ControlButtonID(x)) {
+                    case 0: //Scroll Up
+                        {
+                            if (songID < songOptions.Count-1)
+                            {
+                                Console.WriteLine("Switch song +=1");
+                                // Reseting Game Settings
+                                songID += 1;
+                                note_pos = 0;
+                                times = 0;
+                                level = songOptions[songID].initLevel;
+                                noteList = songOptions[songID].noteList;
+                            }
+
+                        }
+                        break;
+                    case 1: { //Scroll Down
+
+                            if (0 < songID)
+                            {
+                                Console.WriteLine("Switch song -=1");
+                                // Reseting Game Settings
+                                songID -= 1;
+                                note_pos = 0;
+                                times = 0;
+                                level = songOptions[songID].initLevel;
+                                noteList = songOptions[songID].noteList;
+                            }
+
+                        }
+                        break; 
+                    case 2: { // Previous Game
+                            _serialport.Write("B");
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new Drawing(consoleObj, _serialport));
+                        }
+                        break;
+                    case 3: { // Next
+                            _serialport.Write("D");
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new PianoPlay(consoleObj, _serialport));
+                        }
+                        break;
+                    case 4: { //Select
+                            // No purpose
+                        } 
+                        break;
+                    case 5: { // Pause or Play
+                            pauseGame = !pauseGame;
+                            if (pauseGame){
+                                StartAnimation("pause",1,1);
+                                times = 0;
+
+                            }
+                            else {
+                                // reseting sequence
+                                StartAnimation("countDown", 1, 1);
+                                countDownActivated = true;
+                                times = 0;
+
+                            }
+                        } 
+                        break;
+                    case 6: {
+                            _serialport.Write("4");
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
+                        } 
+                        break;
+                    case 7:
+                        {
+                            _serialport.Write("4");
+                            a3ttranimationlist.Clear();
+                            a3ttrSoundlist.Clear();
+                            consoleObj.changeGameModel(new Menu(consoleObj, _serialport));
+                        } break;
+                
+                }
             }
             base.input(action, type, x, y);
         }
@@ -373,7 +534,7 @@ namespace A3ttrEngine.mod
             else
             { // Sharp notes
                 octave = key[2] - 48;
-
+                letter = key[1];
                 y = 6 - octave * 2;
                 switch (letter)
                 {
@@ -449,8 +610,10 @@ namespace A3ttrEngine.mod
             this.gradient(timing[display_status]);
         }
 
-        public void Display(long time, ref int note_pos)
+        public void Display(long time, ref int note_pos,int duration)
         { //did you mean times
+            if (timing[1]!=duration)
+                { timing[1] = duration; }
             if (display_status <= 2)
             {
                 gradient(timing[display_status] - times);
@@ -702,29 +865,67 @@ namespace A3ttrEngine.mod
         }
     }
 
+    class Partition
+    {
+        public int bpm { get; set; }
+        public List<Note> noteList { get; set; }
 
+        public int initLevel { get; set; }
+        public Partition(string[] partition, int bpm, int initLevel)
+        {
+            // Initialising bpm for song --> this will determine display pace
+            this.bpm = bpm;
+            // This parameter will be used to implement starting difficulty
+            this.initLevel = initLevel;
+
+            noteList = new List<Note>();
+
+            foreach (string name in partition)
+            {
+                // The type is to know the length of each note
+                char type = name[0];
+                string key = name.Substring(1, name.Length - 1);
+                noteList.Add(new Note(type, key, bpm));
+
+            }
+
+            this.initLevel = initLevel;
+        }
+    }
     class Note
     {
-        public int duration { get; }
-        public string name { get; }
-        public Note(string name, int duration)
-        {
-            this.name = name;
-            this.duration = duration;
 
+        public int duration { get; set; }
+        public string key { get; }
+        public char type { get; }
+        public Note(char type, string key, int bpm)
+        {   
+            this.type = type;
+            this.key = key;
+            float beatPerSecond = 60.0f / bpm;
+            switch (type)
+            {
+                case 'H': // Half Note
+                    duration  = (int)(beatPerSecond * 2 * 1000);
+
+
+                    break;
+
+                case 'Q': // Quarter Note
+                    duration  = (int)(beatPerSecond * 1000);
+
+
+                    break;
+
+                case 'E': // 1/8th Note
+                    duration = (int)(beatPerSecond * 0.5f*1000);
+                    break;
+
+
+            }
+           
         }
-
-
     }
-    /*
-    class Black : Note
-    {
-        Note
-    }*/
-    /* class Quarter : Note
-     {
-         public Quarter() { };
-     }*/
-
-
 }
+
+

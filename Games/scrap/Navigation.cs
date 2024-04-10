@@ -15,7 +15,7 @@ using System.Threading;
 using System.Diagnostics;
 using Newtonsoft.Json.Linq;
 
-namespace ConsoleApp1
+namespace Games.scrap
 {
     internal class Navigation
     {
@@ -42,7 +42,7 @@ namespace ConsoleApp1
         {
             DisplayPorts();
             // Need to make a command class just in case thing change and I could easily update format without worrying too much
-            Console.WriteLine(extractAllData(0b0000100101000000, new byte[4]{2,1,6,6}));
+            Console.WriteLine(extractAllData(0b0000100101000000, new byte[4] { 2, 1, 6, 6 }));
 
 
 
@@ -55,19 +55,19 @@ namespace ConsoleApp1
 
 
         }
-        public static byte extractData(uint command,int commandMask,byte shiftData)
+        public static byte extractData(uint command, int commandMask, byte shiftData)
         {
-            return (byte)((command & commandMask)>>shiftData);
+            return (byte)((command & commandMask) >> shiftData);
         }
         public static byte[] extractAllData(uint command, byte[] commandFormat)
         {
-            
+
             if (commandFormat.Length == 4)
             {
                 byte[] answer = new byte[8];
                 int shift = 0;
                 uint zero = 0;
-                byte temp = (byte)(~zero);
+                byte temp = (byte)~zero;
 
                 byte _parityShift, _stateShift, _modeShift, _optionShift;
                 _parityShift = _stateShift = _modeShift = _optionShift = 0;
@@ -80,9 +80,9 @@ namespace ConsoleApp1
                     shift += commandFormat[i];
                     switch (i)
                     {
-                        
+
                         case 0:
-                            _parityShift = (byte)(shift);
+                            _parityShift = (byte)shift;
                             break;
                         case 1:
                             _stateShift = (byte)shift;
@@ -96,11 +96,11 @@ namespace ConsoleApp1
 
                     }
                 }
-                _parityMask = (temp >> 7) << _parityShift;
-                _stateMask = (temp >> (8 - commandFormat[0])) << _stateShift;
-                _modeMask = (temp >> (8 - commandFormat[1])) << _modeShift;
-                _optionMask = (temp >> (8 - commandFormat[2])) << _optionShift;
-                _musicMask = temp >> (8 - commandFormat[3]);
+                _parityMask = temp >> 7 << _parityShift;
+                _stateMask = temp >> 8 - commandFormat[0] << _stateShift;
+                _modeMask = temp >> 8 - commandFormat[1] << _modeShift;
+                _optionMask = temp >> 8 - commandFormat[2] << _optionShift;
+                _musicMask = temp >> 8 - commandFormat[3];
 
                 /*
                 //need to check if it works
@@ -118,10 +118,10 @@ namespace ConsoleApp1
                 */
 
 
-                answer[0]=extractData(command, _stateMask, _stateShift);
-                answer[1]=extractData(command, _modeMask, _modeShift);
-                answer[2]=extractData(command, _optionMask, _optionShift);
-                answer[3]=extractData(command, _musicMask, 0);
+                answer[0] = extractData(command, _stateMask, _stateShift);
+                answer[1] = extractData(command, _modeMask, _modeShift);
+                answer[2] = extractData(command, _optionMask, _optionShift);
+                answer[3] = extractData(command, _musicMask, 0);
 
                 return answer;
             }
@@ -132,6 +132,6 @@ namespace ConsoleApp1
 
         }
 
-    } 
-    
+    }
+
 }

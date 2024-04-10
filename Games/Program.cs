@@ -40,7 +40,7 @@ namespace ConsoleApp1
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Capstone Project Team J LaunchPad Setup\n");
+                Console.WriteLine("Capstone Project 2023-2024 Team J LaunchPad Prototype Setup\n");
                 Console.WriteLine("No COM ports are currently available.\n\t1. Please make sure your device is properly plugged in.\n\t2. Make sure no other program is currently using the port.\n");
                 Console.WriteLine("When ready enter one of the following command in the command line:\n\t<update>: Update list of available ports.\n\t<exit>\t: Quit Program.");
 
@@ -61,13 +61,14 @@ namespace ConsoleApp1
             Console.Clear();
             string[] portsList = getAvailablePorts();
             if (portsList == null) {
+                Console.Write("Enter Command\n");
                 return null;
             }
             else
             {
                 CommandList();
             }
-
+            Console.Write("Enter Command\n");
             return portsList;
         }
 
@@ -79,7 +80,7 @@ namespace ConsoleApp1
             bool quitLoop = false;
             // Get short form PortNames: COM#
             do {
-                Console.Write("Enter command: ");
+                Console.Write("> ");
                 
                 inputCommand = Console.ReadLine();
 
@@ -95,13 +96,13 @@ namespace ConsoleApp1
 
                             _serialPort = new SerialPort(portName, 19200, Parity.None, 8, StopBits.One);
 
-                            Console.WriteLine("Successfull Connection");
+                            Console.WriteLine("> Successfull Connection");
                             quitLoop = true;
                             break;
 
                         }
                     }
-                    Console.WriteLine("Portname not in list try again.");
+                    Console.WriteLine(">Portname not in list try again.");
                 }
                 else if (inputCommand.ToLower() == "update")
                 {
@@ -111,7 +112,7 @@ namespace ConsoleApp1
                 }
                 else
                 {
-                    Console.WriteLine("Invalid Command Input, Try again.");
+                    Console.WriteLine("> Invalid Command Input, Try again.");
                 }
             } while (!quitLoop);
                 //COM4

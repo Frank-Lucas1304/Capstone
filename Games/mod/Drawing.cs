@@ -133,12 +133,15 @@ namespace A3ttrEngine.mod
                         break;
                     case 2:
                         { // Previous Game
+                            _serialport.Write("A");
+
                             Console.WriteLine("Previous");
                             consoleObj.changeGameModel(new Game1(consoleObj,0, _serialport));
                         }
                         break;
                     case 3:
                         { // Next
+                            _serialport.Write("C");
                             Console.WriteLine("Next");
                             consoleObj.changeGameModel(new MusicMelody(consoleObj, 0, _serialport)); // Default Song settings
                             

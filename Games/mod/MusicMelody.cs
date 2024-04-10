@@ -75,6 +75,9 @@ namespace A3ttrEngine.mod
 
             // default Settings
             this.songID = songID;
+            if (songID > 2) {
+                songID = 2;
+            }
             noteList = songOptions[songID].noteList;
             level = songOptions[songID].initLevel;
             this._serialport = _serialport;

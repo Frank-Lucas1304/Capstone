@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -35,6 +35,9 @@
     </Reference>
     <Reference Include="OpenTK">
       <HintPath>..\dll\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Management">
+      <HintPath>..\..\..\..\Downloads\system.management\System.Management.dll</HintPath>
     </Reference>
   </ItemGroup>
 

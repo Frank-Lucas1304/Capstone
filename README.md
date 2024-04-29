@@ -23,8 +23,18 @@ The following games that were designed:
 ## 2. Serial Communication
 ## 3. Games
 ### Button Blitz
-Button blitz is a reaction time game.
+Button blitz is a rythm based reaction time game. The target starts from the center of the launchpad and moves towards the outside. The goal is to hit target when it is bright white at the edge of the play area.
+There are three song options for the game which increase in speed as the leve is increased.
+
+Song options:
+- BGM
+- Stayin Alive
+- Edance
+
 #### Design
+'''
+lol 
+'''
 ### Drawing Mode
 #### Design
 ### Music Melody

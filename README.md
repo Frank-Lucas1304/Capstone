@@ -1,20 +1,27 @@
 # Capstone
 
 # Description
+- talk about num of games and implementation with launchpad etc.
 
 ## Table of Content
 
-### Development Environement Requierements
+## Development Environement Requierements
 - Windows OS
 - Pre-installation of OpenAL
 - Visual Studio 2022 as development tool
 - Novation Launchpad Mini MK3
 
-### Game Design
-1. Button Blitz
-2. Drawing Mode
-3. Music Melody
-4. Piano Mode
+## Games
+### Button Blitz
+#### Design
+### Drawing Mode
+#### Design
+### Music Melody
+#### Design
+### Piano Mode
+#### Design
+
+
 
 
  

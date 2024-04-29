@@ -9,11 +9,11 @@ The following games that were designed:
 - Piano Mode   --> Creative game
 
 ## Table of Content
-1. [Development Enviroment](#1.-development-environment)
-2. [Serial Communication](#2.-serial-communication)
-3. [Games](#3.-games)
+1. [Development Enviroment](##1.-development-environment)
+2. [Serial Communication](##2.-serial-communication)
+3. [Games](##3.-games)
 
-## 1.Development Environement
+## 1.-Development Environement
 - Windows OS
 - Pre-installation of OpenAL
 - Visual Studio 2022 as development tool

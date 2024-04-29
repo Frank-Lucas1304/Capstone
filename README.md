@@ -10,18 +10,18 @@ The following games that were designed:
 
 ## Table of Content
 1. [Development Enviroment](#development-environment)
-2. [Serial Communication]
+2. [Serial Communication](#serial-communication)
 3. [Games](#games)
 
-## 1.Development Environement
+## 1. Development Environement
 - Windows OS
 - Pre-installation of OpenAL
 - Visual Studio 2022 as development tool
 - Novation Launchpad Mini MK3
 
 - Arduino Nano (Optionnal)
-
-## 2.Games
+## 2. Serial Communication
+## 3. Games
 ### Button Blitz
 Button blitz is a reaction time game.
 #### Design

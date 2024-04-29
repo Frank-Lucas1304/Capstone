@@ -32,9 +32,9 @@ Song options:
 - Edance
 
 #### Design
-'''
+```
 lol 
-'''
+```
 ### Drawing Mode
 #### Design
 ### Music Melody

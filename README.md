@@ -1,5 +1,5 @@
 # Capstone: Industrial Design/Manufacturing of a Gaming Device for Helping People with ADHD
-<div style="text-align: justify"> This was the capstone project of 6 mechanical engineering students at McGill University. For the purpose of the project, 3 students were responsible for designing the and creating games that could potentially benefit individuals with ADHD. This repository represents their cumulative work throughout the 2023-2024 year. </div>
+<div style="text-align: right"> This was the capstone project of 6 mechanical engineering students at McGill University. For the purpose of the project, 3 students were responsible for designing the and creating games that could potentially benefit individuals with ADHD. This repository represents their cumulative work throughout the 2023-2024 year. </div>
 
 
 

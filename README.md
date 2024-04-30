@@ -32,7 +32,7 @@ Song options:
 - BGM
 - Stayin Alive
 - Edance
-
+### TALK ABOUT GAME MECHANICS
 #### Design
 For starters, when the world target is used we are referring to the game elements that are requires the user to hit them by pressing on a button.
 These targets are stored in a list called `gameTargets`. This was done since there was fixed amount of directions that the targets could go in and we wanted to avoid having to manage an ever growing list each time.
@@ -41,7 +41,12 @@ These targets are stored in a list called `gameTargets`. This was done since the
 ```
 Target is a necessary class since every target needed their own "event" timer for the animations. An improved iteration of this class was used for the Music Melody game.
 
-Each Target instance has a `status` attribute
+Each Target instance has a `status` attribute which can have the following values:
+
+- `"inactive"`: The target is asleep. It has not yet been activated.
+-  `"active"` : the target animation has started.
+- `"hit"`: The target has been hit in the allowable window of time and at the desired location by the user.
+- `"missed"`: The target was not hit in the allowable window of time.
 
 
 

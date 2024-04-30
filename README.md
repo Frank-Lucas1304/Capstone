@@ -20,11 +20,12 @@ The following games that were designed:
 - Novation Launchpad Mini MK3
 
 - Arduino Nano (Optionnal)
+
 ## 2. Serial Communication
 ## 3. Games
 ### Button Blitz
 #### Description
-Button blitz is a rythm based reaction time game. The target starts from the center of the launchpad and moves towards the outside. The goal is to hit target when it is bright white at the edge of the play area.
+Button blitz is a rythm based reaction time game. The target starts from the center of the launchpad and moves towards the outside. The goal is to hit target when it turns bright white at the edge of the play area.
 There are three song options for the game which increase in speed as the leve is increased.
 
 Song options:
@@ -34,13 +35,14 @@ Song options:
 
 #### Design
 For starters, when the world target is used we are referring to the game elements that are requires the user to hit them by pressing on a button.
-These targets are stored in a list called gameTargets. This was done since there was fixed amount of directions that the targets could go in and we wanted to avoid having to manage an ever growing list.
+These targets are stored in a list called `gameTargets`. This was done since there was fixed amount of directions that the targets could go in and we wanted to avoid having to manage an ever growing list each time.
 ```
   List<Target> gameTargets = new List<Target>();
 ```
-Target is a necessary class since every target needed their own "event" timer for the animations. This class was a first implementation of the idea. An improved iteration of this class was used for the Music Melody game.
+Target is a necessary class since every target needed their own "event" timer for the animations. An improved iteration of this class was used for the Music Melody game.
 
-All possible targets are stored in 
+Each Target instance has a `status` attribute
+
 
 
 The songs are handle almost the same way. Since they all have a bpm. 

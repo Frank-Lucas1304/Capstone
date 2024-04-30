@@ -41,13 +41,12 @@ These targets are stored in a list called `gameTargets`. This was done since the
 ```
 Target is a necessary class since every target needed their own "event" timer for the animations. An improved iteration of this class was used for the Music Melody game.
 
-Each Target instance has a `status` attribute which can have the following values:
+Each Target instance has a `status` attribute which stores one of the following variables:
 
 - `"inactive"`: The target is asleep. It has not yet been activated.
 -  `"active"` : the target animation has started.
 - `"hit"`: The target has been hit in the allowable window of time and at the desired location by the user.
 - `"missed"`: The target was not hit in the allowable window of time.
-
 
 
 The songs are handle almost the same way. Since they all have a bpm. 
